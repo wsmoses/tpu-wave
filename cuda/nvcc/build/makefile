@@ -21,9 +21,8 @@ TARGET_OS ?= $(HOST_OS)
 
 # host compiler
 HOST_COMPILER ?= g++-12
-NVCC          := nvcc -ccbin $(HOST_COMPILER)
-HOST_COMPILER  = $(NVCC)
-
+NVCC          := ~/clang++
+HOST_COMPILER  = ~/clang++
 
 # CUDA include directory:
 CUDA_INC_DIR= -I$(CUDA_PATH)/include -I$(CUDA_PATH)/samples/common/inc
@@ -161,11 +160,11 @@ CPPFLAGS_NVCC += $(CUDA_INC_DIR)
 # [2023/04/10]
 # NOTE: -I$(CUDA_PATH)/samples/common/inc from $(CUDA_INC_DIR) seems to be needed
 #       to #include <helper_cuda.h>. -I$(CUDA_PATH)/include may be omitted.
-CPPFLAGS_NVCC += -arch=sm_80
+# CPPFLAGS_NVCC += -arch=sm_80
 # [2023/05/14]
 # NOTE: Need to specify -arch=sm_80. Otherwise, nvcc gives an error like " more 
 #       than one constructor applies to convert from "int" to "__nv_bfloat16". "
-CPPFLAGS_NVCC += -rdc=true
+# CPPFLAGS_NVCC += -rdc=true
 # [2023/07/16]
 # NOTE: The above flag (-rdc=true) is needed for "inline __device__" variables.
 #       If not included, the compile-time error message says 
@@ -219,7 +218,7 @@ LINKER_FLAGS = -lstdc++fs
 # 		Moreover, it seems that using mvapich is actually faster than mvapich2-gdr.
 # 		mvapich2-gdr probably won't give real benefit unless we use multiple gpus.
 # 		I have since updated the default module to gcc + mvapich2 combination.
-LINKER_FLAGS += -arch=sm_80
+# LINKER_FLAGS += -arch=sm_80
 # [2023/07/16]
 # NOTE: Not sure if it's because of adding -rdc=true to the compiler flag, without the
 #       above linker flag added, there is a warning: 
