@@ -38,7 +38,6 @@ __global__ void cuda_interior_x ( ns_type::cuda_precision * stencil_dt_dx_ptr ,
             }
         }
     }
-}
 } // cuda_interior_x_I ()
 
 
