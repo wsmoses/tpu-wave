@@ -72,6 +72,12 @@ void cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::kern
     constexpr int INT_bound_END_x = (C_type_x == 'N' ? C_size_x - 4 : C_size_x - 3);
     constexpr int num_blocks = INT_bound_END_x - INT_bound_BGN_x;
 
+    constexpr char P_type_x = ( C_type_x == 'N' ? 'M' : 'N' );
+    constexpr int P_size_x = ( C_type_x == 'N' ? C_size_x - 1 : C_size_x + 1 );
+    using InteractingGridStructX = cuda_Struct_Grid<P_type_x, C_type_y, P_size_x, C_size_y, C_chunk_size>;
+
+    cudaStream_t stream = bool_stream ? this->stream_dx_I : 0;
+
     cuda_interior_x <bool_extra, num_blocks, 4, GridStruct, InteractingGridStructX> <<< num_blocks , N_thread , 0 , stream >>> 
         ( stencil_dt_dx.ptr, stencil_shift.ptr, INT_bound_BGN_x , S , P , P_extra , R , R_extra );
 }
