@@ -175,7 +175,7 @@ void cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::kern
     if ( c_LR == 'L' ) { row_BGN = 0; } 
     if ( c_LR == 'L' ) { col_BGN = 0; } 
 
-    if ( c_LR == 'R' ) { row_BGN = drvt_grid.G_size_x - D_bdry.rows; }
+    if ( c_LR == 'R' ) { row_BGN = C_size_x - D_bdry.rows; }
     if ( c_LR == 'R' ) { col_BGN = InteractingGridStructX::size_x - D_bdry.cols; }
 
     int num_blocks = D_bdry.rows;
@@ -275,7 +275,7 @@ void cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::kern
 
     int A_inv_projection_BGN = -1<<30;
     if ( c_LR == 'L' ) { A_inv_projection_BGN = 0;                                            } 
-    if ( c_LR == 'R' ) { A_inv_projection_BGN = drvt_grid.G_size_x - A_inv_projection.length; }
+    if ( c_LR == 'R' ) { A_inv_projection_BGN = C_size_x - A_inv_projection.length; }
 
     ns_type::cuda_precision eta = -1<<30;
     if ( c_LR == 'L' ) { eta =   1.; } 
