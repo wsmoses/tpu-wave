@@ -5,8 +5,8 @@
 //       the launcher first then kernel order without a forward declaration.
 
 
-template<bool bool_extra=false>
-__global__ void cuda_interior_x ( cuda_Struct_Grid_Base drvt_grid , cuda_Struct_Grid_Base soln_grid ,
+template<bool bool_extra=false, typename DrvtGrid, typename SolnGrid>
+__global__ void cuda_interior_x ( DrvtGrid drvt_grid , SolnGrid soln_grid ,
                                   cuda_run_time_vector_shallow_copy <ns_type::cuda_precision> stencil_dt_dx ,
                                   cuda_run_time_vector_shallow_copy <int> stencil_shift ,
                                   int INT_bound_BGN_x , int num_blocks ,
@@ -32,10 +32,10 @@ __global__ void cuda_interior_x ( cuda_Struct_Grid_Base drvt_grid , cuda_Struct_
 
     int ix = ind_block + INT_bound_BGN_x;
     {
-        for ( int iy = ind_thread; iy < drvt_grid.G_size_y; iy += N_thread )  // iy goes through the grid index on drvt grid
+        for ( int iy = ind_thread; iy < DrvtGrid::size_y; iy += N_thread )  // iy goes through the grid index on drvt grid
         {    
-            int i_d = ix * drvt_grid.Ly_pad + iy;
-            int i_s = ix * soln_grid.Ly_pad + iy;
+            int i_d = ix * DrvtGrid::Ly_pad + iy;
+            int i_s = ix * SolnGrid::Ly_pad + iy;
 
             ns_type::cuda_precision v_d = 0.;
     
@@ -51,8 +51,8 @@ __global__ void cuda_interior_x ( cuda_Struct_Grid_Base drvt_grid , cuda_Struct_
 } // cuda_interior_x_I ()
 
 
-template<bool bool_extra, int N_block, int N_thread>
-void cuda_Class_Grid::kernel_launch_cuda_interior_x ()
+template<char G_type_x, char G_type_y, int G_size_x, int G_size_y, int chunk_size, bool bool_extra, int N_block, int N_thread>
+void cuda_Class_Grid<G_type_x, G_type_y, G_size_x, G_size_y, chunk_size>::kernel_launch_cuda_interior_x ()
 {
     ns_type::cuda_precision * S = this->Map_pntr_soln.at('x')->ptr;
 
@@ -83,8 +83,11 @@ void cuda_Class_Grid::kernel_launch_cuda_interior_x ()
     const int INT_bound_BGN_x = this->Map_interior_BGN.at('x');
     const int INT_bound_END_x = this->Map_interior_END.at('x');
 
-    cuda_Struct_Grid_Base & drvt_grid =                  this->struct_grid;
-    cuda_Struct_Grid_Base & soln_grid = Map_pntr_grid.at('x')->struct_grid;
+    GridStruct & drvt_grid =                  this->struct_grid;
+    
+    constexpr char P_type_x = ( G_type_x == 'N' ? 'M' : 'N' );
+    constexpr int P_size_x = ( G_type_x == 'N' ? G_size_x - 1 : G_size_x + 1 );
+    using InteractingGridStructX = cuda_Struct_Grid<P_type_x, G_type_y, P_size_x, G_size_y, chunk_size>;
 
     auto stencil_dt_dx    = this->stencil_dt_dx_shallow_copy;
     auto stencil_shift = this->Map_stencil_shift_shallow_copy.at('x');
@@ -93,14 +96,14 @@ void cuda_Class_Grid::kernel_launch_cuda_interior_x ()
 
     cudaStream_t stream = bool_stream ? this->stream_dx_I : 0;
 
-    cuda_interior_x <bool_extra> <<< N_block , N_thread , 0 , stream >>> 
-        ( drvt_grid , soln_grid , stencil_dt_dx , stencil_shift , INT_bound_BGN_x , num_blocks , S , P , P_extra , R , R_extra );
+    cuda_interior_x <bool_extra, GridStruct, InteractingGridStructX> <<< N_block , N_thread , 0 , stream >>> 
+        ( drvt_grid , InteractingGridStructX() , stencil_dt_dx , stencil_shift , INT_bound_BGN_x , num_blocks , S , P , P_extra , R , R_extra );
 }
 
 
 
-template<bool bool_extra=false>
-__global__ void cuda_boundary_x ( cuda_Struct_Grid_Base drvt_grid , cuda_Struct_Grid_Base soln_grid , 
+template<bool bool_extra=false, typename DrvtGrid, typename SolnGrid>
+__global__ void cuda_boundary_x ( DrvtGrid drvt_grid , SolnGrid soln_grid , 
                                   cuda_run_time_matrix_shallow_copy<ns_type::cuda_precision> D_bdry ,
                                   int row_BGN , int col_BGN , int num_blocks ,   // row for x ; col for w
                                   ns_type::cuda_precision * S ,  // S is from pntr grid
@@ -117,15 +120,15 @@ __global__ void cuda_boundary_x ( cuda_Struct_Grid_Base drvt_grid , cuda_Struct_
     if ( ind_block >= num_blocks ) return;
 
     int ix = ind_block + row_BGN;
-    for ( int iy = ind_thread; iy < drvt_grid.G_size_y; iy += N_thread )  // iy goes through the grid index on drvt grid
+    for ( int iy = ind_thread; iy < DrvtGrid::size_y; iy += N_thread )  // iy goes through the grid index on drvt grid
     {
-        int i_d = ix * drvt_grid.Ly_pad + iy;
+        int i_d = ix * DrvtGrid::Ly_pad + iy;
 
         ns_type::cuda_precision v_d = 0.;
     
         for ( int iw = col_BGN; iw < col_BGN + D_bdry.cols; iw++ )  // iw goes through the grid index on soln grid
         {
-            int i_s = iw * soln_grid.Ly_pad + iy;
+            int i_s = iw * SolnGrid::Ly_pad + iy;
             v_d += S[ i_s ] * D_bdry( ix - row_BGN , iw - col_BGN );
         }
 
@@ -136,8 +139,8 @@ __global__ void cuda_boundary_x ( cuda_Struct_Grid_Base drvt_grid , cuda_Struct_
 } // cuda_boundary_x ()
 
 
-template<bool bool_extra, int N_block, int N_thread>
-void cuda_Class_Grid::kernel_launch_cuda_boundary_x ( char c_LR )
+template<char G_type_x, char G_type_y, int G_size_x, int G_size_y, int chunk_size, bool bool_extra, int N_block, int N_thread>
+void cuda_Class_Grid<G_type_x, G_type_y, G_size_x, G_size_y, chunk_size>::kernel_launch_cuda_boundary_x ( char c_LR )
 {
     ns_type::cuda_precision * S = this->Map_pntr_soln.at('x')->ptr;
 
@@ -149,13 +152,6 @@ void cuda_Class_Grid::kernel_launch_cuda_boundary_x ( char c_LR )
 
     if ( bool_extra ) 
     {
-        // [2023/07/17]
-        // NOTE: It would be great if we could "static assert" here to check which grid is calling.
-        //       Even better, if we have a member variable "bool_normal" of the grid class that is 
-        //       available at compile time, we could use that variable for the "if test" instead. 
-        //       Moreover, instead of having 'y' as part of the function name, maybe we can change
-        //       it to a template parameter.
-
         R       = this->Vec_rths.at(1).ptr;  // 0 corresponds to 'y'
         R_extra = this->Vec_rths.at(0).ptr;  // 1 corresponds to 'x', which needs extra work
 
@@ -163,11 +159,13 @@ void cuda_Class_Grid::kernel_launch_cuda_boundary_x ( char c_LR )
         P_extra = this->Vec_prmt.at(1).ptr;  // 2 * mu
     }
 
-    cuda_Struct_Grid_Base & drvt_grid =                  this->struct_grid;
-    cuda_Struct_Grid_Base & soln_grid = Map_pntr_grid.at('x')->struct_grid;
+    GridStruct & drvt_grid =                  this->struct_grid;
+    
+    constexpr char P_type_x = ( G_type_x == 'N' ? 'M' : 'N' );
+    constexpr int P_size_x = ( G_type_x == 'N' ? G_size_x - 1 : G_size_x + 1 );
+    using InteractingGridStructX = cuda_Struct_Grid<P_type_x, G_type_y, P_size_x, G_size_y, chunk_size>;
 
     auto D_bdry = this->Map_D_bdry_shallow_copy.at( {'x',c_LR} );
-    // Question: should/can we use auto & D_bdry ?
 
     int row_BGN = -1<<30; 
     int col_BGN = -1<<30; 
@@ -176,24 +174,24 @@ void cuda_Class_Grid::kernel_launch_cuda_boundary_x ( char c_LR )
     if ( c_LR == 'L' ) { col_BGN = 0; } 
 
     if ( c_LR == 'R' ) { row_BGN = drvt_grid.G_size_x - D_bdry.rows; }
-    if ( c_LR == 'R' ) { col_BGN = soln_grid.G_size_x - D_bdry.cols; }
+    if ( c_LR == 'R' ) { col_BGN = InteractingGridStructX::size_x - D_bdry.cols; }
 
     int num_blocks = D_bdry.rows;
 
     cudaStream_t stream = 0;  // 0 is the default stream
     if ( bool_stream ) { stream = c_LR == 'L' ? this->stream_dx_L : this->stream_dx_R; }
 
-    cuda_boundary_x <bool_extra> <<< N_block , N_thread , 0 , stream >>> 
-        ( drvt_grid , soln_grid , D_bdry , row_BGN , col_BGN , num_blocks , S , P , P_extra , R , R_extra );
+    cuda_boundary_x <bool_extra, GridStruct, InteractingGridStructX> <<< N_block , N_thread , 0 , stream >>> 
+        ( drvt_grid , InteractingGridStructX() , D_bdry , row_BGN , col_BGN , num_blocks , S , P , P_extra , R , R_extra );
 }
 
 
 
-template<bool bool_extra=false>
-__global__ void cuda_secure_bdry_x ( cuda_Struct_Grid_Base soln_grid , 
+template<bool bool_extra=false, typename DrvtGrid, typename SolnGrid>
+__global__ void cuda_secure_bdry_x ( SolnGrid soln_grid , 
                                      cuda_run_time_vector_shallow_copy<ns_type::cuda_precision> projection , 
                                      int projection_BGN , // 0 for L ; soln_grid.G_size_x - projection.length for R
-                                     cuda_Struct_Grid_Base drvt_grid , 
+                                     DrvtGrid drvt_grid , 
                                      cuda_run_time_vector_shallow_copy<ns_type::cuda_precision> A_inv_projection , 
                                      int A_inv_projection_BGN ,     // 0 for L ; drvt_grid.G_size_x - A_inv_projection.length for R
                                      ns_type::cuda_precision eta ,  // 1 for L ; -1 for R
@@ -212,24 +210,24 @@ __global__ void cuda_secure_bdry_x ( cuda_Struct_Grid_Base soln_grid ,
 
     if ( ind_block >= num_blocks ) return;
 
-    for ( int iy = ind_thread; iy < soln_grid.G_size_y; iy += N_thread )  // iy goes through the grid index on soln_grid (same as drvt grid)
+    for ( int iy = ind_thread; iy < SolnGrid::size_y; iy += N_thread )  // iy goes through the grid index on soln_grid (same as drvt grid)
     {
         const int i_p = iy;
         buffer[ i_p ] =  0;
 
         for ( int iw = projection_BGN; iw < projection_BGN + projection.length; iw++ )  // iw goes through the grid index on soln grid
         {
-            int i_s = iw * soln_grid.Ly_pad + iy;
+            int i_s = iw * SolnGrid::Ly_pad + iy;
             buffer[ i_p ] += projection( iw - projection_BGN ) * S[ i_s ];
         }
     }
 
-    for ( int iy = ind_thread; iy < drvt_grid.G_size_y; iy += N_thread )  // iy goes through the grid index on drvt_grid (same as soln grid)
+    for ( int iy = ind_thread; iy < DrvtGrid::size_y; iy += N_thread )  // iy goes through the grid index on drvt_grid (same as soln grid)
     {
         const int i_p = iy;
         for ( int iw = A_inv_projection_BGN; iw < A_inv_projection_BGN + A_inv_projection.length; iw++ )  // iw goes through the grid index on drvt grid
         {
-            int i_d = iw * drvt_grid.Ly_pad + iy;
+            int i_d = iw * DrvtGrid::Ly_pad + iy;
             ns_type::cuda_precision v_d = eta * A_inv_projection( iw - A_inv_projection_BGN ) * buffer[ i_p ];
             drvt_to_rths <bool_extra> ( v_d, i_d, P, P_extra, R, R_extra );
             // [2023/07/18]
@@ -239,8 +237,8 @@ __global__ void cuda_secure_bdry_x ( cuda_Struct_Grid_Base soln_grid ,
 } // cuda_secure_bdry_x ()
 
 
-template<bool bool_extra, int N_block, int N_thread>
-void cuda_Class_Grid::kernel_launch_cuda_secure_bdry_x ( char c_LR )
+template<char G_type_x, char G_type_y, int G_size_x, int G_size_y, int chunk_size, bool bool_extra, int N_block, int N_thread>
+void cuda_Class_Grid<G_type_x, G_type_y, G_size_x, G_size_y, chunk_size>::kernel_launch_cuda_secure_bdry_x ( char c_LR )
 {
     ns_type::cuda_precision * S = this->Map_pntr_soln.at('x')->ptr;
 
@@ -252,13 +250,6 @@ void cuda_Class_Grid::kernel_launch_cuda_secure_bdry_x ( char c_LR )
 
     if ( bool_extra ) 
     {
-        // [2023/07/17]
-        // NOTE: It would be great if we could "static assert" here to check which grid is calling.
-        //       Even better, if we have a member variable "bool_normal" of the grid class that is 
-        //       available at compile time, we could use that variable for the "if test" instead. 
-        //       Moreover, instead of having 'y' as part of the function name, maybe we can change
-        //       it to a template parameter.
-
         R       = this->Vec_rths.at(1).ptr;  // 0 corresponds to 'y'
         R_extra = this->Vec_rths.at(0).ptr;  // 1 corresponds to 'x', which needs extra work
 
@@ -266,15 +257,18 @@ void cuda_Class_Grid::kernel_launch_cuda_secure_bdry_x ( char c_LR )
         P_extra = this->Vec_prmt.at(1).ptr;  // 2 * mu
     }
     
-    cuda_Struct_Grid_Base & drvt_grid = this->struct_grid;
-    cuda_Struct_Grid_Base & soln_grid = Map_pntr_grid.at('x')->struct_grid;
+    GridStruct & drvt_grid = this->struct_grid;
+    
+    constexpr char P_type_x = ( G_type_x == 'N' ? 'M' : 'N' );
+    constexpr int P_size_x = ( G_type_x == 'N' ? G_size_x - 1 : G_size_x + 1 );
+    using InteractingGridStructX = cuda_Struct_Grid<P_type_x, G_type_y, P_size_x, G_size_y, chunk_size>;
 
     auto projection = this->Map_projection_shallow_copy.at({'x',c_LR});
     auto A_inv_projection = this->Map_A_inv_projection_shallow_copy.at({'x',c_LR});
 
     int projection_BGN = -1<<30;
     if ( c_LR == 'L' ) { projection_BGN = 0;                                      } 
-    if ( c_LR == 'R' ) { projection_BGN = soln_grid.G_size_x - projection.length; }
+    if ( c_LR == 'R' ) { projection_BGN = InteractingGridStructX::size_x - projection.length; }
 
     int A_inv_projection_BGN = -1<<30;
     if ( c_LR == 'L' ) { A_inv_projection_BGN = 0;                                            } 
@@ -292,8 +286,8 @@ void cuda_Class_Grid::kernel_launch_cuda_secure_bdry_x ( char c_LR )
     cudaStream_t stream = 0;  // 0 is the default stream
     if ( bool_stream ) { stream = c_LR == 'L' ? this->stream_dx_L : this->stream_dx_R; }
 
-    cuda_secure_bdry_x <bool_extra> <<< N_block , N_thread , 0 , stream >>> 
-        ( soln_grid , projection , projection_BGN , drvt_grid, 
+    cuda_secure_bdry_x <bool_extra, GridStruct, InteractingGridStructX> <<< N_block , N_thread , 0 , stream >>> 
+        ( InteractingGridStructX() , projection , projection_BGN , drvt_grid, 
           A_inv_projection, A_inv_projection_BGN, eta, num_blocks,
           S, P, P_extra, R, R_extra, buffer );
 }

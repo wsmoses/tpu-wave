@@ -10,8 +10,8 @@
 
 
 
-template<int N_block, int N_thread>
-double cuda_Class_Grid::energy_calculation ()
+template<char G_type_x, char G_type_y, int G_size_x, int G_size_y, int chunk_size, int N_block, int N_thread>
+double cuda_Class_Grid<G_type_x, G_type_y, G_size_x, G_size_y, chunk_size>::energy_calculation ()
 {
     auto & T = this->thrust_memory;
 
@@ -46,8 +46,8 @@ double cuda_Class_Grid::energy_calculation ()
 }
 
 
-
-__global__ void weighted_square_NORMAL_grid ( cuda_Struct_Grid_Base struct_grid , 
+template<typename GridType>
+__global__ void weighted_square_NORMAL_grid ( GridType struct_grid , 
                                               ns_type::cuda_precision * Sxx , ns_type::cuda_precision * Syy , 
                                               double * P1  , double * P2  , 
                                               double * T )  // T stores the intermediate output 
@@ -59,12 +59,12 @@ __global__ void weighted_square_NORMAL_grid ( cuda_Struct_Grid_Base struct_grid 
     int ind_thread = threadIdx.x;
 
     int ix = ind_block;
-    if ( ix >= struct_grid.G_size_x ) return;
+    if ( ix >= GridType::size_x ) return;
 
     {
-        for ( int iy = ind_thread; iy < struct_grid.G_size_y; iy += N_thread )
+        for ( int iy = ind_thread; iy < GridType::size_y; iy += N_thread )
         {            
-            int ind = ix * struct_grid.Ly_pad + iy;
+            int ind = ix * GridType::Ly_pad + iy;
 
             T [ind]  = (double) Sxx [ind] * P1 [ind] * (double) Sxx [ind]
                      + (double) Syy [ind] * P1 [ind] * (double) Syy [ind]
@@ -75,8 +75,8 @@ __global__ void weighted_square_NORMAL_grid ( cuda_Struct_Grid_Base struct_grid 
 } // cuda_secure_interface_x ()
 
 
-
-__global__ void weighted_square_SINGLE_grid ( cuda_Struct_Grid_Base struct_grid , 
+template<typename GridType>
+__global__ void weighted_square_SINGLE_grid ( GridType struct_grid , 
                                               ns_type::cuda_precision * S , 
                                               double * P , 
                                               double * T )  // T stores the intermediate output 
@@ -88,12 +88,12 @@ __global__ void weighted_square_SINGLE_grid ( cuda_Struct_Grid_Base struct_grid 
     int ind_thread = threadIdx.x;
 
     int ix = ind_block;
-    if ( ix >= struct_grid.G_size_x ) return;
+    if ( ix >= GridType::size_x ) return;
 
     {
-        for ( int iy = ind_thread; iy < struct_grid.G_size_y; iy += N_thread )
+        for ( int iy = ind_thread; iy < GridType::size_y; iy += N_thread )
         {            
-            int ind = ix * struct_grid.Ly_pad + iy;
+            int ind = ix * GridType::Ly_pad + iy;
             T [ind] = (double) S [ind] * P [ind] * (double) S [ind];
         }
     }

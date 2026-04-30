@@ -24,69 +24,45 @@
 //       and organize data for kernel launch, we can be "liberal" with it.
 
 
-struct cuda_Struct_Grid_Base
-{
-    // size of this grid (in terms of number of grid points)
-    int G_size_x = -(1<<30); // 30 should be fine
-    int G_size_y = -(1<<30); // 30 should be fine
-
-    int chunk_size = 32;  // see cuda_grid_allocate_memory (); to round up the problem size when allocating memory                         
-    
-    int Lx_pad = -(1<<30); // 30 should be fine
-    int Ly_pad = -(1<<30); // 30 should be fine
-
-    int length_memory = -(1<<30);
-
-    // stride: change in the 2D vector index caused by change in grid index in x or y direction by unit 1
-    int stride_x;
-    int stride_y;
-};
-
-template<char G_type_x = 'N', char G_type_y = 'N'>
-struct cuda_Struct_Grid : public cuda_Struct_Grid_Base
+template<char G_type_x, char G_type_y, int G_size_x, int G_size_y, int chunk_size = 32>
+struct cuda_Struct_Grid
 {
     static constexpr char type_x = G_type_x;
     static constexpr char type_y = G_type_y;
+    static constexpr int size_x = G_size_x;
+    static constexpr int size_y = G_size_y;
+    static constexpr int chunk = chunk_size;
+
+    static constexpr int Lx_pad = ((G_size_x + chunk_size - 1) / chunk_size) * chunk_size;
+    static constexpr int Ly_pad = ((G_size_y + chunk_size - 1) / chunk_size) * chunk_size;
+
+    static constexpr int length_memory = Lx_pad * Ly_pad;
+
+    static constexpr int stride_x = Ly_pad;
+    static constexpr int stride_y = 1;
 };
 // if "cuda_Struct_Grid" is intended to pass between host and device, we can remove the "cuda_" prefix from naming
 
 
-class cuda_Class_Grid 
+class cuda_Class_Grid_Base 
 {
     public:
-
         Class_Grid * ptr_class_grid; 
         
-        cuda_Struct_Grid_Base struct_grid;      
-
-        // ------------------------------------------ //
-        // ---- references to the struct members ---- //
-        // ------------------------------------------ //
-
         char G_type_x;
         char G_type_y;
 
-        int  & G_size_x      = struct_grid.G_size_x;
-        int  & G_size_y      = struct_grid.G_size_y;
+        int G_size_x;
+        int G_size_y;
+        int chunk_size;
+        int Lx_pad;
+        int Ly_pad;
+        int length_memory;
+        int stride_x;
+        int stride_y;
 
-        int  & chunk_size    = struct_grid.chunk_size;  // used for calculating Lx_pad and Ly_pad
-
-        int  & Lx_pad        = struct_grid.Lx_pad;
-        int  & Ly_pad        = struct_grid.Ly_pad;
-
-        int  & length_memory = struct_grid.length_memory;
-
-        int  & stride_x      = struct_grid.stride_x;
-        int  & stride_y      = struct_grid.stride_y;
-
-        // ------------------------------------------ //
-        // ---- references to the struct members ---- //
-        // ------------------------------------------ //
-
-        // [2023/06/21]
-        // NOTE: Removed Map_G_type, Map_G_size, and Map_stride from this class since they are not used.
-        //       If want to use aggregate type, std::array may be a better choice (particularly now that 
-        //       we start to use std-20, which can make std::array constexpr).
+        cuda_Class_Grid_Base(char tx, char ty, int sx, int sy, int chunk, int lx, int ly, int len, int strx, int stry) 
+            : G_type_x(tx), G_type_y(ty), G_size_x(sx), G_size_y(sy), chunk_size(chunk), Lx_pad(lx), Ly_pad(ly), length_memory(len), stride_x(strx), stride_y(stry) {}
 
 
         int N_modulo_x = 1<<30;  // Used to map the indices for periodic BC; needed when using OR not using the % operator
@@ -94,9 +70,9 @@ class cuda_Class_Grid
 
 
         // pointers to the three grids that that this grid interacts with
-        cuda_Class_Grid * pntr_Grid_x;
-        cuda_Class_Grid * pntr_Grid_y;
-        std::map< char , cuda_Class_Grid * > Map_pntr_grid;   // char : c_dir
+        cuda_Class_Grid_Base * pntr_Grid_x;
+        cuda_Class_Grid_Base * pntr_Grid_y;
+        std::map< char , cuda_Class_Grid_Base * > Map_pntr_grid;   // char : c_dir
 
         std::map< char , cuda_run_time_vector<ns_type::cuda_precision> * > Map_pntr_soln;
         
@@ -178,20 +154,6 @@ class cuda_Class_Grid
 
         bool bool_stream = true;
 
-
-        // struct Struct_Stream
-        // {
-        //     cudaStream_t soln;
-        //     cudaStream_t drvt;
-        // } struct_stream;  // this syntax works
-
-
-        // std::map < std::string , cudaStream_t > Map_stream;
-        // std::map < std::string , cudaStream_t > Map_event ;
-        // if we use a map, mapping "dx_I" to stream, we can use for loop to create and destroy
-        // we can also wrap both of them into a struct and define a constructor and destructor
-
-
         cudaStream_t stream_dx_I;
         cudaStream_t stream_dx_L;
         cudaStream_t stream_dx_R;
@@ -208,15 +170,35 @@ class cuda_Class_Grid
         cudaStream_t stream_soln;      // update, src, rcv can be put in this stream
         cudaStream_t stream_drvt;      // this one is for reset
 
+        cuda_Class_Grid_Base(cuda_Struct_Grid_Base & sg, char tx, char ty) 
+            : struct_grid(sg), G_type_x(tx), G_type_y(ty) {}
+
+        virtual ~cuda_Class_Grid_Base() {}
+
+        virtual void cuda_Class_Grid_initialize ( Class_Grid * class_grid ) = 0;
+        virtual void set_grid_pointers ( std::map< std::array<char, ns_forward::N_dir> , cuda_Class_Grid_Base * > & Map_cuda_grid_pointers ) = 0;
+};
+
+
+template<char G_type_x = 'N', char G_type_y = 'N', int G_size_x = 600, int G_size_y = 600, int chunk_size = 32>
+class cuda_Class_Grid : public cuda_Class_Grid_Base
+{
+    public:
+        using GridStruct = cuda_Struct_Grid<G_type_x, G_type_y, G_size_x, G_size_y, chunk_size>;
+
+        GridStruct my_struct_grid;      
+
+        static constexpr char type_x = G_type_x;
+        static constexpr char type_y = G_type_y;
+
+        cuda_Class_Grid() : cuda_Class_Grid_Base(G_type_x, G_type_y, G_size_x, G_size_y, chunk_size, GridStruct::Lx_pad, GridStruct::Ly_pad, GridStruct::length_memory, GridStruct::stride_x, GridStruct::stride_y) {}
+
+        void set_grid_pointers ( std::map< std::array<char, ns_forward::N_dir> , cuda_Class_Grid_Base * > & Map_cuda_grid_pointers ) override;
 
         // constructor
-        cuda_Class_Grid ( ) { }
-
-        
-        //-----------------------------------------------//
-        //------------- Function defintiion -------------//
-        //-----------------------------------------------//
-        void cuda_Class_Grid_initialize ( Class_Grid * class_grid ) 
+        // cuda_Class_Grid ( ) { }
+        // [2024/04/03] NOTE: commented out since we added a constructor above.
+        void cuda_Class_Grid_initialize ( Class_Grid * class_grid ) override
         {
             this->ptr_class_grid = class_grid;
 
@@ -224,23 +206,13 @@ class cuda_Class_Grid
             //       for the equivalent cpu class; We mostly copy from the equivalent cpu class, 
             //       except for containers that need to hold gpu memory, and _pad and stride_.
 
-            this->G_type_x = class_grid->G_type_x;
-            this->G_type_y = class_grid->G_type_y;
+            assert(type_x == class_grid->G_type_x);
+            assert(type_y == class_grid->G_type_y);
 
+            assert(GridStruct::size_x == class_grid->G_size_x);
+            assert(GridStruct::size_y == class_grid->G_size_y);
 
-            this->G_size_x = class_grid->G_size_x;
-            this->G_size_y = class_grid->G_size_y;
-
-
-            // chunk_size set to 1 would make Lx_pad == G_size_x and Ly_pad == G_size_y
-            this->Lx_pad = ( ( this->G_size_x + this->chunk_size - 1 ) / this->chunk_size ) * this->chunk_size;
-            this->Ly_pad = ( ( this->G_size_y + this->chunk_size - 1 ) / this->chunk_size ) * this->chunk_size;
-
-            this->length_memory = this->Lx_pad * this->Ly_pad;
-            // [2023/06/21] NOTE: Can we use a better variable name than length_memory?
-
-            this->stride_x = this->Ly_pad;
-            this->stride_y =            1;
+            // Pads and strides are already initialized in struct_grid constructor.
 
 
             this->N_modulo_x = class_grid->N_modulo_x;
@@ -381,7 +353,7 @@ class cuda_Class_Grid
         //-----------------------------------------------//
         //------------- Function defintiion -------------//
         //-----------------------------------------------//
-        void set_grid_pointers ( std::map< std::array<char, ns_forward::N_dir> , cuda_Class_Grid * > & Map_cuda_grid_pointers )
+        void set_grid_pointers ( std::map< std::array<char, ns_forward::N_dir> , cuda_Class_Grid_Base * > & Map_cuda_grid_pointers ) override
         {
             char P_type_x = ( G_type_x == 'N' ? 'M' : 'N' );
             char P_type_y = ( G_type_y == 'N' ? 'M' : 'N' );

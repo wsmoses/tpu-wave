@@ -262,18 +262,18 @@ int main(int argc, char* argv[])
     // cudaDeviceSetCacheConfig ( cudaFuncCachePreferL1 );
 
 
-    std::array < cuda_Class_Grid  , 2<<(N_dir-1) > cuda_Class_Grids ;
-    std::array < cuda_Struct_Grid_Base , 2<<(N_dir-1) > cuda_Struct_Grids;
-    // NOTE: use bit shift to take the power of 2 (only works when base is 2); 
-    //       reason - std::pow () promotes int to float.
+    cuda_Class_Grid<'N', 'N', 601, 601> grid_SNN;
+    cuda_Class_Grid<'M', 'M', 600, 600> grid_SMM;
+    cuda_Class_Grid<'M', 'N', 600, 601> grid_SMN;
+    cuda_Class_Grid<'N', 'M', 601, 600> grid_SNM;
 
-    std::map< std::array<char, ns_forward::N_dir> , cuda_Class_Grid  * > cuda_Map_Class_Grid_pointers  {};    
+    std::map< std::array<char, ns_forward::N_dir> , cuda_Class_Grid_Base * > cuda_Map_Class_Grid_pointers  {};    
 
     // ---- Assign to the map from grid types to pointers of cuda_Class_Grid
-    cuda_Map_Class_Grid_pointers [Array_Grid_types.at(0)] = &cuda_Class_Grids.at(0);
-    cuda_Map_Class_Grid_pointers [Array_Grid_types.at(1)] = &cuda_Class_Grids.at(1);
-    cuda_Map_Class_Grid_pointers [Array_Grid_types.at(2)] = &cuda_Class_Grids.at(2);
-    cuda_Map_Class_Grid_pointers [Array_Grid_types.at(3)] = &cuda_Class_Grids.at(3);
+    cuda_Map_Class_Grid_pointers [{'N','N'}] = &grid_SNN;
+    cuda_Map_Class_Grid_pointers [{'M','M'}] = &grid_SMM;
+    cuda_Map_Class_Grid_pointers [{'M','N'}] = &grid_SMN;
+    cuda_Map_Class_Grid_pointers [{'N','M'}] = &grid_SNM;
 
 
     if ( cuda_Map_Class_Grid_pointers.size() != 2<<(N_dir-1) ) 
@@ -290,7 +290,7 @@ int main(int argc, char* argv[])
     // NOTE: copy the parameters from hst to dev to start the simulation on device
     for ( const auto & iter_grid_type : Array_Grid_types ) 
     {
-        cuda_Class_Grid * cuda_class_grid = cuda_Map_Class_Grid_pointers.at(iter_grid_type);
+        cuda_Class_Grid_Base * cuda_class_grid = cuda_Map_Class_Grid_pointers.at(iter_grid_type);
         for ( int i_field = 0; i_field < cuda_class_grid->N_prmt; i_field++ )
         { 
             cuda_class_grid->copy_field_pitched ( "prmt" , i_field , "hst_to_dev" ); 
@@ -322,11 +322,11 @@ cudaDeviceSynchronize();
     Class_Grid & Grid_SMN  = * ( Fwd_Specs.Map_Grid_pointers.at( {'M','N'} ) );  // Pay attention here; we are using small 'x'
     Class_Grid & Grid_SNM  = * ( Fwd_Specs.Map_Grid_pointers.at( {'N','M'} ) );  // Pay attention here; we are using small 'y'
 
-    cuda_Class_Grid & cuda_Class_Grid_SNN = * ( cuda_Map_Class_Grid_pointers.at( {'N','N'} ) );
-    cuda_Class_Grid & cuda_Class_Grid_SMM = * ( cuda_Map_Class_Grid_pointers.at( {'M','M'} ) );
+    auto & cuda_Class_Grid_SNN = grid_SNN;
+    auto & cuda_Class_Grid_SMM = grid_SMM;
 
-    cuda_Class_Grid & cuda_Class_Grid_SMN  = * ( cuda_Map_Class_Grid_pointers.at( {'M','N'} ) );  // Pay attention here; we are using small 'x'
-    cuda_Class_Grid & cuda_Class_Grid_SNM  = * ( cuda_Map_Class_Grid_pointers.at( {'N','M'} ) );  // Pay attention here; we are using small 'y'
+    auto & cuda_Class_Grid_SMN = grid_SMN;
+    auto & cuda_Class_Grid_SNM = grid_SNM;
 
 
     // NOTE: It is very important that we don't forget the reference (&); otherwise, new objects will be
