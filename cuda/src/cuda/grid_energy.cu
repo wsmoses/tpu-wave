@@ -10,8 +10,9 @@
 
 
 
-template<char G_type_x, char G_type_y, int G_size_x, int G_size_y, int chunk_size, int N_block, int N_thread>
-double cuda_Class_Grid<G_type_x, G_type_y, G_size_x, G_size_y, chunk_size>::energy_calculation ()
+template<char C_type_x, char C_type_y, int C_size_x, int C_size_y, int C_chunk_size>
+template<int N_block, int N_thread>
+double cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::energy_calculation ()
 {
     auto & T = this->thrust_memory;
 

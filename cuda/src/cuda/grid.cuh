@@ -175,6 +175,102 @@ class cuda_Class_Grid_Base
 
         virtual ~cuda_Class_Grid_Base() {}
 
+        void copy_field_pitched ( std::string field_name , int ind_field , std::string copy_direction )
+        {
+            ns_type::cuda_precision * dev_ptr = nullptr;
+
+                 if ( strcmp( field_name.c_str(), "drvt" ) == 0 ) { dev_ptr = this->Vec_drvt     .at(ind_field).ptr; }
+            else if ( strcmp( field_name.c_str(), "soln" ) == 0 ) { dev_ptr = this->Vec_soln     .at(ind_field).ptr; }
+            else if ( strcmp( field_name.c_str(), "prmt" ) == 0 ) { dev_ptr = this->Vec_prmt     .at(ind_field).ptr; }
+            else 
+                { printf ("%s %d Unrecognized field name.\n", __FILE__, __LINE__); fflush(stdout); exit(0); }
+
+
+            std::vector< ns_type::host_precision * > ptr_hst_fields;
+
+            if ( strcmp( field_name.c_str(), "drvt" ) == 0 ) { for ( auto & iter : ptr_class_grid->Map_v_D       ) { ptr_hst_fields.push_back ( iter.second.ptr ); } }
+            if ( strcmp( field_name.c_str(), "soln" ) == 0 ) { for ( auto & iter : ptr_class_grid->Vec_soln      ) { ptr_hst_fields.push_back ( iter.ptr );        } }
+            if ( strcmp( field_name.c_str(), "prmt" ) == 0 ) { for ( auto & iter : ptr_class_grid->Vec_prmt      ) { ptr_hst_fields.push_back ( iter.ptr );        } }
+
+            if ( strcmp( field_name.c_str(), "drvt" ) == 0 ) { assert ( (int) ptr_hst_fields.size() == this->N_drvt ); } 
+            if ( strcmp( field_name.c_str(), "soln" ) == 0 ) { assert ( (int) ptr_hst_fields.size() == this->N_soln ); } 
+            if ( strcmp( field_name.c_str(), "prmt" ) == 0 ) { assert ( (int) ptr_hst_fields.size() == this->N_prmt ); } 
+            
+            ns_type::host_precision * hst_ptr = ptr_hst_fields.at(ind_field);
+
+
+            // assert ( sizeof(ns_type::cuda_precision) == sizeof(ns_type::host_precision) );
+            // [2023/05/13]
+            // NOTE: If setting both "host_precision" and "cuda_precision" to "long double", the
+            //       nvcc compiler warns that "long double" is treated as "double" in device code.
+            //       But maybe on host, it is still the 80 bit version and "compatible" with type 
+            //       host_precision? And that's why the above assert passes? 
+            // [2023/05/14]
+            // NOTE: Actually, both prints out 16 bytes.
+            // [2023/06/25]
+            // NOTE: It makes sense that the 80 bit version is stored as 16 bytes (for alignment 
+            //       purpose). 
+            // printf( "\n\n%s %d cuda_precision: %d, host_precision: %d\n\n", __FILE__, __LINE__, 
+            //          sizeof(ns_type::cuda_precision), sizeof(ns_type::host_precision) );
+            // [2023/06/25]
+            // NOTE: "sizeof ()" is not a good test for if the two types are the same. "is_same_v" 
+            //       is better.
+            static_assert ( std::is_same_v< ns_type::cuda_precision , ns_type::host_precision > , "Not the same type." );
+
+            if ( strcmp( copy_direction.c_str(), "hst_to_dev" ) == 0 )
+            {
+                cudaMemcpy2D( dev_ptr, Ly_pad   * sizeof(ns_type::cuda_precision), 
+                               hst_ptr, G_size_y * sizeof(ns_type::host_precision),
+                               G_size_y * sizeof(ns_type::host_precision) , 
+                               G_size_x , cudaMemcpyHostToDevice );
+            }
+            else if ( strcmp( copy_direction.c_str(), "dev_to_hst" ) == 0 )
+            {
+                cudaMemcpy2D( hst_ptr, G_size_y * sizeof(ns_type::host_precision),
+                              dev_ptr, Ly_pad   * sizeof(ns_type::cuda_precision), 
+                              G_size_y * sizeof(ns_type::host_precision) , 
+                              G_size_x , cudaMemcpyDeviceToHost );
+            }
+            else 
+                { printf ("%s %d Unrecognized direction.\n", __FILE__, __LINE__); fflush(stdout); exit(0); }
+        }
+
+        void copy_field_pitched_enrg ( std::string field_name , int ind_field , std::string copy_direction )
+        {
+            double * dev_ptr = nullptr;
+
+                 if ( strcmp( field_name.c_str(), "enrg" ) == 0 ) { dev_ptr = this->Vec_prmt_enrg.at(ind_field).ptr; } 
+            else 
+                { printf ("%s %d Unrecognized field name.\n", __FILE__, __LINE__); fflush(stdout); exit(0); }
+
+
+            std::vector< double * > ptr_hst_fields;
+
+            if ( strcmp( field_name.c_str(), "enrg" ) == 0 ) { for ( auto & iter : ptr_class_grid->Vec_prmt_enrg ) { ptr_hst_fields.push_back ( iter.ptr );        } }
+            
+            if ( strcmp( field_name.c_str(), "enrg" ) == 0 ) { assert ( (int) ptr_hst_fields.size() == this->N_enrg ); } 
+            
+            double * hst_ptr = ptr_hst_fields.at(ind_field);
+
+
+            if ( strcmp( copy_direction.c_str(), "hst_to_dev" ) == 0 )
+            {
+                cudaMemcpy2D( dev_ptr, Ly_pad   * sizeof(double), 
+                              hst_ptr, G_size_y * sizeof(double),
+                              G_size_y * sizeof(double) , 
+                              G_size_x , cudaMemcpyHostToDevice );
+            }
+            else if ( strcmp( copy_direction.c_str(), "dev_to_hst" ) == 0 )
+            {
+                cudaMemcpy2D( hst_ptr, G_size_y * sizeof(double),
+                              dev_ptr, Ly_pad   * sizeof(double), 
+                              G_size_y * sizeof(double) , 
+                              G_size_x , cudaMemcpyDeviceToHost );
+            }
+            else 
+                { printf ("%s %d Unrecognized direction.\n", __FILE__, __LINE__); fflush(stdout); exit(0); }
+        }
+
         virtual void cuda_Class_Grid_initialize ( Class_Grid * class_grid ) = 0;
         virtual void set_grid_pointers ( std::map< std::array<char, ns_forward::N_dir> , cuda_Class_Grid_Base * > & Map_cuda_grid_pointers ) = 0;
 };
@@ -381,108 +477,7 @@ class cuda_Class_Grid : public cuda_Class_Grid_Base
         } // set_grid_pointers()
 
 
-        //-----------------------------------------------//
-        //------------- Function defintiion -------------//
-        //-----------------------------------------------//
-        void copy_field_pitched ( std::string field_name , int ind_field , std::string copy_direction )
-        {
-            ns_type::cuda_precision * dev_ptr = nullptr;
 
-                 if ( strcmp( field_name.c_str(), "drvt" ) == 0 ) { dev_ptr = this->Vec_drvt     .at(ind_field).ptr; }
-            else if ( strcmp( field_name.c_str(), "soln" ) == 0 ) { dev_ptr = this->Vec_soln     .at(ind_field).ptr; }
-            else if ( strcmp( field_name.c_str(), "prmt" ) == 0 ) { dev_ptr = this->Vec_prmt     .at(ind_field).ptr; }
-            else 
-                { printf ("%s %d Unrecognized field name.\n", __FILE__, __LINE__); fflush(stdout); exit(0); }
-
-
-            std::vector< ns_type::host_precision * > ptr_hst_fields;
-
-            if ( strcmp( field_name.c_str(), "drvt" ) == 0 ) { for ( auto & iter : ptr_class_grid->Map_v_D       ) { ptr_hst_fields.push_back ( iter.second.ptr ); } }
-            if ( strcmp( field_name.c_str(), "soln" ) == 0 ) { for ( auto & iter : ptr_class_grid->Vec_soln      ) { ptr_hst_fields.push_back ( iter.ptr );        } }
-            if ( strcmp( field_name.c_str(), "prmt" ) == 0 ) { for ( auto & iter : ptr_class_grid->Vec_prmt      ) { ptr_hst_fields.push_back ( iter.ptr );        } }
-
-            if ( strcmp( field_name.c_str(), "drvt" ) == 0 ) { assert ( (int) ptr_hst_fields.size() == this->N_drvt ); } 
-            if ( strcmp( field_name.c_str(), "soln" ) == 0 ) { assert ( (int) ptr_hst_fields.size() == this->N_soln ); } 
-            if ( strcmp( field_name.c_str(), "prmt" ) == 0 ) { assert ( (int) ptr_hst_fields.size() == this->N_prmt ); } 
-            
-            ns_type::host_precision * hst_ptr = ptr_hst_fields.at(ind_field);
-
-
-            // assert ( sizeof(ns_type::cuda_precision) == sizeof(ns_type::host_precision) );
-            // [2023/05/13]
-            // NOTE: If setting both "host_precision" and "cuda_precision" to "long double", the
-            //       nvcc compiler warns that "long double" is treated as "double" in device code.
-            //       But maybe on host, it is still the 80 bit version and "compatible" with type 
-            //       host_precision? And that's why the above assert passes? 
-            // [2023/05/14]
-            // NOTE: Actually, both prints out 16 bytes.
-            // [2023/06/25]
-            // NOTE: It makes sense that the 80 bit version is stored as 16 bytes (for alignment 
-            //       purpose). 
-            // printf( "\n\n%s %d cuda_precision: %d, host_precision: %d\n\n", __FILE__, __LINE__, 
-            //          sizeof(ns_type::cuda_precision), sizeof(ns_type::host_precision) );
-            // [2023/06/25]
-            // NOTE: "sizeof ()" is not a good test for if the two types are the same. "is_same_v" 
-            //       is better.
-            static_assert ( std::is_same_v< ns_type::cuda_precision , ns_type::host_precision > , "Not the same type." );
-
-            if ( strcmp( copy_direction.c_str(), "hst_to_dev" ) == 0 )
-            {
-                cudaMemcpy2D( dev_ptr, Ly_pad   * sizeof(ns_type::cuda_precision), 
-                              hst_ptr, G_size_y * sizeof(ns_type::host_precision),
-                              G_size_y * sizeof(ns_type::host_precision) , 
-                              G_size_x , cudaMemcpyHostToDevice );
-            }
-            else if ( strcmp( copy_direction.c_str(), "dev_to_hst" ) == 0 )
-            {
-                cudaMemcpy2D( hst_ptr, G_size_y * sizeof(ns_type::host_precision),
-                              dev_ptr, Ly_pad   * sizeof(ns_type::cuda_precision), 
-                              G_size_y * sizeof(ns_type::host_precision) , 
-                              G_size_x , cudaMemcpyDeviceToHost );
-            }
-            else 
-                { printf ("%s %d Unrecognized direction.\n", __FILE__, __LINE__); fflush(stdout); exit(0); }
-        }
-
-
-        //-----------------------------------------------//
-        //------------- Function defintiion -------------//
-        //-----------------------------------------------//
-        void copy_field_pitched_enrg ( std::string field_name , int ind_field , std::string copy_direction )
-        {
-            double * dev_ptr = nullptr;
-
-                 if ( strcmp( field_name.c_str(), "enrg" ) == 0 ) { dev_ptr = this->Vec_prmt_enrg.at(ind_field).ptr; } 
-            else 
-                { printf ("%s %d Unrecognized field name.\n", __FILE__, __LINE__); fflush(stdout); exit(0); }
-
-
-            std::vector< double * > ptr_hst_fields;
-
-            if ( strcmp( field_name.c_str(), "enrg" ) == 0 ) { for ( auto & iter : ptr_class_grid->Vec_prmt_enrg ) { ptr_hst_fields.push_back ( iter.ptr );        } }
-            
-            if ( strcmp( field_name.c_str(), "enrg" ) == 0 ) { assert ( (int) ptr_hst_fields.size() == this->N_enrg ); } 
-            
-            double * hst_ptr = ptr_hst_fields.at(ind_field);
-
-
-            if ( strcmp( copy_direction.c_str(), "hst_to_dev" ) == 0 )
-            {
-                cudaMemcpy2D( dev_ptr, Ly_pad   * sizeof(double), 
-                              hst_ptr, G_size_y * sizeof(double),
-                              G_size_y * sizeof(double) , 
-                              G_size_x , cudaMemcpyHostToDevice );
-            }
-            else if ( strcmp( copy_direction.c_str(), "dev_to_hst" ) == 0 )
-            {
-                cudaMemcpy2D( hst_ptr, G_size_y * sizeof(double),
-                              dev_ptr, Ly_pad   * sizeof(double), 
-                              G_size_y * sizeof(double) , 
-                              G_size_x , cudaMemcpyDeviceToHost );
-            }
-            else 
-                { printf ("%s %d Unrecognized direction.\n", __FILE__, __LINE__); fflush(stdout); exit(0); }
-        }
 
 
         //-----------------------------------------------//

@@ -51,8 +51,9 @@ __global__ void cuda_interior_x ( DrvtGrid drvt_grid , SolnGrid soln_grid ,
 } // cuda_interior_x_I ()
 
 
-template<char G_type_x, char G_type_y, int G_size_x, int G_size_y, int chunk_size, bool bool_extra, int N_block, int N_thread>
-void cuda_Class_Grid<G_type_x, G_type_y, G_size_x, G_size_y, chunk_size>::kernel_launch_cuda_interior_x ()
+template<char C_type_x, char C_type_y, int C_size_x, int C_size_y, int C_chunk_size>
+template<bool bool_extra, int N_block, int N_thread>
+void cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::kernel_launch_cuda_interior_x ()
 {
     ns_type::cuda_precision * S = this->Map_pntr_soln.at('x')->ptr;
 
@@ -139,8 +140,9 @@ __global__ void cuda_boundary_x ( DrvtGrid drvt_grid , SolnGrid soln_grid ,
 } // cuda_boundary_x ()
 
 
-template<char G_type_x, char G_type_y, int G_size_x, int G_size_y, int chunk_size, bool bool_extra, int N_block, int N_thread>
-void cuda_Class_Grid<G_type_x, G_type_y, G_size_x, G_size_y, chunk_size>::kernel_launch_cuda_boundary_x ( char c_LR )
+template<char C_type_x, char C_type_y, int C_size_x, int C_size_y, int C_chunk_size>
+template<bool bool_extra, int N_block, int N_thread>
+void cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::kernel_launch_cuda_boundary_x ( char c_LR )
 {
     ns_type::cuda_precision * S = this->Map_pntr_soln.at('x')->ptr;
 
@@ -237,8 +239,9 @@ __global__ void cuda_secure_bdry_x ( SolnGrid soln_grid ,
 } // cuda_secure_bdry_x ()
 
 
-template<char G_type_x, char G_type_y, int G_size_x, int G_size_y, int chunk_size, bool bool_extra, int N_block, int N_thread>
-void cuda_Class_Grid<G_type_x, G_type_y, G_size_x, G_size_y, chunk_size>::kernel_launch_cuda_secure_bdry_x ( char c_LR )
+template<char C_type_x, char C_type_y, int C_size_x, int C_size_y, int C_chunk_size>
+template<bool bool_extra, int N_block, int N_thread>
+void cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::kernel_launch_cuda_secure_bdry_x ( char c_LR )
 {
     ns_type::cuda_precision * S = this->Map_pntr_soln.at('x')->ptr;
 
