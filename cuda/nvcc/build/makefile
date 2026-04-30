@@ -287,6 +287,7 @@ $(CUDA_EXE_LIST) : $(CUDA_EXE_DIR)/%.exe : $(CUDA_DIR_OBJ_MAIN)/%.o $(CPP_OBJS_L
 
 # compiling .cpp
 $(CPP_OBJS_LOCAL_MAIN) : $(CPP_DIR_OBJ_MAIN)/%.o: $(CPP_DIR_SRC_MAIN)/%.cpp
+	@mkdir -p $(@D)
 	@echo 'Building file: $<'
 	@echo 'Invoking gcc Compiler'
 	$(HOST_COMPILER) $(CPPFLAGS_HOST) $(DPPFLAGS) $(MACROFLAGS) -o $@ -c $<
@@ -294,6 +295,7 @@ $(CPP_OBJS_LOCAL_MAIN) : $(CPP_DIR_OBJ_MAIN)/%.o: $(CPP_DIR_SRC_MAIN)/%.cpp
 	@echo ' '
 
 $(CPP_DIR_OBJ)/%.o: $(CPP_DIR_SRC)/%.cpp
+	@mkdir -p $(@D)
 	@echo 'Building file: $<'
 	@echo 'Invoking gcc Compiler'
 	${HOST_COMPILER} $(CPPFLAGS_HOST) $(DPPFLAGS) $(MACROFLAGS) -o "$@" -c "$<"
@@ -301,6 +303,7 @@ $(CPP_DIR_OBJ)/%.o: $(CPP_DIR_SRC)/%.cpp
 	@echo ' '
 
 $(CPP_DIR_OBJ_REMOTE)/%.o: $(CPP_DIR_SRC_REMOTE)/%.cpp
+	@mkdir -p $(@D)
 	@echo 'Building file: $<'
 	@echo 'Invoking gcc Compiler'
 	${HOST_COMPILER} $(CPPFLAGS_HOST) $(DPPFLAGS) $(MACROFLAGS) -o "$@" -c "$<"
@@ -309,6 +312,7 @@ $(CPP_DIR_OBJ_REMOTE)/%.o: $(CPP_DIR_SRC_REMOTE)/%.cpp
 
 # Compiling .cu
 $(CUDA_OBJS_LOCAL_MAIN) : $(CUDA_DIR_OBJ_MAIN)/%.o: $(CUDA_DIR_SRC_MAIN)/%.cu
+	@mkdir -p $(@D)
 	@echo 'Building file: $<'
 	@echo 'Invoking gcc Compiler'
 	$(NVCC) $(CPPFLAGS_NVCC) $(DPPFLAGS) $(MACROFLAGS) -o $@ -c $<
@@ -316,6 +320,7 @@ $(CUDA_OBJS_LOCAL_MAIN) : $(CUDA_DIR_OBJ_MAIN)/%.o: $(CUDA_DIR_SRC_MAIN)/%.cu
 	@echo ' '
 
 $(CUDA_DIR_OBJ)/%.o: $(CUDA_DIR_SRC)/%.cu
+	@mkdir -p $(@D)
 	@echo 'Building file: $<'
 	@echo 'Invoking nvcc Compiler'
 	$(NVCC) $(CPPFLAGS_NVCC) $(DPPFLAGS) $(MACROFLAGS) -o $@ -c $<
@@ -323,6 +328,7 @@ $(CUDA_DIR_OBJ)/%.o: $(CUDA_DIR_SRC)/%.cu
 	@echo ' '
 
 $(CUDA_DIR_OBJ_REMOTE)/%.o: $(CUDA_DIR_SRC_REMOTE)/%.cu
+	@mkdir -p $(@D)
 	@echo 'Building file: $<'
 	@echo 'Invoking nvcc Compiler'
 	$(NVCC) $(CPPFLAGS_NVCC) $(DPPFLAGS) $(MACROFLAGS) -o $@ -c $<
