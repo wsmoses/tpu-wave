@@ -480,7 +480,7 @@ cudaDeviceSynchronize(); // debug
 cudaDeviceSynchronize(); // debug
 
         // y derivative of Vy
-        cuda_Class_Grid_SNM.kernel_launch_cuda_periodic_y_modulo ();
+        cuda_Class_Grid_SNM.kernel_launch_cuda_periodic_y_modulo <false, 'N', 'N'> ();
 
 cudaDeviceSynchronize(); // debug
 
@@ -513,7 +513,7 @@ cudaDeviceSynchronize(); // debug
 cudaDeviceSynchronize(); // debug
         
         // y derivative of Vx
-        cuda_Class_Grid_SMN.kernel_launch_cuda_periodic_y_modulo ();
+        cuda_Class_Grid_SMN.kernel_launch_cuda_periodic_y_modulo <false, 'M', 'M'> ();
 
 cudaDeviceSynchronize(); // debug
 
@@ -586,7 +586,7 @@ cudaDeviceSynchronize(); // debug
         cudaStreamSynchronize ( cuda_Class_Grid_SNM .stream_soln );
 
         // y derivative of SNN
-        cuda_Class_Grid_SNN.kernel_launch_cuda_periodic_y_modulo ();
+        cuda_Class_Grid_SNN.kernel_launch_cuda_periodic_y_modulo <false, 'N', 'M'> ();
 
 cudaDeviceSynchronize(); // debug
 
@@ -608,7 +608,7 @@ cudaDeviceSynchronize(); // debug
             cuda_Class_Grid_SNN.kernel_launch_cuda_boundary_x ( 'R' );
         }
         // y derivative of SMM
-        cuda_Class_Grid_SMM.kernel_launch_cuda_periodic_y_modulo <true> ();
+        cuda_Class_Grid_SMM.kernel_launch_cuda_periodic_y_modulo <true, 'M', 'N'> ();
 
 cudaDeviceSynchronize(); // debug        
 

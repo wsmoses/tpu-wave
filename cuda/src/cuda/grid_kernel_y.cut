@@ -1,5 +1,5 @@
-template<bool bool_extra=false>
-__global__ void cuda_periodic_y_modulo ( cuda_Struct_Grid drvt_grid  , cuda_Struct_Grid soln_grid , 
+template<bool bool_extra=false, char soln_type_x='N', char soln_type_y='N'>
+__global__ void cuda_periodic_y_modulo ( cuda_Struct_Grid_Base drvt_grid  , cuda_Struct_Grid_Base soln_grid , 
                                           cuda_run_time_vector_shallow_copy <ns_type::cuda_precision> stencil_dt_dx , 
                                           cuda_run_time_vector_shallow_copy <int> stencil_shift , 
                                           int num_blocks ,
@@ -24,8 +24,8 @@ __global__ void cuda_periodic_y_modulo ( cuda_Struct_Grid drvt_grid  , cuda_Stru
 
 
     int N_modulo = 1<<2;    // see misc c_modulo_operator for rationale
-    if ( soln_grid.G_type_y == 'M' ) { N_modulo = soln_grid.G_size_y    ; }
-    if ( soln_grid.G_type_y == 'N' ) { N_modulo = soln_grid.G_size_y - 1; }
+    if constexpr ( soln_type_y == 'M' ) { N_modulo = soln_grid.G_size_y    ; }
+    if constexpr ( soln_type_y == 'N' ) { N_modulo = soln_grid.G_size_y - 1; }
 
     int ix = ind_block;
     {
@@ -45,7 +45,7 @@ __global__ void cuda_periodic_y_modulo ( cuda_Struct_Grid drvt_grid  , cuda_Stru
 } // cuda_periodic_y_modulo ()
 
 
-template<bool bool_extra, int N_block, int N_thread>
+template<bool bool_extra, char soln_type_x, char soln_type_y, int N_block, int N_thread>
 void cuda_Class_Grid::kernel_launch_cuda_periodic_y_modulo ()
 {
     ns_type::cuda_precision * S = this->Map_pntr_soln.at('y')->ptr;
@@ -73,8 +73,8 @@ void cuda_Class_Grid::kernel_launch_cuda_periodic_y_modulo ()
     }
 
 
-    cuda_Struct_Grid & drvt_grid =                  this->struct_grid;
-    cuda_Struct_Grid & soln_grid = Map_pntr_grid.at('y')->struct_grid;
+    cuda_Struct_Grid_Base & drvt_grid = this->struct_grid;
+    cuda_Struct_Grid_Base & soln_grid = Map_pntr_grid.at('y')->struct_grid;
 
     auto stencil_dt_dx    = this->stencil_dt_dx_shallow_copy;
     auto stencil_shift = this->Map_stencil_shift_shallow_copy.at('y');
@@ -83,6 +83,6 @@ void cuda_Class_Grid::kernel_launch_cuda_periodic_y_modulo ()
     
     cudaStream_t stream = bool_stream ? this->stream_dy : 0;
 
-    cuda_periodic_y_modulo <bool_extra> <<< N_block , N_thread , 0 , stream >>> 
+    cuda_periodic_y_modulo <bool_extra, soln_type_x, soln_type_y> <<< N_block , N_thread , 0 , stream >>> 
         ( drvt_grid , soln_grid , stencil_dt_dx , stencil_shift , num_blocks , S , P , P_extra , R , R_extra );
 }

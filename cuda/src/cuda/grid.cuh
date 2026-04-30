@@ -24,12 +24,8 @@
 //       and organize data for kernel launch, we can be "liberal" with it.
 
 
-struct cuda_Struct_Grid
+struct cuda_Struct_Grid_Base
 {
-    // type of this grid (i.e., is it an N grid or M grid, direction-wise)
-    char G_type_x;  // Do we need them in the struct?
-    char G_type_y;  // Do we need them in the struct?
-
     // size of this grid (in terms of number of grid points)
     int G_size_x = -(1<<30); // 30 should be fine
     int G_size_y = -(1<<30); // 30 should be fine
@@ -45,6 +41,13 @@ struct cuda_Struct_Grid
     int stride_x;
     int stride_y;
 };
+
+template<char G_type_x = 'N', char G_type_y = 'N'>
+struct cuda_Struct_Grid : public cuda_Struct_Grid_Base
+{
+    static constexpr char type_x = G_type_x;
+    static constexpr char type_y = G_type_y;
+};
 // if "cuda_Struct_Grid" is intended to pass between host and device, we can remove the "cuda_" prefix from naming
 
 
@@ -54,14 +57,14 @@ class cuda_Class_Grid
 
         Class_Grid * ptr_class_grid; 
         
-        cuda_Struct_Grid struct_grid;      
+        cuda_Struct_Grid_Base struct_grid;      
 
         // ------------------------------------------ //
         // ---- references to the struct members ---- //
         // ------------------------------------------ //
 
-        char & G_type_x      = struct_grid.G_type_x;
-        char & G_type_y      = struct_grid.G_type_y;
+        char G_type_x;
+        char G_type_y;
 
         int  & G_size_x      = struct_grid.G_size_x;
         int  & G_size_y      = struct_grid.G_size_y;
@@ -586,7 +589,7 @@ class cuda_Class_Grid
         template<bool bool_extra=false, int N_block=1, int N_thread=32>
         void kernel_launch_cuda_secure_bdry_x ( char c_LR );
 
-        template<bool bool_extra=false, int N_block=600, int N_thread=32>
+        template<bool bool_extra=false, char soln_type_x='N', char soln_type_y='N', int N_block=600, int N_thread=32>
         void kernel_launch_cuda_periodic_y_modulo ();
 
         template<int cpst_N = 0 , char cpst_S = '0', int N_block=600, int N_thread=32>
