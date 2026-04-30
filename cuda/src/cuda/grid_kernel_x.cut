@@ -16,35 +16,27 @@ __global__ void cuda_interior_x ( DrvtGrid drvt_grid , SolnGrid soln_grid ,
                                   ns_type::cuda_precision * R ,
                                   ns_type::cuda_precision * R_extra )
 {
-    // int N_block  =  gridDim.x;   // Not needed because we don't loop through the (simulation) gridLines (one threadblock each gridLine)
-    int N_thread = blockDim.x;
-
     int ind_block  =  blockIdx.x;
     int ind_thread = threadIdx.x;
 
     if ( ind_block >= num_blocks ) return;
 
-    // [2022/07/18]
-    // NOTE: One threadBlock is assigned to one gridLine; when calling this 
-    //       kernel, the first argument in <<< >>> should be specified as 
-    //       drvt_grid.interior_END_x - drvt_grid.interior_BGN_x, i.e., the
-    //       total number of gridLines this kernel is responsible for.
-
     int ix = ind_block + INT_bound_BGN_x;
     {
-        for ( int iy = ind_thread; iy < DrvtGrid::size_y; iy += N_thread )  // iy goes through the grid index on drvt grid
+        for ( int iy = 0; iy < DrvtGrid::size_y; iy += blockDim.x )  // iy goes through the grid index on drvt grid
         {    
-            int i_d = ix * DrvtGrid::Ly_pad + iy;
-            int i_s = ix * SolnGrid::Ly_pad + iy;
+            int actual_iy = iy + ind_thread;
+            if (actual_iy < DrvtGrid::size_y) {
+                int i_d = ix * DrvtGrid::Ly_pad + actual_iy;
+                int i_s = ix * SolnGrid::Ly_pad + actual_iy;
 
-            ns_type::cuda_precision v_d = 0.;
-    
-            for ( int ind_stencil=0; ind_stencil<stencil_dt_dx.length; ind_stencil++ )
-                { v_d += S[ i_s + stencil_shift( ind_stencil ) * soln_grid.Ly_pad ] * stencil_dt_dx( ind_stencil ); }
+                ns_type::cuda_precision v_d = 0.;
+        
+                for ( int ind_stencil=0; ind_stencil<stencil_dt_dx.length; ind_stencil++ )
+                    { v_d += S[ i_s + stencil_shift( ind_stencil ) * SolnGrid::Ly_pad ] * stencil_dt_dx( ind_stencil ); }
 
-            drvt_to_rths <bool_extra> ( v_d, i_d, P, P_extra, R, R_extra );
-            // [2023/07/18]
-            // NOTE: "drvt_to_rths ()" should be called at the same level where "i_d" is calculated.
+                drvt_to_rths <bool_extra> ( v_d, i_d, P, P_extra, R, R_extra );
+            }
         }
     }
 
@@ -113,29 +105,28 @@ __global__ void cuda_boundary_x ( DrvtGrid drvt_grid , SolnGrid soln_grid ,
                                   ns_type::cuda_precision * R ,
                                   ns_type::cuda_precision * R_extra )
 {
-    int N_thread = blockDim.x;
-
     int ind_block  =  blockIdx.x;
     int ind_thread = threadIdx.x;
 
     if ( ind_block >= num_blocks ) return;
 
     int ix = ind_block + row_BGN;
-    for ( int iy = ind_thread; iy < DrvtGrid::size_y; iy += N_thread )  // iy goes through the grid index on drvt grid
+    for ( int iy = 0; iy < DrvtGrid::size_y; iy += blockDim.x )  // iy goes through the grid index on drvt grid
     {
-        int i_d = ix * DrvtGrid::Ly_pad + iy;
+        int actual_iy = iy + ind_thread;
+        if (actual_iy < DrvtGrid::size_y) {
+            int i_d = ix * DrvtGrid::Ly_pad + actual_iy;
 
-        ns_type::cuda_precision v_d = 0.;
-    
-        for ( int iw = col_BGN; iw < col_BGN + D_bdry.cols; iw++ )  // iw goes through the grid index on soln grid
-        {
-            int i_s = iw * SolnGrid::Ly_pad + iy;
-            v_d += S[ i_s ] * D_bdry( ix - row_BGN , iw - col_BGN );
+            ns_type::cuda_precision v_d = 0.;
+        
+            for ( int iw = col_BGN; iw < col_BGN + D_bdry.cols; iw++ )  // iw goes through the grid index on soln grid
+            {
+                int i_s = iw * SolnGrid::Ly_pad + actual_iy;
+                v_d += S[ i_s ] * D_bdry( ix - row_BGN , iw - col_BGN );
+            }
+
+            drvt_to_rths <bool_extra> ( v_d, i_d, P, P_extra, R, R_extra );
         }
-
-        drvt_to_rths <bool_extra> ( v_d, i_d, P, P_extra, R, R_extra );
-        // [2023/07/18]
-        // NOTE: "drvt_to_rths ()" should be called at the same level where "i_d" is calculated.
     }
 } // cuda_boundary_x ()
 
@@ -205,35 +196,37 @@ __global__ void cuda_secure_bdry_x ( SolnGrid soln_grid ,
                                      ns_type::cuda_precision * R_extra , 
                                      ns_type::cuda_precision * buffer )
 {
-    int N_thread = blockDim.x;
-
     int ind_block  =  blockIdx.x;
     int ind_thread = threadIdx.x;
 
     if ( ind_block >= num_blocks ) return;
 
-    for ( int iy = ind_thread; iy < SolnGrid::size_y; iy += N_thread )  // iy goes through the grid index on soln_grid (same as drvt grid)
+    for ( int iy = 0; iy < SolnGrid::size_y; iy += blockDim.x )  // iy goes through the grid index on soln_grid (same as drvt grid)
     {
-        const int i_p = iy;
-        buffer[ i_p ] =  0;
+        int actual_iy = iy + ind_thread;
+        if (actual_iy < SolnGrid::size_y) {
+            const int i_p = actual_iy;
+            buffer[ i_p ] =  0;
 
-        for ( int iw = projection_BGN; iw < projection_BGN + projection.length; iw++ )  // iw goes through the grid index on soln grid
-        {
-            int i_s = iw * SolnGrid::Ly_pad + iy;
-            buffer[ i_p ] += projection( iw - projection_BGN ) * S[ i_s ];
+            for ( int iw = projection_BGN; iw < projection_BGN + projection.length; iw++ )  // iw goes through the grid index on soln grid
+            {
+                int i_s = iw * SolnGrid::Ly_pad + actual_iy;
+                buffer[ i_p ] += projection( iw - projection_BGN ) * S[ i_s ];
+            }
         }
     }
 
-    for ( int iy = ind_thread; iy < DrvtGrid::size_y; iy += N_thread )  // iy goes through the grid index on drvt_grid (same as soln grid)
+    for ( int iy = 0; iy < DrvtGrid::size_y; iy += blockDim.x )  // iy goes through the grid index on drvt_grid (same as soln grid)
     {
-        const int i_p = iy;
-        for ( int iw = A_inv_projection_BGN; iw < A_inv_projection_BGN + A_inv_projection.length; iw++ )  // iw goes through the grid index on drvt grid
-        {
-            int i_d = iw * DrvtGrid::Ly_pad + iy;
-            ns_type::cuda_precision v_d = eta * A_inv_projection( iw - A_inv_projection_BGN ) * buffer[ i_p ];
-            drvt_to_rths <bool_extra> ( v_d, i_d, P, P_extra, R, R_extra );
-            // [2023/07/18]
-            // NOTE: "drvt_to_rths ()" should be called at the same level where "i_d" is calculated.
+        int actual_iy = iy + ind_thread;
+        if (actual_iy < DrvtGrid::size_y) {
+            const int i_p = actual_iy;
+            for ( int iw = A_inv_projection_BGN; iw < A_inv_projection_BGN + A_inv_projection.length; iw++ )  // iw goes through the grid index on drvt grid
+            {
+                int i_d = iw * DrvtGrid::Ly_pad + actual_iy;
+                ns_type::cuda_precision v_d = eta * A_inv_projection( iw - A_inv_projection_BGN ) * buffer[ i_p ];
+                drvt_to_rths <bool_extra> ( v_d, i_d, P, P_extra, R, R_extra );
+            }
         }
     }
 } // cuda_secure_bdry_x ()

@@ -9,19 +9,10 @@ __global__ void cuda_periodic_y_modulo ( DrvtGrid drvt_grid  , SolnGrid soln_gri
                                           ns_type::cuda_precision * R ,
                                           ns_type::cuda_precision * R_extra )
 {
-    // int N_block  =  gridDim.x;   // Not needed because we don't loop through the (simulation) gridLines (one threadblock each gridLine)
-    int N_thread = blockDim.x;
-
     int ind_block  =  blockIdx.x;
     int ind_thread = threadIdx.x;
 
     if ( ind_block >= num_blocks ) return;
-
-    // NOTE: One threadBlock is assigned to one gridLine; when calling this 
-    //       kernel, the first argument in <<< >>> should be specified as 
-    //       drvt_grid.interior_END_x - drvt_grid.interior_BGN_x, i.e., the
-    //       total number of gridLines this kernel is responsible for.
-
 
     int N_modulo = 1<<2;    // see misc c_modulo_operator for rationale
     if constexpr ( soln_type_y == 'M' ) { N_modulo = SolnGrid::size_y    ; }
@@ -29,17 +20,20 @@ __global__ void cuda_periodic_y_modulo ( DrvtGrid drvt_grid  , SolnGrid soln_gri
 
     int ix = ind_block;
     {
-        for ( int iy = ind_thread; iy < DrvtGrid::size_y; iy += N_thread )  // iy goes through the grid index on drvt grid
+        for ( int iy = 0; iy < DrvtGrid::size_y; iy += blockDim.x )  // iy goes through the grid index on drvt grid
         {
-            int i_d = ix * DrvtGrid::Ly_pad + iy;
-            int i_s = ix * SolnGrid::Ly_pad;
+            int actual_iy = iy + ind_thread;
+            if (actual_iy < DrvtGrid::size_y) {
+                int i_d = ix * DrvtGrid::Ly_pad + actual_iy;
+                int i_s = ix * SolnGrid::Ly_pad;
 
-            ns_type::cuda_precision v_d = 0.;
+                ns_type::cuda_precision v_d = 0.;
 
-            for ( int ind_stencil=0; ind_stencil<stencil_dt_dx.length; ind_stencil++ )
-                { v_d += S[ i_s + ( iy + stencil_shift( ind_stencil ) + N_modulo ) % N_modulo ] * stencil_dt_dx( ind_stencil ); }
+                for ( int ind_stencil=0; ind_stencil<stencil_dt_dx.length; ind_stencil++ )
+                    { v_d += S[ i_s + ( actual_iy + stencil_shift( ind_stencil ) + N_modulo ) % N_modulo ] * stencil_dt_dx( ind_stencil ); }
 
-            drvt_to_rths <bool_extra> ( v_d, i_d, P, P_extra, R, R_extra );
+                drvt_to_rths <bool_extra> ( v_d, i_d, P, P_extra, R, R_extra );
+            }
         }
     }
 } // cuda_periodic_y_modulo ()

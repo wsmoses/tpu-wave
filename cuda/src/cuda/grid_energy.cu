@@ -9,14 +9,11 @@
 // Since there is a limit of 4KB (i.e., 512 doubles), let's make a struct that contains only data members.
 
 
-
-template<char C_type_x, char C_type_y, int C_size_x, int C_size_y, int C_chunk_size>
-template<int N_block, int N_thread>
+template<char C_type_x, char C_type_y, int C_size_x, int C_size_y, int C_chunk_size, int N_block, int N_thread>
 double cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::energy_calculation ()
 {
     auto & T = this->thrust_memory;
 
-    // if ( (G_type_x - 'M') + (G_type_y - 'M') == ('N' - 'M') * 2 )  // NN grid
     if ( strcmp( grid_name.c_str(), "SMM" ) == 0 )
     {
         auto & Sxx = Vec_soln .at(0);
@@ -25,10 +22,10 @@ double cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::en
         auto & P1  = Vec_prmt_enrg.at(0);
         auto & P2  = Vec_prmt_enrg.at(1);
 
-        weighted_square_NORMAL_grid <<< N_block , N_thread >>> ( this->struct_grid , 
+        weighted_square_NORMAL_grid <GridStruct> <<< N_block , N_thread >>> ( this->my_struct_grid , 
                                                                  Sxx.ptr , Syy.ptr , 
                                                                  P1 .ptr , P2 .ptr , 
-                                                                 T  .ptr );  // T needs to be allocated thrust_memory ?
+                                                                 T  .ptr );
     }
     else
     {
@@ -36,8 +33,8 @@ double cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::en
         auto & P = Vec_prmt_enrg.at(0);        
         auto & T = this->thrust_memory;
 
-        weighted_square_SINGLE_grid <<< N_block , N_thread >>> ( this->struct_grid , 
-                                                                 S.ptr , P.ptr , T.ptr );  // T needs to be allocated thrust_memory ?
+        weighted_square_SINGLE_grid <GridStruct> <<< N_block , N_thread >>> ( this->my_struct_grid , 
+                                                                 S.ptr , P.ptr , T.ptr );
     }
 
     thrust::device_ptr<double> d_ptr ( T.ptr );
@@ -53,9 +50,6 @@ __global__ void weighted_square_NORMAL_grid ( GridType struct_grid ,
                                               double * P1  , double * P2  , 
                                               double * T )  // T stores the intermediate output 
 {    
-    // int N_block  =  gridDim.x;    // Not needed because we don't loop through the (simulation) gridLines (one threadblock each gridLine)
-    int N_thread = blockDim.x;
-
     int ind_block  =  blockIdx.x;
     int ind_thread = threadIdx.x;
 
@@ -63,17 +57,19 @@ __global__ void weighted_square_NORMAL_grid ( GridType struct_grid ,
     if ( ix >= GridType::size_x ) return;
 
     {
-        for ( int iy = ind_thread; iy < GridType::size_y; iy += N_thread )
+        for ( int iy = 0; iy < GridType::size_y; iy += blockDim.x )
         {            
-            int ind = ix * GridType::Ly_pad + iy;
+            int actual_iy = iy + ind_thread;
+            if (actual_iy < GridType::size_y) {
+                int ind = ix * GridType::Ly_pad + actual_iy;
 
-            T [ind]  = (double) Sxx [ind] * P1 [ind] * (double) Sxx [ind]
-                     + (double) Syy [ind] * P1 [ind] * (double) Syy [ind]
-                     + (double) Sxx [ind] * P2 [ind] * (double) Syy [ind];
+                T [ind]  = (double) Sxx [ind] * P1 [ind] * (double) Sxx [ind]
+                         + (double) Syy [ind] * P1 [ind] * (double) Syy [ind]
+                         + (double) Sxx [ind] * P2 [ind] * (double) Syy [ind];
+            }
         }
     }
-
-} // cuda_secure_interface_x ()
+}
 
 
 template<typename GridType>
@@ -82,9 +78,6 @@ __global__ void weighted_square_SINGLE_grid ( GridType struct_grid ,
                                               double * P , 
                                               double * T )  // T stores the intermediate output 
 {    
-    // int N_block  =  gridDim.x;    // Not needed because we don't loop through the (simulation) gridLines (one threadblock each gridLine)
-    int N_thread = blockDim.x;
-
     int ind_block  =  blockIdx.x;
     int ind_thread = threadIdx.x;
 
@@ -92,11 +85,13 @@ __global__ void weighted_square_SINGLE_grid ( GridType struct_grid ,
     if ( ix >= GridType::size_x ) return;
 
     {
-        for ( int iy = ind_thread; iy < GridType::size_y; iy += N_thread )
+        for ( int iy = 0; iy < GridType::size_y; iy += blockDim.x )
         {            
-            int ind = ix * GridType::Ly_pad + iy;
-            T [ind] = (double) S [ind] * P [ind] * (double) S [ind];
+            int actual_iy = iy + ind_thread;
+            if (actual_iy < GridType::size_y) {
+                int ind = ix * GridType::Ly_pad + actual_iy;
+                T [ind] = (double) S [ind] * P [ind] * (double) S [ind];
+            }
         }
     }
-
-} // cuda_secure_interface_x ()
+}

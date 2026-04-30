@@ -128,9 +128,6 @@ template<typename prcs_type , int cpst_N , char cpst_S, typename GridType>
 __global__ void cuda_update ( GridType struct_grid , prcs_type * C , 
                               prcs_type * R , prcs_type * S )
 {
-    // int N_block  =  gridDim.x; // Not needed because we don't loop through the (simulation) grid lines (one kernel each line)
-    int N_thread = blockDim.x;
-
     int ind_block  =  blockIdx.x;
     int ind_thread = threadIdx.x;
 
@@ -138,26 +135,24 @@ __global__ void cuda_update ( GridType struct_grid , prcs_type * C ,
     if ( ix >= GridType::size_x ) return;
 
     {
-        for ( int iy = ind_thread; iy < GridType::size_y; iy += N_thread ) // Grid.G_size_y can be replaced by Grid.Ly_pad (should we?)
+        for ( int iy = 0; iy < GridType::size_y; iy += blockDim.x ) 
         {
-            int ind = ix * GridType::Ly_pad + iy;
+            int actual_iy = iy + ind_thread;
+            if (actual_iy < GridType::size_y) {
+                int ind = ix * GridType::Ly_pad + actual_iy;
 
-                 if constexpr ( cpst_N ==  0 && cpst_S == '0' ) { device_update_00          <prcs_type> ( ind ,     R , S ); } 
+                     if constexpr ( cpst_N ==  0 && cpst_S == '0' ) { device_update_00          <prcs_type> ( ind ,     R , S ); } 
 
-            else if constexpr ( cpst_N == -3 && cpst_S == 'C' ) { device_update_3C          <prcs_type> ( ind , C , R , S ); }
-            else if constexpr ( cpst_N ==  3 && cpst_S == 'C' ) { device_update_3C_fast2sum <prcs_type> ( ind , C , R , S ); }
-            else if constexpr ( cpst_N ==  6 && cpst_S == 'C' ) { device_update_6C_slow2sum <prcs_type> ( ind , C , R , S ); }
+                else if constexpr ( cpst_N == -3 && cpst_S == 'C' ) { device_update_3C          <prcs_type> ( ind , C , R , S ); }
+                else if constexpr ( cpst_N ==  3 && cpst_S == 'C' ) { device_update_3C_fast2sum <prcs_type> ( ind , C , R , S ); }
+                else if constexpr ( cpst_N ==  6 && cpst_S == 'C' ) { device_update_6C_slow2sum <prcs_type> ( ind , C , R , S ); }
 
-            else if constexpr ( cpst_N == -3 && cpst_S == 'R' ) { device_update_3R          <prcs_type> ( ind ,     R , S ); }
-            else if constexpr ( cpst_N ==  3 && cpst_S == 'R' ) { device_update_3R_fast2sum <prcs_type> ( ind ,     R , S ); }
-            else if constexpr ( cpst_N ==  6 && cpst_S == 'R' ) { device_update_6R_slow2sum <prcs_type> ( ind ,     R , S ); }
+                else if constexpr ( cpst_N == -3 && cpst_S == 'R' ) { device_update_3R          <prcs_type> ( ind ,     R , S ); }
+                else if constexpr ( cpst_N ==  3 && cpst_S == 'R' ) { device_update_3R_fast2sum <prcs_type> ( ind ,     R , S ); }
+                else if constexpr ( cpst_N ==  6 && cpst_S == 'R' ) { device_update_6R_slow2sum <prcs_type> ( ind ,     R , S ); }
+            }
         }
     }
-
-    // NOTE: For each (simulation) grid line on x direction (slower direction), we launch a threadBlock; 
-    //       thus ix = blockIdx.x will give the index for the (simulation) grid line;
-    //           Each threadBlock has N_thread, they operate concurrently and "roll forward" N_thread 
-    //       a time in the loop.
 }
 
 
