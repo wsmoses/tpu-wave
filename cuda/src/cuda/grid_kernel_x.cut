@@ -6,7 +6,7 @@
 
 
 template<bool bool_extra=false>
-__global__ void cuda_interior_x ( cuda_Struct_Grid drvt_grid , cuda_Struct_Grid soln_grid ,
+__global__ void cuda_interior_x ( cuda_Struct_Grid_Base drvt_grid , cuda_Struct_Grid_Base soln_grid ,
                                   cuda_run_time_vector_shallow_copy <ns_type::cuda_precision> stencil_dt_dx ,
                                   cuda_run_time_vector_shallow_copy <int> stencil_shift ,
                                   int INT_bound_BGN_x , int num_blocks ,
@@ -83,8 +83,8 @@ void cuda_Class_Grid::kernel_launch_cuda_interior_x ()
     const int INT_bound_BGN_x = this->Map_interior_BGN.at('x');
     const int INT_bound_END_x = this->Map_interior_END.at('x');
 
-    cuda_Struct_Grid & drvt_grid =                  this->struct_grid;
-    cuda_Struct_Grid & soln_grid = Map_pntr_grid.at('x')->struct_grid;
+    cuda_Struct_Grid_Base & drvt_grid =                  this->struct_grid;
+    cuda_Struct_Grid_Base & soln_grid = Map_pntr_grid.at('x')->struct_grid;
 
     auto stencil_dt_dx    = this->stencil_dt_dx_shallow_copy;
     auto stencil_shift = this->Map_stencil_shift_shallow_copy.at('x');
@@ -100,7 +100,7 @@ void cuda_Class_Grid::kernel_launch_cuda_interior_x ()
 
 
 template<bool bool_extra=false>
-__global__ void cuda_boundary_x ( cuda_Struct_Grid drvt_grid , cuda_Struct_Grid soln_grid , 
+__global__ void cuda_boundary_x ( cuda_Struct_Grid_Base drvt_grid , cuda_Struct_Grid_Base soln_grid , 
                                   cuda_run_time_matrix_shallow_copy<ns_type::cuda_precision> D_bdry ,
                                   int row_BGN , int col_BGN , int num_blocks ,   // row for x ; col for w
                                   ns_type::cuda_precision * S ,  // S is from pntr grid
@@ -163,8 +163,8 @@ void cuda_Class_Grid::kernel_launch_cuda_boundary_x ( char c_LR )
         P_extra = this->Vec_prmt.at(1).ptr;  // 2 * mu
     }
 
-    cuda_Struct_Grid & drvt_grid =                  this->struct_grid;
-    cuda_Struct_Grid & soln_grid = Map_pntr_grid.at('x')->struct_grid;
+    cuda_Struct_Grid_Base & drvt_grid =                  this->struct_grid;
+    cuda_Struct_Grid_Base & soln_grid = Map_pntr_grid.at('x')->struct_grid;
 
     auto D_bdry = this->Map_D_bdry_shallow_copy.at( {'x',c_LR} );
     // Question: should/can we use auto & D_bdry ?
@@ -188,11 +188,12 @@ void cuda_Class_Grid::kernel_launch_cuda_boundary_x ( char c_LR )
 }
 
 
+
 template<bool bool_extra=false>
-__global__ void cuda_secure_bdry_x ( cuda_Struct_Grid soln_grid , 
+__global__ void cuda_secure_bdry_x ( cuda_Struct_Grid_Base soln_grid , 
                                      cuda_run_time_vector_shallow_copy<ns_type::cuda_precision> projection , 
                                      int projection_BGN , // 0 for L ; soln_grid.G_size_x - projection.length for R
-                                     cuda_Struct_Grid drvt_grid , 
+                                     cuda_Struct_Grid_Base drvt_grid , 
                                      cuda_run_time_vector_shallow_copy<ns_type::cuda_precision> A_inv_projection , 
                                      int A_inv_projection_BGN ,     // 0 for L ; drvt_grid.G_size_x - A_inv_projection.length for R
                                      ns_type::cuda_precision eta ,  // 1 for L ; -1 for R
@@ -265,8 +266,8 @@ void cuda_Class_Grid::kernel_launch_cuda_secure_bdry_x ( char c_LR )
         P_extra = this->Vec_prmt.at(1).ptr;  // 2 * mu
     }
     
-    cuda_Struct_Grid & drvt_grid = this->struct_grid;
-    cuda_Struct_Grid & soln_grid = Map_pntr_grid.at('x')->struct_grid;
+    cuda_Struct_Grid_Base & drvt_grid = this->struct_grid;
+    cuda_Struct_Grid_Base & soln_grid = Map_pntr_grid.at('x')->struct_grid;
 
     auto projection = this->Map_projection_shallow_copy.at({'x',c_LR});
     auto A_inv_projection = this->Map_A_inv_projection_shallow_copy.at({'x',c_LR});

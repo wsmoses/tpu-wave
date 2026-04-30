@@ -650,12 +650,12 @@ __global__ void cuda_record_soln ( ns_type::cuda_precision * R , ns_type::cuda_p
 __global__ void cuda_print_soln ( ns_type::cuda_precision * S , int ind , int it );
 
 
-__global__ void weighted_square_NORMAL_grid ( cuda_Struct_Grid struct_grid , 
+__global__ void weighted_square_NORMAL_grid ( cuda_Struct_Grid_Base struct_grid , 
                                               ns_type::cuda_precision * Sxx , ns_type::cuda_precision * Syy  , 
                                               double * P1  , double * P2   , 
                                               double * T );  // T stores the intermediate output 
 
-__global__ void weighted_square_SINGLE_grid ( cuda_Struct_Grid struct_grid , 
+__global__ void weighted_square_SINGLE_grid ( cuda_Struct_Grid_Base struct_grid , 
                                               ns_type::cuda_precision * S , double * P , double * T );  // T stores the intermediate output 
 
 #endif

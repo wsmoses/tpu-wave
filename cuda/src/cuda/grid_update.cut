@@ -125,7 +125,7 @@ __device__ void device_update_6R_slow2sum ( int ind , prcs_type * R , prcs_type 
 
 
 template<typename prcs_type , int cpst_N , char cpst_S>
-__global__ void cuda_update ( cuda_Struct_Grid struct_grid , prcs_type * C , 
+__global__ void cuda_update ( cuda_Struct_Grid_Base struct_grid , prcs_type * C , 
                               prcs_type * R , prcs_type * S )
 {
     // int N_block  =  gridDim.x; // Not needed because we don't loop through the (simulation) grid lines (one kernel each line)

@@ -263,7 +263,7 @@ int main(int argc, char* argv[])
 
 
     std::array < cuda_Class_Grid  , 2<<(N_dir-1) > cuda_Class_Grids ;
-    std::array < cuda_Struct_Grid , 2<<(N_dir-1) > cuda_Struct_Grids;
+    std::array < cuda_Struct_Grid_Base , 2<<(N_dir-1) > cuda_Struct_Grids;
     // NOTE: use bit shift to take the power of 2 (only works when base is 2); 
     //       reason - std::pow () promotes int to float.
 
