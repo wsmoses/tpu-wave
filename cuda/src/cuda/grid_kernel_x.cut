@@ -5,9 +5,9 @@
 //       the launcher first then kernel order without a forward declaration.
 
 
-template<bool bool_extra=false, typename DrvtGrid, typename SolnGrid>
-__global__ void cuda_interior_x ( int stencil_dt_dx_length, ns_type::cuda_precision * stencil_dt_dx_ptr ,
-                                  int stencil_shift_length, int * stencil_shift_ptr ,
+template<bool bool_extra=false, int StencilLength=4, typename DrvtGrid, typename SolnGrid>
+__global__ void cuda_interior_x ( ns_type::cuda_precision * stencil_dt_dx_ptr ,
+                                  int * stencil_shift_ptr ,
                                   int INT_bound_BGN_x , int num_blocks ,
                                   ns_type::cuda_precision * S ,  // S is from pntr grid
                                   ns_type::cuda_precision * P ,
@@ -31,7 +31,7 @@ __global__ void cuda_interior_x ( int stencil_dt_dx_length, ns_type::cuda_precis
 
                 ns_type::cuda_precision v_d = 0.;
         
-                for ( int ind_stencil=0; ind_stencil<stencil_dt_dx_length; ind_stencil++ )
+                for ( int ind_stencil=0; ind_stencil<StencilLength; ind_stencil++ )
                     { v_d += S[ i_s + stencil_shift_ptr[ind_stencil] * SolnGrid::Ly_pad ] * stencil_dt_dx_ptr[ind_stencil]; }
 
                 drvt_to_rths <bool_extra> ( v_d, i_d, P, P_extra, R, R_extra );
@@ -88,14 +88,14 @@ void cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::kern
 
     cudaStream_t stream = bool_stream ? this->stream_dx_I : 0;
 
-    cuda_interior_x <bool_extra, GridStruct, InteractingGridStructX> <<< N_block , N_thread , 0 , stream >>> 
-        ( stencil_dt_dx.length, stencil_dt_dx.ptr, stencil_shift.length, stencil_shift.ptr, INT_bound_BGN_x , num_blocks , S , P , P_extra , R , R_extra );
+    cuda_interior_x <bool_extra, 4, GridStruct, InteractingGridStructX> <<< N_block , N_thread , 0 , stream >>> 
+        ( stencil_dt_dx.ptr, stencil_shift.ptr, INT_bound_BGN_x , num_blocks , S , P , P_extra , R , R_extra );
 }
 
 
 
-template<bool bool_extra=false, typename DrvtGrid, typename SolnGrid>
-__global__ void cuda_boundary_x ( int D_bdry_rows, int D_bdry_cols, ns_type::cuda_precision * D_bdry_ptr ,
+template<bool bool_extra=false, int D_bdry_rows=4, int D_bdry_cols=5, typename DrvtGrid, typename SolnGrid>
+__global__ void cuda_boundary_x ( ns_type::cuda_precision * D_bdry_ptr ,
                                   int row_BGN , int col_BGN , int num_blocks ,   // row for x ; col for w
                                   ns_type::cuda_precision * S ,  // S is from pntr grid
                                   ns_type::cuda_precision * P ,
@@ -172,16 +172,18 @@ void cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::kern
     cudaStream_t stream = 0;  // 0 is the default stream
     if ( bool_stream ) { stream = c_LR == 'L' ? this->stream_dx_L : this->stream_dx_R; }
 
-    cuda_boundary_x <bool_extra, GridStruct, InteractingGridStructX> <<< N_block , N_thread , 0 , stream >>> 
-        ( D_bdry.rows, D_bdry.cols, D_bdry.ptr, row_BGN , col_BGN , num_blocks , S , P , P_extra , R , R_extra );
+    constexpr int D_bdry_rows = (C_type_x == 'N' ? 4 : 3);
+    constexpr int D_bdry_cols = 5;
+    cuda_boundary_x <bool_extra, D_bdry_rows, D_bdry_cols, GridStruct, InteractingGridStructX> <<< N_block , N_thread , 0 , stream >>> 
+        ( D_bdry.ptr, row_BGN , col_BGN , num_blocks , S , P , P_extra , R , R_extra );
 }
 
 
 
-template<bool bool_extra=false, typename DrvtGrid, typename SolnGrid>
-__global__ void cuda_secure_bdry_x ( int projection_length, ns_type::cuda_precision * projection_ptr , 
+template<bool bool_extra=false, int ProjectionLength=4, typename DrvtGrid, typename SolnGrid>
+__global__ void cuda_secure_bdry_x ( ns_type::cuda_precision * projection_ptr , 
                                      int projection_BGN , // 0 for L ; soln_grid.G_size_x - projection.length for R
-                                     int A_inv_projection_length, ns_type::cuda_precision * A_inv_projection_ptr , 
+                                     ns_type::cuda_precision * A_inv_projection_ptr , 
                                      int A_inv_projection_BGN ,     // 0 for L ; drvt_grid.G_size_x - A_inv_projection.length for R
                                      ns_type::cuda_precision eta ,  // 1 for L ; -1 for R
                                      int num_blocks ,
@@ -204,7 +206,7 @@ __global__ void cuda_secure_bdry_x ( int projection_length, ns_type::cuda_precis
             const int i_p = actual_iy;
             buffer[ i_p ] =  0;
 
-            for ( int iw = projection_BGN; iw < projection_BGN + projection_length; iw++ )  // iw goes through the grid index on soln grid
+            for ( int iw = projection_BGN; iw < projection_BGN + ProjectionLength; iw++ )  // iw goes through the grid index on soln grid
             {
                 int i_s = iw * SolnGrid::Ly_pad + actual_iy;
                 buffer[ i_p ] += projection_ptr[iw - projection_BGN] * S[ i_s ];
@@ -217,7 +219,7 @@ __global__ void cuda_secure_bdry_x ( int projection_length, ns_type::cuda_precis
         int actual_iy = iy + ind_thread;
         if (actual_iy < DrvtGrid::size_y) {
             const int i_p = actual_iy;
-            for ( int iw = A_inv_projection_BGN; iw < A_inv_projection_BGN + A_inv_projection_length; iw++ )  // iw goes through the grid index on drvt grid
+            for ( int iw = A_inv_projection_BGN; iw < A_inv_projection_BGN + ProjectionLength; iw++ )  // iw goes through the grid index on drvt grid
             {
                 int i_d = iw * DrvtGrid::Ly_pad + actual_iy;
                 ns_type::cuda_precision v_d = eta * A_inv_projection_ptr[iw - A_inv_projection_BGN] * buffer[ i_p ];
@@ -278,8 +280,8 @@ void cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::kern
     cudaStream_t stream = 0;  // 0 is the default stream
     if ( bool_stream ) { stream = c_LR == 'L' ? this->stream_dx_L : this->stream_dx_R; }
 
-    cuda_secure_bdry_x <bool_extra, GridStruct, InteractingGridStructX> <<< N_block , N_thread , 0 , stream >>> 
-        ( projection.length, projection.ptr , projection_BGN , 
-          A_inv_projection.length, A_inv_projection.ptr, A_inv_projection_BGN, eta, num_blocks,
+    constexpr int projection_length = (C_type_x == 'M' ? 4 : 3);
+    cuda_secure_bdry_x <bool_extra, projection_length, GridStruct, InteractingGridStructX> <<< N_block , N_thread , 0 , stream >>> 
+        ( projection.ptr , projection_BGN , A_inv_projection.ptr, A_inv_projection_BGN, eta, num_blocks,
           S, P, P_extra, R, R_extra, buffer );
 }
