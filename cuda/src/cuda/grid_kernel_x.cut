@@ -78,6 +78,9 @@ void cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::kern
 
     cudaStream_t stream = bool_stream ? this->stream_dx_I : 0;
 
+    auto stencil_dt_dx    = this->stencil_dt_dx_shallow_copy;
+    auto stencil_shift = this->Map_stencil_shift_shallow_copy.at('x');
+
     cuda_interior_x <bool_extra, num_blocks, 4, GridStruct, InteractingGridStructX> <<< num_blocks , N_thread , 0 , stream >>> 
         ( stencil_dt_dx.ptr, stencil_shift.ptr, INT_bound_BGN_x , S , P , P_extra , R , R_extra );
 }
