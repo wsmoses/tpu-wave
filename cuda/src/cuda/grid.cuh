@@ -170,8 +170,8 @@ class cuda_Class_Grid_Base
         cudaStream_t stream_soln;      // update, src, rcv can be put in this stream
         cudaStream_t stream_drvt;      // this one is for reset
 
-        cuda_Class_Grid_Base(cuda_Struct_Grid_Base & sg, char tx, char ty) 
-            : struct_grid(sg), G_type_x(tx), G_type_y(ty) {}
+        cuda_Class_Grid_Base(char tx, char ty, int sx, int sy, int chunk, int lx, int ly, int len, int strx, int stry) 
+            : G_type_x(tx), G_type_y(ty), G_size_x(sx), G_size_y(sy), chunk_size(chunk), Lx_pad(lx), Ly_pad(ly), length_memory(len), stride_x(strx), stride_y(stry) {}
 
         virtual ~cuda_Class_Grid_Base() {}
 
@@ -180,20 +180,18 @@ class cuda_Class_Grid_Base
 };
 
 
-template<char G_type_x = 'N', char G_type_y = 'N', int G_size_x = 600, int G_size_y = 600, int chunk_size = 32>
+template<char C_type_x = 'N', char C_type_y = 'N', int C_size_x = 600, int C_size_y = 600, int C_chunk_size = 32>
 class cuda_Class_Grid : public cuda_Class_Grid_Base
 {
     public:
-        using GridStruct = cuda_Struct_Grid<G_type_x, G_type_y, G_size_x, G_size_y, chunk_size>;
+        using GridStruct = cuda_Struct_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>;
 
         GridStruct my_struct_grid;      
 
-        static constexpr char type_x = G_type_x;
-        static constexpr char type_y = G_type_y;
+        static constexpr char type_x = C_type_x;
+        static constexpr char type_y = C_type_y;
 
-        cuda_Class_Grid() : cuda_Class_Grid_Base(G_type_x, G_type_y, G_size_x, G_size_y, chunk_size, GridStruct::Lx_pad, GridStruct::Ly_pad, GridStruct::length_memory, GridStruct::stride_x, GridStruct::stride_y) {}
-
-        void set_grid_pointers ( std::map< std::array<char, ns_forward::N_dir> , cuda_Class_Grid_Base * > & Map_cuda_grid_pointers ) override;
+        cuda_Class_Grid() : cuda_Class_Grid_Base(C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size, GridStruct::Lx_pad, GridStruct::Ly_pad, GridStruct::length_memory, GridStruct::stride_x, GridStruct::stride_y) {}
 
         // constructor
         // cuda_Class_Grid ( ) { }
@@ -275,7 +273,7 @@ class cuda_Class_Grid : public cuda_Class_Grid_Base
             for ( const char& c_dir : {'x','y'} )
             {
                 this->Map_stencil_shift   [c_dir].allocate_memory ( class_grid->Map_stencil_shift.at(c_dir).length );
-                this->Map_stencil_shift.at(c_dir).copy_from_host <int> ( class_grid->Map_stencil_shift.at(c_dir) );
+                this->Map_stencil_shift.at(c_dir).template copy_from_host <int> ( class_grid->Map_stencil_shift.at(c_dir) );
             }
             // NOTE: Pay special attention to if the stencil_shift on cpu and gpu have the same 
             //       definition, i.e., are they multiplied by the strides already or not.
@@ -288,13 +286,13 @@ class cuda_Class_Grid : public cuda_Class_Grid_Base
                     auto & host_D_bdry = class_grid->Map_D_bdry.at( { c_dir , c_LR } );
 
                     this->Map_D_bdry   [ { c_dir , c_LR } ].allocate_memory ( host_D_bdry.rows , host_D_bdry.cols );
-                    this->Map_D_bdry.at( { c_dir , c_LR } ).copy_from_host <ns_type::host_precision> ( host_D_bdry );
+                    this->Map_D_bdry.at( { c_dir , c_LR } ).template copy_from_host <ns_type::host_precision> ( host_D_bdry );
 
 
                     auto & host_projection = class_grid->Map_projection.at( { c_dir , c_LR } );
 
                     this->Map_projection   [ { c_dir , c_LR } ].allocate_memory ( host_projection.length );
-                    this->Map_projection.at( { c_dir , c_LR } ).copy_from_host <ns_type::host_precision> ( host_projection );
+                    this->Map_projection.at( { c_dir , c_LR } ).template copy_from_host <ns_type::host_precision> ( host_projection );
 
 
                     auto & host_A_inv_projection = class_grid->Map_A_inv_projection.at( { c_dir , c_LR } );
