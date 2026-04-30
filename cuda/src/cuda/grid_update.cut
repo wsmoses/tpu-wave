@@ -135,6 +135,8 @@ __global__ void cuda_update ( cuda_Struct_Grid struct_grid , prcs_type * C ,
     int ind_thread = threadIdx.x;
 
     int ix = ind_block;
+    if ( ix >= struct_grid.G_size_x ) return;
+
     {
         for ( int iy = ind_thread; iy < struct_grid.G_size_y; iy += N_thread ) // Grid.G_size_y can be replaced by Grid.Ly_pad (should we?)
         {
@@ -159,12 +161,9 @@ __global__ void cuda_update ( cuda_Struct_Grid struct_grid , prcs_type * C ,
 }
 
 
-template<int cpst_N , char cpst_S>
-void cuda_Class_Grid::kernel_launch_cuda_update ( int N_block , int N_thread )
+template<int cpst_N, char cpst_S, int N_block, int N_thread>
+void cuda_Class_Grid::kernel_launch_cuda_update ()
 {
-    if ( N_block  == -1 ) { N_block  = this->G_size_x; }
-    if ( N_thread == -1 ) { N_thread = 32; }
-
     cudaStream_t stream = bool_stream ? this->stream_soln : 0;
 
     for ( int i_soln = 0; i_soln < this->N_soln; i_soln++ )

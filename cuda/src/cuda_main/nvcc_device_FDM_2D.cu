@@ -451,8 +451,8 @@ cudaDeviceSynchronize();
 
 cudaDeviceSynchronize(); // debug
 
-        if ( bool_energy ) { cudaStreamSynchronize ( cuda_Class_Grid_SMM.stream_soln ); ns_input::Record_E_p0.at(it) += cuda_Class_Grid_SMM.energy_calculation( -1 , -1 ); }
-        if ( bool_energy ) { cudaStreamSynchronize ( cuda_Class_Grid_SNN.stream_soln ); ns_input::Record_E_p0.at(it) += cuda_Class_Grid_SNN.energy_calculation( -1 , -1 ); }
+        if ( bool_energy ) { cudaStreamSynchronize ( cuda_Class_Grid_SMM.stream_soln ); ns_input::Record_E_p0.at(it) += cuda_Class_Grid_SMM.energy_calculation (); }
+        if ( bool_energy ) { cudaStreamSynchronize ( cuda_Class_Grid_SNN.stream_soln ); ns_input::Record_E_p0.at(it) += cuda_Class_Grid_SNN.energy_calculation (); }
 
 cudaDeviceSynchronize(); // debug
 
@@ -480,19 +480,19 @@ cudaDeviceSynchronize(); // debug
 cudaDeviceSynchronize(); // debug
 
         // y derivative of Vy
-        cuda_Class_Grid_SNM.kernel_launch_cuda_periodic_y_modulo ( -1 , -1 );
+        cuda_Class_Grid_SNM.kernel_launch_cuda_periodic_y_modulo ();
 
 cudaDeviceSynchronize(); // debug
 
         // x derivative of Vx
         {
-            cuda_Class_Grid_SMN.kernel_launch_cuda_interior_x ( -1 , -1 );
+            cuda_Class_Grid_SMN.kernel_launch_cuda_interior_x ();
 
-            cuda_Class_Grid_SMN.kernel_launch_cuda_boundary_x ( -1 , -1 , 'L' );
-            cuda_Class_Grid_SMN.kernel_launch_cuda_boundary_x ( -1 , -1 , 'R' );
+            cuda_Class_Grid_SMN.kernel_launch_cuda_boundary_x ( 'L' );
+            cuda_Class_Grid_SMN.kernel_launch_cuda_boundary_x ( 'R' );
 
-            cuda_Class_Grid_SMN.kernel_launch_cuda_secure_bdry_x ( -1 , -1 , 'L' );
-            cuda_Class_Grid_SMN.kernel_launch_cuda_secure_bdry_x ( -1 , -1 , 'R' );
+            cuda_Class_Grid_SMN.kernel_launch_cuda_secure_bdry_x ( 'L' );
+            cuda_Class_Grid_SMN.kernel_launch_cuda_secure_bdry_x ( 'R' );
         }
 
 cudaDeviceSynchronize(); // debug
@@ -501,19 +501,19 @@ cudaDeviceSynchronize(); // debug
 
         // x derivative of Vy
         {
-            cuda_Class_Grid_SNM.kernel_launch_cuda_interior_x ( -1 , -1 );
+            cuda_Class_Grid_SNM.kernel_launch_cuda_interior_x ();
             
-            cuda_Class_Grid_SNM.kernel_launch_cuda_boundary_x ( -1 , -1 , 'L' );
-            cuda_Class_Grid_SNM.kernel_launch_cuda_boundary_x ( -1 , -1 , 'R' );
+            cuda_Class_Grid_SNM.kernel_launch_cuda_boundary_x ( 'L' );
+            cuda_Class_Grid_SNM.kernel_launch_cuda_boundary_x ( 'R' );
     
-            cuda_Class_Grid_SNM.kernel_launch_cuda_secure_bdry_x ( -1 , -1 , 'L' );
-            cuda_Class_Grid_SNM.kernel_launch_cuda_secure_bdry_x ( -1 , -1 , 'R' );
+            cuda_Class_Grid_SNM.kernel_launch_cuda_secure_bdry_x ( 'L' );
+            cuda_Class_Grid_SNM.kernel_launch_cuda_secure_bdry_x ( 'R' );
         }
 
 cudaDeviceSynchronize(); // debug
         
         // y derivative of Vx
-        cuda_Class_Grid_SMN.kernel_launch_cuda_periodic_y_modulo ( -1 , -1 );
+        cuda_Class_Grid_SMN.kernel_launch_cuda_periodic_y_modulo ();
 
 cudaDeviceSynchronize(); // debug
 
@@ -523,7 +523,7 @@ cudaDeviceSynchronize(); // debug
         cudaStreamSynchronize( cuda_Class_Grid_SNM.stream_dx_R );
         cudaStreamSynchronize( cuda_Class_Grid_SNM.stream_dy   );
 
-        cuda_Class_Grid_SNM.kernel_launch_cuda_update <cpst_N , cpst_S> ( -1 , -1 );
+        cuda_Class_Grid_SNM.kernel_launch_cuda_update <cpst_N , cpst_S> ();
     
 cudaDeviceSynchronize(); // debug
 
@@ -532,7 +532,7 @@ cudaDeviceSynchronize(); // debug
         cudaStreamSynchronize( cuda_Class_Grid_SMN.stream_dx_R );
         cudaStreamSynchronize( cuda_Class_Grid_SMN.stream_dy   );
 
-        cuda_Class_Grid_SMN.kernel_launch_cuda_update <cpst_N , cpst_S> ( -1 , -1 );
+        cuda_Class_Grid_SMN.kernel_launch_cuda_update <cpst_N , cpst_S> ();
 
 cudaDeviceSynchronize(); // debug
 
@@ -575,8 +575,8 @@ cudaDeviceSynchronize(); // debug
 
 cudaDeviceSynchronize(); // debug
 
-        if ( bool_energy ) { cudaStreamSynchronize ( cuda_Class_Grid_SMN .stream_soln ); ns_input::Record_E_k.at(it) += cuda_Class_Grid_SMN.energy_calculation ( -1 , -1 ); }
-        if ( bool_energy ) { cudaStreamSynchronize ( cuda_Class_Grid_SNM .stream_soln ); ns_input::Record_E_k.at(it) += cuda_Class_Grid_SNM.energy_calculation ( -1 , -1 ); }
+        if ( bool_energy ) { cudaStreamSynchronize ( cuda_Class_Grid_SMN .stream_soln ); ns_input::Record_E_k.at(it) += cuda_Class_Grid_SMN.energy_calculation (); }
+        if ( bool_energy ) { cudaStreamSynchronize ( cuda_Class_Grid_SNM .stream_soln ); ns_input::Record_E_k.at(it) += cuda_Class_Grid_SNM.energy_calculation (); }
 
 cudaDeviceSynchronize(); // debug
 
@@ -586,15 +586,15 @@ cudaDeviceSynchronize(); // debug
         cudaStreamSynchronize ( cuda_Class_Grid_SNM .stream_soln );
 
         // y derivative of SNN
-        cuda_Class_Grid_SNN.kernel_launch_cuda_periodic_y_modulo ( -1 , -1 );
+        cuda_Class_Grid_SNN.kernel_launch_cuda_periodic_y_modulo ();
 
 cudaDeviceSynchronize(); // debug
 
         // x derivative of SMM
         {
-            cuda_Class_Grid_SMM.kernel_launch_cuda_interior_x <true> ( -1 , -1 );
-            cuda_Class_Grid_SMM.kernel_launch_cuda_boundary_x <true> ( -1 , -1 , 'L' );
-            cuda_Class_Grid_SMM.kernel_launch_cuda_boundary_x <true> ( -1 , -1 , 'R' );
+            cuda_Class_Grid_SMM.kernel_launch_cuda_interior_x <true> ();
+            cuda_Class_Grid_SMM.kernel_launch_cuda_boundary_x <true> ( 'L' );
+            cuda_Class_Grid_SMM.kernel_launch_cuda_boundary_x <true> ( 'R' );
         }
 
 cudaDeviceSynchronize(); // debug
@@ -603,12 +603,12 @@ cudaDeviceSynchronize(); // debug
 
         // x derivative of SNN
         {
-            cuda_Class_Grid_SNN.kernel_launch_cuda_interior_x ( -1 , -1 );
-            cuda_Class_Grid_SNN.kernel_launch_cuda_boundary_x ( -1 , -1 , 'L' );
-            cuda_Class_Grid_SNN.kernel_launch_cuda_boundary_x ( -1 , -1 , 'R' );
+            cuda_Class_Grid_SNN.kernel_launch_cuda_interior_x ();
+            cuda_Class_Grid_SNN.kernel_launch_cuda_boundary_x ( 'L' );
+            cuda_Class_Grid_SNN.kernel_launch_cuda_boundary_x ( 'R' );
         }
         // y derivative of SMM
-        cuda_Class_Grid_SMM.kernel_launch_cuda_periodic_y_modulo <true> ( -1 , -1 );
+        cuda_Class_Grid_SMM.kernel_launch_cuda_periodic_y_modulo <true> ();
 
 cudaDeviceSynchronize(); // debug        
 
@@ -618,7 +618,7 @@ cudaDeviceSynchronize(); // debug
         cudaStreamSynchronize( cuda_Class_Grid_SNN.stream_dx_R );
         cudaStreamSynchronize( cuda_Class_Grid_SNN.stream_dy );
 
-        cuda_Class_Grid_SNN.kernel_launch_cuda_update <cpst_N , cpst_S> ( -1 , -1 );
+        cuda_Class_Grid_SNN.kernel_launch_cuda_update <cpst_N , cpst_S> ();
 
 cudaDeviceSynchronize(); // debug
 
@@ -627,7 +627,7 @@ cudaDeviceSynchronize(); // debug
         cudaStreamSynchronize( cuda_Class_Grid_SMM.stream_dx_R );
         cudaStreamSynchronize( cuda_Class_Grid_SMM.stream_dy );
 
-        cuda_Class_Grid_SMM.kernel_launch_cuda_update <cpst_N , cpst_S> ( -1 , -1 );
+        cuda_Class_Grid_SMM.kernel_launch_cuda_update <cpst_N , cpst_S> ();
         
 cudaDeviceSynchronize(); // debug
 
@@ -675,8 +675,8 @@ cudaDeviceSynchronize(); // debug
 // NOTE: most of the above code for applying source can be taken outside the time loop
 
 
-        if ( bool_energy ) { cudaStreamSynchronize ( cuda_Class_Grid_SMM.stream_soln ); ns_input::Record_E_p1.at(it) += cuda_Class_Grid_SMM.energy_calculation( -1 , -1 ); }
-        if ( bool_energy ) { cudaStreamSynchronize ( cuda_Class_Grid_SNN.stream_soln ); ns_input::Record_E_p1.at(it) += cuda_Class_Grid_SNN.energy_calculation( -1 , -1 ); }
+        if ( bool_energy ) { cudaStreamSynchronize ( cuda_Class_Grid_SMM.stream_soln ); ns_input::Record_E_p1.at(it) += cuda_Class_Grid_SMM.energy_calculation (); }
+        if ( bool_energy ) { cudaStreamSynchronize ( cuda_Class_Grid_SNN.stream_soln ); ns_input::Record_E_p1.at(it) += cuda_Class_Grid_SNN.energy_calculation (); }
 
 
 cudaDeviceSynchronize(); // debug

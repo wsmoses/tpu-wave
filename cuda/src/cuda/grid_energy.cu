@@ -10,11 +10,9 @@
 
 
 
-double cuda_Class_Grid::energy_calculation ( int N_block , int N_thread )
+template<int N_block, int N_thread>
+double cuda_Class_Grid::energy_calculation ()
 {
-    if ( N_block  == -1 ) { N_block  = this->G_size_x; }
-    if ( N_thread == -1 ) { N_thread = 32; }
-
     auto & T = this->thrust_memory;
 
     // if ( (G_type_x - 'M') + (G_type_y - 'M') == ('N' - 'M') * 2 )  // NN grid
@@ -61,6 +59,8 @@ __global__ void weighted_square_NORMAL_grid ( cuda_Struct_Grid struct_grid ,
     int ind_thread = threadIdx.x;
 
     int ix = ind_block;
+    if ( ix >= struct_grid.G_size_x ) return;
+
     {
         for ( int iy = ind_thread; iy < struct_grid.G_size_y; iy += N_thread )
         {            
@@ -88,6 +88,8 @@ __global__ void weighted_square_SINGLE_grid ( cuda_Struct_Grid struct_grid ,
     int ind_thread = threadIdx.x;
 
     int ix = ind_block;
+    if ( ix >= struct_grid.G_size_x ) return;
+
     {
         for ( int iy = ind_thread; iy < struct_grid.G_size_y; iy += N_thread )
         {            

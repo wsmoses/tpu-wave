@@ -577,22 +577,23 @@ class cuda_Class_Grid
         // [2022/07/18]
         // NOTE: In the following function names, _x and _y refer to the "data" direction, 
         //       not the "physical" direction.
-        template<bool bool_extra=false>
-        void kernel_launch_cuda_interior_x ( int N_block , int N_thread );
+        template<bool bool_extra=false, int N_block=600, int N_thread=32>
+        void kernel_launch_cuda_interior_x ();
         
-        template<bool bool_extra=false>
-        void kernel_launch_cuda_boundary_x ( int N_block , int N_thread , char c_LR );
+        template<bool bool_extra=false, int N_block=600, int N_thread=32>
+        void kernel_launch_cuda_boundary_x ( char c_LR );
 
-        template<bool bool_extra=false>
-        void kernel_launch_cuda_secure_bdry_x ( int N_block , int N_thread , char c_LR );
+        template<bool bool_extra=false, int N_block=1, int N_thread=32>
+        void kernel_launch_cuda_secure_bdry_x ( char c_LR );
 
-        template<bool bool_extra=false>
-        void kernel_launch_cuda_periodic_y_modulo ( int N_block , int N_thread );
+        template<bool bool_extra=false, int N_block=600, int N_thread=32>
+        void kernel_launch_cuda_periodic_y_modulo ();
 
-        template<int cpst_N = 0 , char cpst_S = '0'>
-        void kernel_launch_cuda_update ( int N_block , int N_thread );
+        template<int cpst_N = 0 , char cpst_S = '0', int N_block=600, int N_thread=32>
+        void kernel_launch_cuda_update ();
 
-        double energy_calculation ( int N_block , int N_thread );
+        template<int N_block=600, int N_thread=32>
+        double energy_calculation ();
 };
 
 
