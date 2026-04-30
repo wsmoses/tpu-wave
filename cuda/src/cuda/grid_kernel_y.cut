@@ -1,6 +1,6 @@
 template<bool bool_extra=false, char soln_type_x='N', char soln_type_y='N', typename DrvtGrid, typename SolnGrid>
-__global__ void cuda_periodic_y_modulo ( cuda_run_time_vector_shallow_copy <ns_type::cuda_precision> stencil_dt_dx , 
-                                          cuda_run_time_vector_shallow_copy <int> stencil_shift , 
+__global__ void cuda_periodic_y_modulo ( int stencil_dt_dx_length, ns_type::cuda_precision * stencil_dt_dx_ptr , 
+                                          int stencil_shift_length, int * stencil_shift_ptr , 
                                           int num_blocks ,
                                           ns_type::cuda_precision * S ,  // S is from pntr grid
                                           ns_type::cuda_precision * P ,
@@ -28,8 +28,8 @@ __global__ void cuda_periodic_y_modulo ( cuda_run_time_vector_shallow_copy <ns_t
 
                 ns_type::cuda_precision v_d = 0.;
 
-                for ( int ind_stencil=0; ind_stencil<stencil_dt_dx.length; ind_stencil++ )
-                    { v_d += S[ i_s + ( actual_iy + stencil_shift( ind_stencil ) + N_modulo ) % N_modulo ] * stencil_dt_dx( ind_stencil ); }
+                for ( int ind_stencil=0; ind_stencil<stencil_dt_dx_length; ind_stencil++ )
+                    { v_d += S[ i_s + ( actual_iy + stencil_shift_ptr[ind_stencil] + N_modulo ) % N_modulo ] * stencil_dt_dx_ptr[ind_stencil]; }
 
                 drvt_to_rths <bool_extra> ( v_d, i_d, P, P_extra, R, R_extra );
             }
@@ -74,5 +74,5 @@ void cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::kern
     cudaStream_t stream = bool_stream ? this->stream_dy : 0;
 
     cuda_periodic_y_modulo <bool_extra, soln_type_x, soln_type_y, GridStruct, InteractingGridStructY> <<< N_block , N_thread , 0 , stream >>> 
-        ( stencil_dt_dx , stencil_shift , num_blocks , S , P , P_extra , R , R_extra );
+        ( stencil_dt_dx.length, stencil_dt_dx.ptr, stencil_shift.length, stencil_shift.ptr, num_blocks , S , P , P_extra , R , R_extra );
 }
