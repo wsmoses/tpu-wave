@@ -191,6 +191,6 @@ void cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::kern
         //           It is still better that the check is on the host side - the message may not 
         //       be eatean and may be easier to recognize.
 
-        cuda_update <ns_type::cuda_precision , cpst_N , cpst_S, GridStruct> <<< N_block , N_thread , 0 , stream >>> ( this->struct_grid , C , R , S );
+        cuda_update <ns_type::cuda_precision , cpst_N , cpst_S, GridStruct> <<< N_block , N_thread , 0 , stream >>> ( this->my_struct_grid , C , R , S );
     }
 }

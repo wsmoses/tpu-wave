@@ -170,8 +170,7 @@ class cuda_Class_Grid_Base
         cudaStream_t stream_soln;      // update, src, rcv can be put in this stream
         cudaStream_t stream_drvt;      // this one is for reset
 
-        cuda_Class_Grid_Base(char tx, char ty, int sx, int sy, int chunk, int lx, int ly, int len, int strx, int stry) 
-            : G_type_x(tx), G_type_y(ty), G_size_x(sx), G_size_y(sy), chunk_size(chunk), Lx_pad(lx), Ly_pad(ly), length_memory(len), stride_x(strx), stride_y(stry) {}
+
 
         virtual ~cuda_Class_Grid_Base() {}
 
@@ -394,13 +393,13 @@ class cuda_Class_Grid : public cuda_Class_Grid_Base
                     auto & host_A_inv_projection = class_grid->Map_A_inv_projection.at( { c_dir , c_LR } );
 
                     this->Map_A_inv_projection   [ { c_dir , c_LR } ].allocate_memory ( host_A_inv_projection.length );
-                    this->Map_A_inv_projection.at( { c_dir , c_LR } ).copy_from_host <ns_type::host_precision> ( host_A_inv_projection );
+                    this->Map_A_inv_projection.at( { c_dir , c_LR } ).template copy_from_host <ns_type::host_precision> ( host_A_inv_projection );
 
 
                     auto & host_A_bdry_diag = class_grid->Map_A_bdry_diag.at( { c_dir , c_LR } );
 
                     this->Map_A_bdry_diag   [ { c_dir , c_LR } ].allocate_memory ( host_A_bdry_diag.length );
-                    this->Map_A_bdry_diag.at( { c_dir , c_LR } ).copy_from_host <ns_type::host_precision> ( host_A_bdry_diag );
+                    this->Map_A_bdry_diag.at( { c_dir , c_LR } ).template copy_from_host <ns_type::host_precision> ( host_A_bdry_diag );
                 }
             }
 
@@ -615,12 +614,6 @@ __global__ void cuda_record_soln ( ns_type::cuda_precision * R , ns_type::cuda_p
 __global__ void cuda_print_soln ( ns_type::cuda_precision * S , int ind , int it );
 
 
-__global__ void weighted_square_NORMAL_grid ( cuda_Struct_Grid_Base struct_grid , 
-                                              ns_type::cuda_precision * Sxx , ns_type::cuda_precision * Syy  , 
-                                              double * P1  , double * P2   , 
-                                              double * T );  // T stores the intermediate output 
-
-__global__ void weighted_square_SINGLE_grid ( cuda_Struct_Grid_Base struct_grid , 
-                                              ns_type::cuda_precision * S , double * P , double * T );  // T stores the intermediate output 
+ 
 
 #endif

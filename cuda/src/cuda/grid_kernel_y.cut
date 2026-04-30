@@ -67,11 +67,11 @@ void cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::kern
     }
 
 
-    GridStruct & drvt_grid = this->struct_grid;
+    GridStruct & drvt_grid = this->my_struct_grid;
     
-    constexpr char P_type_y = ( G_type_y == 'N' ? 'M' : 'N' );
-    constexpr int P_size_y = ( G_type_y == 'N' ? G_size_y - 1 : G_size_y + 1 );
-    using InteractingGridStructY = cuda_Struct_Grid<G_type_x, P_type_y, G_size_x, P_size_y, chunk_size>;
+    constexpr char P_type_y = ( C_type_y == 'N' ? 'M' : 'N' );
+    constexpr int P_size_y = ( C_type_y == 'N' ? C_size_y - 1 : C_size_y + 1 );
+    using InteractingGridStructY = cuda_Struct_Grid<C_type_x, P_type_y, C_size_x, P_size_y, C_chunk_size>;
 
     auto stencil_dt_dx    = this->stencil_dt_dx_shallow_copy;
     auto stencil_shift = this->Map_stencil_shift_shallow_copy.at('y');

@@ -352,7 +352,7 @@ cudaDeviceSynchronize();
 
     for ( const auto & iter_grid_type : Array_Grid_types ) 
     {
-        cuda_Class_Grid * grid = cuda_Map_Class_Grid_pointers.at(iter_grid_type);
+        cuda_Class_Grid_Base * grid = cuda_Map_Class_Grid_pointers.at(iter_grid_type);
 
         cudaStreamCreate( & grid->stream_dx_I );
         cudaStreamCreate( & grid->stream_dx_L );
@@ -787,7 +787,7 @@ printf("\n");
     // NOTE: copy the soln from dev to hst for the final snapshot
     for ( const auto & iter_grid_type : Array_Grid_types ) 
     {
-        cuda_Class_Grid * cuda_class_grid = cuda_Map_Class_Grid_pointers.at(iter_grid_type);
+        cuda_Class_Grid_Base * cuda_class_grid = cuda_Map_Class_Grid_pointers.at(iter_grid_type);
         for ( int i_field = 0; i_field < cuda_class_grid->N_soln; i_field++ )
             { cuda_class_grid->copy_field_pitched ( "soln" , i_field , "dev_to_hst" ); }
     }
@@ -823,7 +823,7 @@ printf("\n");
 
     for ( const auto & iter_grid_type : Array_Grid_types ) 
     {
-        cuda_Class_Grid * grid = cuda_Map_Class_Grid_pointers.at(iter_grid_type);
+        cuda_Class_Grid_Base * grid = cuda_Map_Class_Grid_pointers.at(iter_grid_type);
 
         cudaStreamDestroy( grid->stream_dx_I );
         cudaStreamDestroy( grid->stream_dx_L );

@@ -84,11 +84,11 @@ void cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::kern
     const int INT_bound_BGN_x = this->Map_interior_BGN.at('x');
     const int INT_bound_END_x = this->Map_interior_END.at('x');
 
-    GridStruct & drvt_grid =                  this->struct_grid;
+    GridStruct & drvt_grid =                  this->my_struct_grid;
     
-    constexpr char P_type_x = ( G_type_x == 'N' ? 'M' : 'N' );
-    constexpr int P_size_x = ( G_type_x == 'N' ? G_size_x - 1 : G_size_x + 1 );
-    using InteractingGridStructX = cuda_Struct_Grid<P_type_x, G_type_y, P_size_x, G_size_y, chunk_size>;
+    constexpr char P_type_x = ( C_type_x == 'N' ? 'M' : 'N' );
+    constexpr int P_size_x = ( C_type_x == 'N' ? C_size_x - 1 : C_size_x + 1 );
+    using InteractingGridStructX = cuda_Struct_Grid<P_type_x, C_type_y, P_size_x, C_size_y, C_chunk_size>;
 
     auto stencil_dt_dx    = this->stencil_dt_dx_shallow_copy;
     auto stencil_shift = this->Map_stencil_shift_shallow_copy.at('x');
@@ -161,11 +161,11 @@ void cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::kern
         P_extra = this->Vec_prmt.at(1).ptr;  // 2 * mu
     }
 
-    GridStruct & drvt_grid =                  this->struct_grid;
+    GridStruct & drvt_grid =                  this->my_struct_grid;
     
-    constexpr char P_type_x = ( G_type_x == 'N' ? 'M' : 'N' );
-    constexpr int P_size_x = ( G_type_x == 'N' ? G_size_x - 1 : G_size_x + 1 );
-    using InteractingGridStructX = cuda_Struct_Grid<P_type_x, G_type_y, P_size_x, G_size_y, chunk_size>;
+    constexpr char P_type_x = ( C_type_x == 'N' ? 'M' : 'N' );
+    constexpr int P_size_x = ( C_type_x == 'N' ? C_size_x - 1 : C_size_x + 1 );
+    using InteractingGridStructX = cuda_Struct_Grid<P_type_x, C_type_y, P_size_x, C_size_y, C_chunk_size>;
 
     auto D_bdry = this->Map_D_bdry_shallow_copy.at( {'x',c_LR} );
 
@@ -260,11 +260,11 @@ void cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::kern
         P_extra = this->Vec_prmt.at(1).ptr;  // 2 * mu
     }
     
-    GridStruct & drvt_grid = this->struct_grid;
+    GridStruct & drvt_grid = this->my_struct_grid;
     
-    constexpr char P_type_x = ( G_type_x == 'N' ? 'M' : 'N' );
-    constexpr int P_size_x = ( G_type_x == 'N' ? G_size_x - 1 : G_size_x + 1 );
-    using InteractingGridStructX = cuda_Struct_Grid<P_type_x, G_type_y, P_size_x, G_size_y, chunk_size>;
+    constexpr char P_type_x = ( C_type_x == 'N' ? 'M' : 'N' );
+    constexpr int P_size_x = ( C_type_x == 'N' ? C_size_x - 1 : C_size_x + 1 );
+    using InteractingGridStructX = cuda_Struct_Grid<P_type_x, C_type_y, P_size_x, C_size_y, C_chunk_size>;
 
     auto projection = this->Map_projection_shallow_copy.at({'x',c_LR});
     auto A_inv_projection = this->Map_A_inv_projection_shallow_copy.at({'x',c_LR});
