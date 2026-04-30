@@ -5,10 +5,10 @@
 //       the launcher first then kernel order without a forward declaration.
 
 
-template<bool bool_extra=false, int StencilLength=4, typename DrvtGrid, typename SolnGrid>
+template<bool bool_extra=false, int NumBlocks=600, int StencilLength=4, typename DrvtGrid, typename SolnGrid>
 __global__ void cuda_interior_x ( ns_type::cuda_precision * stencil_dt_dx_ptr ,
                                   int * stencil_shift_ptr ,
-                                  int INT_bound_BGN_x , int num_blocks ,
+                                  int INT_bound_BGN_x , // removed num_blocks
                                   ns_type::cuda_precision * S ,  // S is from pntr grid
                                   ns_type::cuda_precision * P ,
                                   ns_type::cuda_precision * P_extra ,
@@ -17,8 +17,6 @@ __global__ void cuda_interior_x ( ns_type::cuda_precision * stencil_dt_dx_ptr ,
 {
     int ind_block  =  blockIdx.x;
     int ind_thread = threadIdx.x;
-
-    if ( ind_block >= num_blocks ) return;
 
     int ix = ind_block + INT_bound_BGN_x;
     {
@@ -70,32 +68,19 @@ void cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::kern
     }
 
 
-    // ---- loop bounds
-    const int INT_bound_BGN_x = this->Map_interior_BGN.at('x');
-    const int INT_bound_END_x = this->Map_interior_END.at('x');
+    constexpr int INT_bound_BGN_x = (C_type_x == 'N' ? 4 : 3);
+    constexpr int INT_bound_END_x = (C_type_x == 'N' ? C_size_x - 4 : C_size_x - 3);
+    constexpr int num_blocks = INT_bound_END_x - INT_bound_BGN_x;
 
-    GridStruct & drvt_grid =                  this->my_struct_grid;
-    
-    constexpr char P_type_x = ( C_type_x == 'N' ? 'M' : 'N' );
-    constexpr int P_size_x = ( C_type_x == 'N' ? C_size_x - 1 : C_size_x + 1 );
-    using InteractingGridStructX = cuda_Struct_Grid<P_type_x, C_type_y, P_size_x, C_size_y, C_chunk_size>;
-
-    auto stencil_dt_dx    = this->stencil_dt_dx_shallow_copy;
-    auto stencil_shift = this->Map_stencil_shift_shallow_copy.at('x');
-
-    int num_blocks = INT_bound_END_x - INT_bound_BGN_x;
-
-    cudaStream_t stream = bool_stream ? this->stream_dx_I : 0;
-
-    cuda_interior_x <bool_extra, 4, GridStruct, InteractingGridStructX> <<< N_block , N_thread , 0 , stream >>> 
-        ( stencil_dt_dx.ptr, stencil_shift.ptr, INT_bound_BGN_x , num_blocks , S , P , P_extra , R , R_extra );
+    cuda_interior_x <bool_extra, num_blocks, 4, GridStruct, InteractingGridStructX> <<< num_blocks , N_thread , 0 , stream >>> 
+        ( stencil_dt_dx.ptr, stencil_shift.ptr, INT_bound_BGN_x , S , P , P_extra , R , R_extra );
 }
 
 
 
 template<bool bool_extra=false, int D_bdry_rows=4, int D_bdry_cols=5, typename DrvtGrid, typename SolnGrid>
 __global__ void cuda_boundary_x ( ns_type::cuda_precision * D_bdry_ptr ,
-                                  int row_BGN , int col_BGN , int num_blocks ,   // row for x ; col for w
+                                  int row_BGN , int col_BGN , // removed num_blocks
                                   ns_type::cuda_precision * S ,  // S is from pntr grid
                                   ns_type::cuda_precision * P ,
                                   ns_type::cuda_precision * P_extra ,
@@ -104,8 +89,6 @@ __global__ void cuda_boundary_x ( ns_type::cuda_precision * D_bdry_ptr ,
 {
     int ind_block  =  blockIdx.x;
     int ind_thread = threadIdx.x;
-
-    if ( ind_block >= num_blocks ) return;
 
     int ix = ind_block + row_BGN;
     for ( int iy = 0; iy < DrvtGrid::size_y; iy += blockDim.x )  // iy goes through the grid index on drvt grid
@@ -173,8 +156,8 @@ void cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::kern
 
     constexpr int D_bdry_rows = (C_type_x == 'N' ? 4 : 3);
     constexpr int D_bdry_cols = 5;
-    cuda_boundary_x <bool_extra, D_bdry_rows, D_bdry_cols, GridStruct, InteractingGridStructX> <<< N_block , N_thread , 0 , stream >>> 
-        ( D_bdry.ptr, row_BGN , col_BGN , num_blocks , S , P , P_extra , R , R_extra );
+    cuda_boundary_x <bool_extra, D_bdry_rows, D_bdry_cols, GridStruct, InteractingGridStructX> <<< D_bdry_rows , N_thread , 0 , stream >>> 
+        ( D_bdry.ptr, row_BGN , col_BGN , S , P , P_extra , R , R_extra );
 }
 
 
@@ -195,8 +178,6 @@ __global__ void cuda_secure_bdry_x ( ns_type::cuda_precision * projection_ptr ,
 {
     int ind_block  =  blockIdx.x;
     int ind_thread = threadIdx.x;
-
-    if ( ind_block >= num_blocks ) return;
 
     for ( int iy = 0; iy < SolnGrid::size_y; iy += blockDim.x )  // iy goes through the grid index on soln_grid (same as drvt grid)
     {

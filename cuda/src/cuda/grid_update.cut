@@ -132,8 +132,6 @@ __global__ void cuda_update ( prcs_type * C ,
     int ind_thread = threadIdx.x;
 
     int ix = ind_block;
-    if ( ix >= GridType::size_x ) return;
-
     {
         for ( int iy = 0; iy < GridType::size_y; iy += blockDim.x ) 
         {
@@ -186,6 +184,6 @@ void cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::kern
         //           It is still better that the check is on the host side - the message may not 
         //       be eatean and may be easier to recognize.
 
-        cuda_update <ns_type::cuda_precision , cpst_N , cpst_S, GridStruct> <<< N_block , N_thread , 0 , stream >>> ( C , R , S );
+        cuda_update <ns_type::cuda_precision , cpst_N , cpst_S, GridStruct> <<< GridStruct::size_x , N_thread , 0 , stream >>> ( C , R , S );
     }
 }
