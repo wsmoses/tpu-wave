@@ -22,8 +22,7 @@ double cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::en
         auto & P1  = Vec_prmt_enrg.at(0);
         auto & P2  = Vec_prmt_enrg.at(1);
 
-        weighted_square_NORMAL_grid <GridStruct> <<< N_block , N_thread >>> ( this->my_struct_grid , 
-                                                                 Sxx.ptr , Syy.ptr , 
+        weighted_square_NORMAL_grid <GridStruct> <<< N_block , N_thread >>> ( Sxx.ptr , Syy.ptr , 
                                                                  P1 .ptr , P2 .ptr , 
                                                                  T  .ptr );
     }
@@ -33,8 +32,7 @@ double cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::en
         auto & P = Vec_prmt_enrg.at(0);        
         auto & T = this->thrust_memory;
 
-        weighted_square_SINGLE_grid <GridStruct> <<< N_block , N_thread >>> ( this->my_struct_grid , 
-                                                                 S.ptr , P.ptr , T.ptr );
+        weighted_square_SINGLE_grid <GridStruct> <<< N_block , N_thread >>> ( S.ptr , P.ptr , T.ptr );
     }
 
     thrust::device_ptr<double> d_ptr ( T.ptr );
@@ -45,8 +43,7 @@ double cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::en
 
 
 template<typename GridType>
-__global__ void weighted_square_NORMAL_grid ( GridType struct_grid , 
-                                              ns_type::cuda_precision * Sxx , ns_type::cuda_precision * Syy , 
+__global__ void weighted_square_NORMAL_grid ( ns_type::cuda_precision * Sxx , ns_type::cuda_precision * Syy , 
                                               double * P1  , double * P2  , 
                                               double * T )  // T stores the intermediate output 
 {    
@@ -73,8 +70,7 @@ __global__ void weighted_square_NORMAL_grid ( GridType struct_grid ,
 
 
 template<typename GridType>
-__global__ void weighted_square_SINGLE_grid ( GridType struct_grid , 
-                                              ns_type::cuda_precision * S , 
+__global__ void weighted_square_SINGLE_grid ( ns_type::cuda_precision * S , 
                                               double * P , 
                                               double * T )  // T stores the intermediate output 
 {    

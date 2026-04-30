@@ -125,7 +125,7 @@ __device__ void device_update_6R_slow2sum ( int ind , prcs_type * R , prcs_type 
 
 
 template<typename prcs_type , int cpst_N , char cpst_S, typename GridType>
-__global__ void cuda_update ( GridType struct_grid , prcs_type * C , 
+__global__ void cuda_update ( prcs_type * C , 
                               prcs_type * R , prcs_type * S )
 {
     int ind_block  =  blockIdx.x;
@@ -186,6 +186,6 @@ void cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::kern
         //           It is still better that the check is on the host side - the message may not 
         //       be eatean and may be easier to recognize.
 
-        cuda_update <ns_type::cuda_precision , cpst_N , cpst_S, GridStruct> <<< N_block , N_thread , 0 , stream >>> ( this->my_struct_grid , C , R , S );
+        cuda_update <ns_type::cuda_precision , cpst_N , cpst_S, GridStruct> <<< N_block , N_thread , 0 , stream >>> ( C , R , S );
     }
 }

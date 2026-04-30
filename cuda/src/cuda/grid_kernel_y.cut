@@ -1,6 +1,5 @@
 template<bool bool_extra=false, char soln_type_x='N', char soln_type_y='N', typename DrvtGrid, typename SolnGrid>
-__global__ void cuda_periodic_y_modulo ( DrvtGrid drvt_grid  , SolnGrid soln_grid , 
-                                          cuda_run_time_vector_shallow_copy <ns_type::cuda_precision> stencil_dt_dx , 
+__global__ void cuda_periodic_y_modulo ( cuda_run_time_vector_shallow_copy <ns_type::cuda_precision> stencil_dt_dx , 
                                           cuda_run_time_vector_shallow_copy <int> stencil_shift , 
                                           int num_blocks ,
                                           ns_type::cuda_precision * S ,  // S is from pntr grid
@@ -75,5 +74,5 @@ void cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::kern
     cudaStream_t stream = bool_stream ? this->stream_dy : 0;
 
     cuda_periodic_y_modulo <bool_extra, soln_type_x, soln_type_y, GridStruct, InteractingGridStructY> <<< N_block , N_thread , 0 , stream >>> 
-        ( drvt_grid , InteractingGridStructY() , stencil_dt_dx , stencil_shift , num_blocks , S , P , P_extra , R , R_extra );
+        ( stencil_dt_dx , stencil_shift , num_blocks , S , P , P_extra , R , R_extra );
 }
