@@ -354,13 +354,7 @@ cudaDeviceSynchronize();
     {
         cuda_Class_Grid_Base * grid = cuda_Map_Class_Grid_pointers.at(iter_grid_type);
 
-        cudaStreamCreate( & grid->stream_dx_I );
-        cudaStreamCreate( & grid->stream_dx_L );
-        cudaStreamCreate( & grid->stream_dx_R );
 
-        cudaStreamCreate( & grid->stream_dy );
-
-        cudaStreamCreate( & grid->stream_soln );
 
         // NOTE: stream_drvt is removed since reseting derivatives to zero is absorbed in their
         //       calculations - on gpu, the loop ordering does not affect the performance that 
@@ -451,8 +445,8 @@ cudaDeviceSynchronize();
 
 cudaDeviceSynchronize(); // debug
 
-        if ( bool_energy ) { cudaStreamSynchronize ( cuda_Class_Grid_SMM.stream_soln ); ns_input::Record_E_p0.at(it) += cuda_Class_Grid_SMM.energy_calculation (); }
-        if ( bool_energy ) { cudaStreamSynchronize ( cuda_Class_Grid_SNN.stream_soln ); ns_input::Record_E_p0.at(it) += cuda_Class_Grid_SNN.energy_calculation (); }
+        if ( bool_energy ) { ns_input::Record_E_p0.at(it) += cuda_Class_Grid_SMM.energy_calculation (); }
+        if ( bool_energy ) { ns_input::Record_E_p0.at(it) += cuda_Class_Grid_SNN.energy_calculation (); }
 
 cudaDeviceSynchronize(); // debug
 
@@ -472,7 +466,7 @@ cudaDeviceSynchronize(); // debug
         //       benefit for the update of Vx and Vy, presumbly because they took
         //       roughly the same time.)
 
-        cudaStreamSynchronize ( cuda_Class_Grid_SNN.stream_soln );
+
         // NOTE: Pay attention to the XY and xy distinction. When Sxy is ready, 
         //       the y derivative of NM grid can be calculated, which is where 
         //       Vy is, not Vx.
@@ -497,7 +491,7 @@ cudaDeviceSynchronize(); // debug
 
 cudaDeviceSynchronize(); // debug
 
-        cudaStreamSynchronize ( cuda_Class_Grid_SMM.stream_soln );
+
 
         // x derivative of Vy
         {
@@ -518,19 +512,13 @@ cudaDeviceSynchronize(); // debug
 cudaDeviceSynchronize(); // debug
 
         // update
-        cudaStreamSynchronize( cuda_Class_Grid_SNM.stream_dx_I );
-        cudaStreamSynchronize( cuda_Class_Grid_SNM.stream_dx_L );
-        cudaStreamSynchronize( cuda_Class_Grid_SNM.stream_dx_R );
-        cudaStreamSynchronize( cuda_Class_Grid_SNM.stream_dy   );
+
 
         cuda_Class_Grid_SNM.kernel_launch_cuda_update <cpst_N , cpst_S> ();
     
 cudaDeviceSynchronize(); // debug
 
-        cudaStreamSynchronize( cuda_Class_Grid_SMN.stream_dx_I );
-        cudaStreamSynchronize( cuda_Class_Grid_SMN.stream_dx_L );
-        cudaStreamSynchronize( cuda_Class_Grid_SMN.stream_dx_R );
-        cudaStreamSynchronize( cuda_Class_Grid_SMN.stream_dy   );
+
 
         cuda_Class_Grid_SMN.kernel_launch_cuda_update <cpst_N , cpst_S> ();
 
@@ -556,7 +544,7 @@ cudaDeviceSynchronize(); // debug
                 for ( int i_field = 0; i_field < cuda_grid_src->N_soln; i_field++ )
                 {
                     ns_type::cuda_precision * S = cuda_grid_src->Vec_soln.at(i_field).ptr;
-                    cuda_apply_source <<< 1 , 1 , 0 , cuda_grid_src->stream_soln >>> ( S , ind , increment );
+                    cuda_apply_source <<< 1 , 1 , 0 , 0 >>> ( S , ind , increment );
                     // if ( cpst_N == 0 )
                     // {
                     //     cuda_apply_source <<< 1 , 1 , 0 , cuda_grid_src->stream_soln >>> ( S , ind , increment );
@@ -575,15 +563,15 @@ cudaDeviceSynchronize(); // debug
 
 cudaDeviceSynchronize(); // debug
 
-        if ( bool_energy ) { cudaStreamSynchronize ( cuda_Class_Grid_SMN .stream_soln ); ns_input::Record_E_k.at(it) += cuda_Class_Grid_SMN.energy_calculation (); }
-        if ( bool_energy ) { cudaStreamSynchronize ( cuda_Class_Grid_SNM .stream_soln ); ns_input::Record_E_k.at(it) += cuda_Class_Grid_SNM.energy_calculation (); }
+        if ( bool_energy ) { ns_input::Record_E_k.at(it) += cuda_Class_Grid_SMN.energy_calculation (); }
+        if ( bool_energy ) { ns_input::Record_E_k.at(it) += cuda_Class_Grid_SNM.energy_calculation (); }
 
 cudaDeviceSynchronize(); // debug
 
         // ---- S
         // NOTE: reset the derivatives is absorbed in their calculation.
 
-        cudaStreamSynchronize ( cuda_Class_Grid_SNM .stream_soln );
+
 
         // y derivative of SNN
         cuda_Class_Grid_SNN.kernel_launch_cuda_periodic_y_modulo <false, 'N', 'M'> ();
@@ -599,7 +587,7 @@ cudaDeviceSynchronize(); // debug
 
 cudaDeviceSynchronize(); // debug
 
-        cudaStreamSynchronize ( cuda_Class_Grid_SMN .stream_soln );
+
 
         // x derivative of SNN
         {
@@ -613,19 +601,13 @@ cudaDeviceSynchronize(); // debug
 cudaDeviceSynchronize(); // debug        
 
         // update
-        cudaStreamSynchronize( cuda_Class_Grid_SNN.stream_dx_I );
-        cudaStreamSynchronize( cuda_Class_Grid_SNN.stream_dx_L );
-        cudaStreamSynchronize( cuda_Class_Grid_SNN.stream_dx_R );
-        cudaStreamSynchronize( cuda_Class_Grid_SNN.stream_dy );
+
 
         cuda_Class_Grid_SNN.kernel_launch_cuda_update <cpst_N , cpst_S> ();
 
 cudaDeviceSynchronize(); // debug
 
-        cudaStreamSynchronize( cuda_Class_Grid_SMM.stream_dx_I );
-        cudaStreamSynchronize( cuda_Class_Grid_SMM.stream_dx_L );
-        cudaStreamSynchronize( cuda_Class_Grid_SMM.stream_dx_R );
-        cudaStreamSynchronize( cuda_Class_Grid_SMM.stream_dy );
+
 
         cuda_Class_Grid_SMM.kernel_launch_cuda_update <cpst_N , cpst_S> ();
         
@@ -651,7 +633,7 @@ cudaDeviceSynchronize(); // debug
                 for ( int i_field = 0; i_field < cuda_grid_src->N_soln; i_field++ )
                 { 
                     ns_type::cuda_precision * S = cuda_grid_src->Vec_soln.at(i_field).ptr;
-                    cuda_apply_source <<< 1 , 1 , 0 , cuda_grid_src->stream_soln >>> ( S , ind , increment );
+                    cuda_apply_source <<< 1 , 1 , 0 , 0 >>> ( S , ind , increment );
                     // if ( cpst_N == 0 )
                     // {
                     //     cuda_apply_source <<< 1 , 1 , 0 , cuda_grid_src->stream_soln >>> ( S , ind , increment );
@@ -675,8 +657,8 @@ cudaDeviceSynchronize(); // debug
 // NOTE: most of the above code for applying source can be taken outside the time loop
 
 
-        if ( bool_energy ) { cudaStreamSynchronize ( cuda_Class_Grid_SMM.stream_soln ); ns_input::Record_E_p1.at(it) += cuda_Class_Grid_SMM.energy_calculation (); }
-        if ( bool_energy ) { cudaStreamSynchronize ( cuda_Class_Grid_SNN.stream_soln ); ns_input::Record_E_p1.at(it) += cuda_Class_Grid_SNN.energy_calculation (); }
+        if ( bool_energy ) { ns_input::Record_E_p1.at(it) += cuda_Class_Grid_SMM.energy_calculation (); }
+        if ( bool_energy ) { ns_input::Record_E_p1.at(it) += cuda_Class_Grid_SNN.energy_calculation (); }
 
 
 cudaDeviceSynchronize(); // debug
@@ -704,7 +686,7 @@ cudaDeviceSynchronize(); // debug
                     { 
                         ns_type::cuda_precision * R = Solution_RESULT.ptr + i_field * Nt + it;
                         ns_type::cuda_precision * S = cuda_grid_rcv->Vec_soln.at(i_field).ptr;
-                        cuda_record_soln <<< 1 , 1 , 0 , cuda_grid_rcv->stream_soln >>> ( R , S , I_RCV );
+                        cuda_record_soln <<< 1 , 1 , 0 , 0 >>> ( R , S , I_RCV );
                     }
                 }
             }

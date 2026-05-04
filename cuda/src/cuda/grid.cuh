@@ -152,23 +152,7 @@ class cuda_Class_Grid_Base
         std::vector< cuda_run_time_matrix<ns_type::cuda_precision> > Vec_RESULT_rcv;     // we probably want to change _matrix to _vector
 
 
-        bool bool_stream = true;
 
-        cudaStream_t stream_dx_I;
-        cudaStream_t stream_dx_L;
-        cudaStream_t stream_dx_R;
-
-        cudaStream_t stream_bx_L;
-        cudaStream_t stream_bx_R;
-
-        cudaStream_t stream_dy;     // we may later separate this stream into 3 parts as for the x direction
-
-        cudaStream_t stream_dy_I;     // we may later separate this stream into 3 parts as for the x direction
-        cudaStream_t stream_dy_L;     // we may later separate this stream into 3 parts as for the x direction
-        cudaStream_t stream_dy_R;     // we may later separate this stream into 3 parts as for the x direction
-
-        cudaStream_t stream_soln;      // update, src, rcv can be put in this stream
-        cudaStream_t stream_drvt;      // this one is for reset
 
 
 
@@ -492,12 +476,7 @@ class cuda_Class_Grid : public cuda_Class_Grid_Base
             else 
                 { printf ("%s %d Unrecognized field name.\n", __FILE__, __LINE__); fflush(stdout); exit(0); }
 
-            auto & stream = this->stream_drvt;
-
-            if ( bool_stream == false )
-                { cudaMemset      ( dev_ptr, 0, this->length_memory * sizeof(ns_type::cuda_precision) ); }
-            else
-                { cudaMemsetAsync ( dev_ptr, 0, this->length_memory * sizeof(ns_type::cuda_precision), stream ); }
+            cudaMemsetAsync ( dev_ptr, 0, this->length_memory * sizeof(ns_type::cuda_precision), 0 );
         }
 
 

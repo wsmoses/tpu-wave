@@ -66,7 +66,7 @@ void cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::kern
     auto stencil_dt_dx    = this->stencil_dt_dx_shallow_copy;
     auto stencil_shift = this->Map_stencil_shift_shallow_copy.at('y');
 
-    cudaStream_t stream = bool_stream ? this->stream_dy : 0;
+    cudaStream_t stream = 0;
 
     cuda_periodic_y_modulo <bool_extra, soln_type_x, soln_type_y, 4, GridStruct, InteractingGridStructY> <<< C_size_x , N_thread , 0 , stream >>> 
         ( stencil_dt_dx.ptr , stencil_shift.ptr , S , P , P_extra , R , R_extra );
