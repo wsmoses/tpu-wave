@@ -25,7 +25,7 @@ NVCC          := ~/clang++
 HOST_COMPILER  = ~/clang++
 
 # CUDA include directory:
-CUDA_INC_DIR= -I$(CUDA_PATH)/include -I$(CUDA_PATH)/samples/common/inc
+CUDA_INC_DIR= -I$(CUDA_PATH)/include -I$(CUDA_PATH)/samples/common/inc -I/usr/local/cuda/targets/x86_64-linux/
 # [2023/04/10] NOTE: -I$(CUDA_PATH)/samples/common/inc is for helper_cuda.h
 # CUDA library directory:
 CUDA_LIB_DIR= -L$(CUDA_PATH)/lib64

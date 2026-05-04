@@ -1,8 +1,8 @@
 #ifndef NAMESPACE_TYPE_NVCC
 #define NAMESPACE_TYPE_NVCC
 
-#include "cuda_fp16.h"
-#include "cuda_bf16.h"
+// #include "cuda_fp16.h"
+// #include "cuda_bf16.h"
 
 // #include <string>
 // #include <typeinfo>
@@ -39,8 +39,8 @@ inline void print_precision_type ()
     std::string str_precision = "Unrecognized type";
     if ( typeid(ns_type::cuda_precision) == typeid(double)        ) { str_precision = "double";        } 
     if ( typeid(ns_type::cuda_precision) == typeid(float)         ) { str_precision = "float" ;        } 
-    if ( typeid(ns_type::cuda_precision) == typeid(__half)        ) { str_precision = "__half";        } 
-    if ( typeid(ns_type::cuda_precision) == typeid(__nv_bfloat16) ) { str_precision = "__nv_bfloat16"; }
+    // if ( typeid(ns_type::cuda_precision) == typeid(__half)        ) { str_precision = "__half";        } 
+  //  if ( typeid(ns_type::cuda_precision) == typeid(__nv_bfloat16) ) { str_precision = "__nv_bfloat16"; }
     if ( typeid(ns_type::cuda_precision) == typeid(_Float16)      ) { str_precision = "_Float16";      }  
 
     printf( "\nPrecision type: %s .\n", str_precision.c_str() );
