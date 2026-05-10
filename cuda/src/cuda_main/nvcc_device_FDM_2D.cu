@@ -733,7 +733,7 @@ printf("\n");
     }
 
     // ---- output the results
-    char dt_folder[22];  // 2 (?.) + 15 + 4 (e-0?) + 1 ('\0')
+    char dt_folder[32];  // Increased size to avoid overflow
     sprintf( dt_folder, "dt_%16.15e", (double) ns_input::dt );
     dt_folder[4] = 'p';
 
@@ -803,18 +803,7 @@ printf("\n");
 
 
 
-    for ( const auto & iter_grid_type : Array_Grid_types ) 
-    {
-        cuda_Class_Grid_Base * grid = cuda_Map_Class_Grid_pointers.at(iter_grid_type);
 
-        cudaStreamDestroy( grid->stream_dx_I );
-        cudaStreamDestroy( grid->stream_dx_L );
-        cudaStreamDestroy( grid->stream_dx_R );
-
-        cudaStreamDestroy( grid->stream_dy );
-
-        cudaStreamDestroy( grid->stream_soln );
-    }
 
 } 
 
