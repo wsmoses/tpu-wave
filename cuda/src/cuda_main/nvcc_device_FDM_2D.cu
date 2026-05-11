@@ -15,6 +15,9 @@ int main(int argc, char* argv[])
     Fwd_Specs.Map_Grid_pointers[Array_Grid_types.at(2)] = &Grids.at(2);
     Fwd_Specs.Map_Grid_pointers[Array_Grid_types.at(3)] = &Grids.at(3);
 
+    for ( const auto & iter_grid_type : Array_Grid_types ) 
+        { Fwd_Specs.Map_Grid_pointers.at(iter_grid_type)->set_grid_parameters ( iter_grid_type , true ); }
+
     printf("Array_Grid_types size: %lu\n", Array_Grid_types.size());
     for (auto const& type : Array_Grid_types) {
         printf("Type: %c %c\n", type[0], type[1]);
