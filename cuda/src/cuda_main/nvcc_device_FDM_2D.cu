@@ -15,6 +15,11 @@ int main(int argc, char* argv[])
     Fwd_Specs.Map_Grid_pointers[Array_Grid_types.at(2)] = &Grids.at(2);
     Fwd_Specs.Map_Grid_pointers[Array_Grid_types.at(3)] = &Grids.at(3);
 
+    ns_input::Nx_soln = 600;
+    ns_input::Ny_soln = 600;
+    ns_input::Mx_soln = 601;
+    ns_input::My_soln = 601;
+
     for ( const auto & iter_grid_type : Array_Grid_types ) 
         { Fwd_Specs.Map_Grid_pointers.at(iter_grid_type)->set_grid_parameters ( iter_grid_type , true ); }
 
