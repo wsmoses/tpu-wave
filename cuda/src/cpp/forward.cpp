@@ -104,7 +104,16 @@ void Class_Forward_Specs::process_src_locations ( struct_src_input & src_input )
 void Class_Forward_Specs::process_rcv_locations ( std::vector< struct_rcv_input > & Vec_Rcv_Input ) 
 {
     constexpr int N_dir = ns_forward::N_dir;
-    std::array<char, 2> grid_type = {'N', 'M'};
+    
+    // Construct grid_type from string to see if it triggers the bug!
+    std::string input_string = "MN";
+    std::array<char, 2> grid_type {};
+    int count = 0;
+    for ( const char& c_dir : {'X','Y'} ) { 
+        grid_type.at( ns_forward::XY_to_01(c_dir) ) = input_string.at(count); 
+        count++; 
+    }
+
     Class_Grid * grid_rcv = Map_Grid_pointers.at(grid_type);
 
     // Hardcode index_rcv to be inside bounds
