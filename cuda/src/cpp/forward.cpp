@@ -9,7 +9,6 @@ using ns_input::bool_visual;
 
 void Class_Forward_Specs::process_src_locations ( struct_src_input & src_input )
 {
-    // keep this as is for now, since it works
     constexpr int N_dir = ns_forward::N_dir;
 
     std::array<char, N_dir> & grid_type = src_input.src_grid_type;
@@ -68,7 +67,6 @@ void Class_Forward_Specs::process_rcv_locations ( std::vector< struct_rcv_input 
         std::array<char, N_dir> grid_type = rcv_input.rcv_grid_type;
         Class_Grid * grid_rcv = Map_Grid_pointers.at(grid_type);
 
-        // Removed conversion loop, hardcoded values below
         if ( true )
         {
             Map_grid_N_rcvs.at(grid_type) += 1;
@@ -92,28 +90,7 @@ void Class_Forward_Specs::process_rcv_locations ( std::vector< struct_rcv_input 
             Map_grid_misfit_rcv.at(grid_type).push_back( 0. );
         }
     }
-
-    for ( const auto & iter_map : Map_Grid_pointers ) 
-    {
-        std::array<char, N_dir> grid_type = iter_map.first;
-        Class_Grid * grid_rcv = iter_map.second;
-
-        if ( static_cast<unsigned long> ( Map_grid_N_rcvs.at(grid_type) ) != Map_grid_struct_rcv_forward.at(grid_type).size()
-          || static_cast<unsigned long> ( Map_grid_N_rcvs.at(grid_type) ) != Map_grid_record_rcv.at(grid_type).size() 
-          || static_cast<unsigned long> ( Map_grid_N_rcvs.at(grid_type) ) != Map_grid_RESULT_rcv.at(grid_type).size()
-          || static_cast<unsigned long> ( Map_grid_N_rcvs.at(grid_type) ) != Map_grid_misfit_rcv.at(grid_type).size() )
-        { printf("Number of collected receivers do not match.\n"); fflush(stdout); exit(0); }
-
-        if ( Map_grid_N_rcvs.at(grid_type) != 0 )
-        {
-            printf( " ---- Collected %3d receivers on grid (%c %c)\n", Map_grid_N_rcvs.at(grid_type), grid_type.at(0), grid_type.at(1) ); fflush(stdout);
-        }
-
-        for ( auto& record_rcv : Map_grid_record_rcv.at(grid_type) ) 
-            { record_rcv.allocate_memory( grid_rcv->N_soln , Nt ); }
-        for ( auto& RESULT_rcv : Map_grid_RESULT_rcv.at(grid_type) ) 
-            { RESULT_rcv.allocate_memory( grid_rcv->N_soln , Nt ); }
-    }
+    // Second loop removed
 } // Class_Forward_Specs::process_rcv_locations ()
 
 
