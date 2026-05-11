@@ -702,7 +702,7 @@ cudaDeviceSynchronize(); // debug
             	    + Fwd_Specs.src_forward.iy_src;
 
         	for ( int i_field = 0; i_field < cuda_grid_src->N_soln; i_field++ )
-            	{ cuda_print_soln <<< 1 , 1 >>> ( cuda_grid_src->Vec_soln.at(i_field).ptr , ind , it ); }
+            	// { cuda_print_soln <<< 1 , 1 >>> ( cuda_grid_src->Vec_soln.at(i_field).ptr , ind , it ); }
         }
         // [2024/03/27]
         // NOTE: Made the above changes on the printing out the solution at the src location. Before, we always print out

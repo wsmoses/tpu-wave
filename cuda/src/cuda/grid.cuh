@@ -607,13 +607,26 @@ __device__ void drvt_to_rths ( ns_type::cuda_precision v_d , int i_d ,
 
 __global__ void cuda_apply_source ( ns_type::cuda_precision * S , int ind , 
                                     ns_type::cuda_precision * R , int i_field ,
-                                    double increment );
+                                    double increment )
+{
+    R [ i_field ] += increment;
+    device_slow2sum <ns_type::cuda_precision> ( S[ind] , R[i_field] , S[ind] , R[i_field] );
+}
 
-__global__ void cuda_apply_source ( ns_type::cuda_precision * S , int ind , double increment );
+__global__ void cuda_apply_source ( ns_type::cuda_precision * S , int ind , double increment )
+{
+    S [ ind ] += increment;
+}
 
-__global__ void cuda_record_soln ( ns_type::cuda_precision * R , ns_type::cuda_precision * S , int I_RCV );
+__global__ void cuda_record_soln ( ns_type::cuda_precision * R , ns_type::cuda_precision * S , int I_RCV )
+{
+    * R = S [ I_RCV ];
+}
 
-__global__ void cuda_print_soln ( ns_type::cuda_precision * S , int ind , int it );
+// __global__ void cuda_print_soln ( ns_type::cuda_precision * S , int ind , int it )
+// {
+//     printf( "Time step: %6d soln: % 12.11e \n", it, (double) S [ind] );
+// }
 
 
 // NOTE: Reference: https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#function-parameters
