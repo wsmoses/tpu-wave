@@ -159,6 +159,8 @@ void Class_Grid::make_density_reciprocal ( Class_Inverse_Specs &Inv_Specs )
             interpolate_forward_parameter < double > ( inverse_P , forward_P );
 
             run_time_vector<ns_type::host_precision> & P = this->Vec_prmt.at(0);
+            printf("make_density_reciprocal: grid %s, P.length = %d, forward_P.length = %d\n", this->grid_name.c_str(), P.length, forward_P.length);
+            fflush(stdout);
             for ( int i = 0; i < P.length; i++ ) { P.at(i) = 1. / forward_P.at(i); }
         }
     }
