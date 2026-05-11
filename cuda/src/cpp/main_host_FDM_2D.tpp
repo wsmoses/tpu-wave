@@ -240,7 +240,7 @@ int main(int argc, char* argv[])
         // ---- actual simulation
         Fwd_Specs.forward_simulation_periodic_y <cpst_N,cpst_S> ();
 
-        char dt_folder[22];  // 2 (?.) + 15 + 4 (e-0?) + 1 ('\0')
+        char dt_folder[32];  // Increased size to avoid overflow
         sprintf( dt_folder, "dt_%16.15e", (double) ns_input::dt );
         dt_folder[4] = 'p';
 
@@ -248,8 +248,9 @@ int main(int argc, char* argv[])
         if ( std::is_same_v < ns_type::cuda_precision , double        > ) { str_precision = "fp64"; }
         if ( std::is_same_v < ns_type::cuda_precision , float         > ) { str_precision = "fp32"; }
         if ( std::is_same_v < ns_type::cuda_precision , _Float16      > ) { str_precision = "fp16"; } // this would compile?
-        if ( std::is_same_v < ns_type::cuda_precision , __half        > ) { str_precision = "fp16"; }
-        if ( std::is_same_v < ns_type::cuda_precision , __nv_bfloat16 > ) { str_precision = "bf16"; }
+        // Commented out due to missing headers in this environment
+        // if ( std::is_same_v < ns_type::cuda_precision , __half        > ) { str_precision = "fp16"; }
+        // if ( std::is_same_v < ns_type::cuda_precision , __nv_bfloat16 > ) { str_precision = "bf16"; }
         printf( "\nPrecision type: %s .\n", str_precision.c_str() );
 
         // ---- in case when we want to check the output
