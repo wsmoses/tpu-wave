@@ -5,6 +5,8 @@
 int main(int argc, char* argv[]) 
 {
     Class_Forward_Specs Fwd_Specs;
+    using ns_forward::N_dir;
+    std::array< Class_Grid , 2<<(N_dir-1) > Grids;
 
     constexpr auto Array_Grid_types = ns_forward::define_Array_Grid_types ();
 
