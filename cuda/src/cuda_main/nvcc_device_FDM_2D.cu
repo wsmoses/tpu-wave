@@ -188,9 +188,6 @@ int main(int argc, char* argv[])
     // [2024/04/03]
     // NOTE: Let's first see how the results look like before making changes to make_density_reciprocal ().
 
-    
-    print_discretization_parameters ( 1. , 2. );
-
 
 // -------------------------------- WARNING -------------------------------- //
 // [2023/07/18]                                                              //

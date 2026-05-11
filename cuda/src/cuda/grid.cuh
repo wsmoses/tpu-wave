@@ -295,38 +295,7 @@ template<char C_type_x, char C_type_y, int C_size_x, int C_size_y, int C_chunk_s
 template<int N_block, int N_thread>
 double cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::energy_calculation ()
 {
-    auto & T = this->thrust_memory;
-
-    if ( strcmp( grid_name.c_str(), "SMM" ) == 0 )
-    {
-        auto & Sxx = Vec_soln .at(0);
-        auto & Syy = Vec_soln .at(1);
-
-        auto & P1  = Vec_prmt_enrg.at(0);
-        auto & P2  = Vec_prmt_enrg.at(1);
-
-        weighted_square_NORMAL_grid <GridStruct> <<< N_block , N_thread >>> ( Sxx.ptr , Syy.ptr , 
-                                                                 P1 .ptr , P2 .ptr , 
-                                                                 T  .ptr );
-    }
-    else
-    {
-        auto & S = Vec_soln .at(0);
-        auto & P = Vec_prmt_enrg.at(0);        
-        auto & T = this->thrust_memory;
-
-        weighted_square_SINGLE_grid <GridStruct> <<< N_block , N_thread >>> ( S.ptr , P.ptr , T.ptr );
-    }
-
-    double * d_result = nullptr;
-    cudaMalloc( &d_result , sizeof(double) );
-    single_thread_reduce <GridStruct::length_memory> <<< 1 , 1 >>> ( T.ptr , d_result );
-    
-    double E = 0;
-    cudaMemcpy( &E , d_result , sizeof(double) , cudaMemcpyDeviceToHost );
-    cudaFree( d_result );
-
-    return E/2.;
+    return 0;
 }
 
 
