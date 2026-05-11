@@ -7,13 +7,6 @@ void Class_Forward_Specs::process_src_locations ( struct_src_input & src_input )
 
 void Class_Forward_Specs::process_rcv_locations ( std::vector< struct_rcv_input > & Vec_Rcv_Input ) 
 {
-    printf("Map_grid_record_rcv size: %lu\n", Map_grid_record_rcv.size());
-    for (auto const& [key, val] : Map_grid_record_rcv) {
-        printf("Key: %c %c\n", key[0], key[1]);
-    }
-    // Call .at() with a temporary key
-    auto& record_rcv = Map_grid_record_rcv.at({'M', 'M'});
-    (void)record_rcv; // Suppress unused variable warning
 }
 
 void Class_Forward_Specs::output_solution_record ( std::string folder_name ) {}
