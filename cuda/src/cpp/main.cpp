@@ -1,11 +1,23 @@
 #include "forward.hpp"
 
+// Define the extern variables needed by set_grid_parameters
+namespace namespace_input {
+    long Nx_soln = 600;
+    long Mx_soln = 600;
+    long Ny_soln = 600;
+    long My_soln = 600;
+    
+    // Also need these for allocate_memory in set_grid_parameters
+    run_time_vector<double> Record_E_k;
+    run_time_vector<double> Record_E_p0;
+    run_time_vector<double> Record_E_p1;
+}
+
 int main() {
     Class_Forward_Specs Fwd_Specs;
     
     std::array<Class_Grid, 4> Grids;
     
-    // Use the function from namespace_forward
     constexpr auto Array_Grid_types = ns_forward::define_Array_Grid_types();
 
     // Initialize Map_Grid_pointers
@@ -13,6 +25,11 @@ int main() {
     Fwd_Specs.Map_Grid_pointers[Array_Grid_types[1]] = &Grids[1];
     Fwd_Specs.Map_Grid_pointers[Array_Grid_types[2]] = &Grids[2];
     Fwd_Specs.Map_Grid_pointers[Array_Grid_types[3]] = &Grids[3];
+
+    // Call set_grid_parameters as in the original code
+    for ( const auto & grid_type : Array_Grid_types ) { 
+        Fwd_Specs.Map_Grid_pointers.at(grid_type)->set_grid_parameters ( grid_type , false ); 
+    }
 
     // Initialize the maps as in the original code
     for ( const auto & grid_type : Array_Grid_types ) { Fwd_Specs.Map_grid_N_rcvs            [grid_type] = 0;  }
