@@ -226,15 +226,17 @@ int main(int argc, char* argv[])
     {
         // ---- Process the source and receiver location 
 
-        printf( "Processing source locations for source %d.\n", iter_vec.src_index );
-        Fwd_Specs.process_src_locations ( iter_vec );           // NOTE: This function should return some information so that 
-                                                                //       I can know if the src process is successful.
+        Fwd_Specs.process_src_locations ( iter_vec );
         int & fwd_src_index = Fwd_Specs.src_forward.src_index;
-
 
         printf( "    Processing receiver locations for source %d.\n", fwd_src_index );
         if ( Map_Vec_Rcv_Input.at( fwd_src_index ).size() <= 0 )
             { printf( "No receiver found for source %d.\n", fwd_src_index ); fflush(stdout); exit(0); }
+
+        printf("Array_Grid_types size: %lu\n", Array_Grid_types.size());
+        for (auto const& type : Array_Grid_types) {
+            printf("Type: %c %c\n", type[0], type[1]);
+        }
 
         for ( const auto & grid_type : Array_Grid_types ) { Fwd_Specs.Map_grid_N_rcvs            [grid_type] = 0;  }
         for ( const auto & grid_type : Array_Grid_types ) { Fwd_Specs.Map_grid_struct_rcv_forward[grid_type] = {}; }
