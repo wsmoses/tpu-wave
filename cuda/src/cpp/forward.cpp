@@ -20,7 +20,7 @@ void Class_Forward_Specs::process_src_locations ( struct_src_input & src_input )
     for ( int i_dir = 0; i_dir < N_dir; i_dir++ ) 
     {
         num_location[i_dir] = src_input.src_location[i_dir*2  ];
-        den_location[i_dir] = src_input.src_location[i_dir*2+1];    
+        num_location[i_dir] = src_input.src_location[i_dir*2+1];    
     }
 
     // global source index
@@ -105,14 +105,47 @@ void Class_Forward_Specs::process_rcv_locations ( std::vector< struct_rcv_input 
 {
     constexpr int N_dir = ns_forward::N_dir;
     
-    // Loop through receivers but keep the body simple
     for ( const auto & rcv_input : Vec_Rcv_Input ) 
     {
         std::array<char, N_dir> grid_type = rcv_input.rcv_grid_type;
         Class_Grid * grid_rcv = Map_Grid_pointers.at(grid_type);
 
-        // Hardcode index_rcv to be inside bounds
-        std::array<long, 2> index_rcv = { 10, 400 }; // from the output
+        // inputted 'physical' source location
+        std::array<long, N_dir> num_location {}; num_location.fill(-1);
+        std::array<long, N_dir> den_location {}; den_location.fill(-1);
+        for ( int i_dir = 0; i_dir < N_dir; i_dir++ ) 
+        {
+            num_location[i_dir] = rcv_input.rcv_location[i_dir*2  ];
+            den_location[i_dir] = rcv_input.rcv_location[i_dir*2+1];    
+        }
+
+        // global source index
+        std::array<long, N_dir> index_rcv {}; index_rcv.fill(-1);
+
+        // Convert the 'physical' location to global indices
+        for ( int i_dir = 0; i_dir < N_dir; i_dir++ )
+        {
+            if ( grid_type[i_dir] == 'N' )
+            {
+                long num_rcv = num_location[i_dir] * ns_input::den_dx_soln;
+                long den_rcv = den_location[i_dir] * ns_input::num_dx_soln;
+                if ( den_rcv == 0 ) { printf("den_rcv should not be zero.\n"); fflush(stdout); exit(0); }
+                if ( num_rcv % den_rcv != 0 )
+                    { printf("Cannot convert physical location to integer index on direction %d ---- abort.\n", i_dir); fflush(stdout); exit(0); }
+                index_rcv[i_dir] = num_rcv / den_rcv;
+            }
+            else if ( grid_type[i_dir] == 'M' )
+            {
+                long num_rcv = 2 * num_location[i_dir] * ns_input::den_dx_soln - den_location[i_dir] * ns_input::num_dx_soln;
+                long den_rcv = 2 * den_location[i_dir] * ns_input::num_dx_soln;
+                if ( den_rcv == 0 ) { printf("den_rcv should not be zero.\n"); fflush(stdout); exit(0); }
+                if ( num_rcv % den_rcv != 0 )
+                    { printf("Cannot convert physical location to integer index on direction %d ---- abort.\n", i_dir); fflush(stdout); exit(0); }
+                index_rcv[i_dir] = num_rcv / den_rcv;
+            }
+            else
+                { printf("Grid type unrecognized %c.\n", grid_type[i_dir]); fflush(stdout); exit(0); }
+        }
 
         // increment the number of receivers for src_index on grid_type
         Map_grid_N_rcvs.at(grid_type) += 1;
