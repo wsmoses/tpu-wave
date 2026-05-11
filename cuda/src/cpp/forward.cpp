@@ -147,26 +147,54 @@ void Class_Forward_Specs::process_rcv_locations ( std::vector< struct_rcv_input 
                 { printf("Grid type unrecognized %c.\n", grid_type[i_dir]); fflush(stdout); exit(0); }
         }
 
-        // increment the number of receivers for src_index on grid_type
-        Map_grid_N_rcvs.at(grid_type) += 1;
+        // Restore the if statement
+        if ( grid_rcv->G_ix_bgn <= index_rcv[0] && index_rcv[0] <= grid_rcv->G_ix_end && 
+             grid_rcv->G_iy_bgn <= index_rcv[1] && index_rcv[1] <= grid_rcv->G_iy_end )
+        {
+            // increment the number of receivers for src_index on grid_type
+            Map_grid_N_rcvs.at(grid_type) += 1;
 
-        struct_rcv_forward rcv_forward {};
-        rcv_forward.rcv_index = rcv_input.rcv_index;
-        rcv_forward.ix_rcv = index_rcv[0] - grid_rcv->G_ix_bgn;
-        rcv_forward.iy_rcv = index_rcv[1] - grid_rcv->G_iy_bgn;
-        rcv_forward.I_RCV  = rcv_forward.ix_rcv * grid_rcv->G_size_y + rcv_forward.iy_rcv;
+            struct_rcv_forward rcv_forward {};
+            rcv_forward.rcv_index = rcv_input.rcv_index;
+            rcv_forward.ix_rcv = index_rcv[0] - grid_rcv->G_ix_bgn;
+            rcv_forward.iy_rcv = index_rcv[1] - grid_rcv->G_iy_bgn;
+            rcv_forward.I_RCV  = rcv_forward.ix_rcv * grid_rcv->G_size_y + rcv_forward.iy_rcv;
 
-        Map_grid_struct_rcv_forward.at(grid_type).push_back( rcv_forward );
+            Map_grid_struct_rcv_forward.at(grid_type).push_back( rcv_forward );
 
-        printf( " ---- Found receiver at (%3d %3d - %9d) on grid (%c %c) of sizes (%3d %3d)\n", 
-                rcv_forward.ix_rcv, rcv_forward.iy_rcv, rcv_forward.I_RCV, 
-                grid_rcv->G_type_x,  grid_rcv->G_type_y, 
-                grid_rcv->G_size_x,  grid_rcv->G_size_y );
-        fflush(stdout);
+            printf( " ---- Found receiver at (%3d %3d - %9d) on grid (%c %c) of sizes (%3d %3d)\n", 
+                    rcv_forward.ix_rcv, rcv_forward.iy_rcv, rcv_forward.I_RCV, 
+                    grid_rcv->G_type_x,  grid_rcv->G_type_y, 
+                    grid_rcv->G_size_x,  grid_rcv->G_size_y );
+            fflush(stdout);
 
-        Map_grid_record_rcv.at(grid_type).push_back( run_time_matrix<ns_type::host_precision> {} );
-        Map_grid_RESULT_rcv.at(grid_type).push_back( run_time_matrix<ns_type::host_precision> {} );
-        Map_grid_misfit_rcv.at(grid_type).push_back( 0. );
+            Map_grid_record_rcv.at(grid_type).push_back( run_time_matrix<ns_type::host_precision> {} );
+            Map_grid_RESULT_rcv.at(grid_type).push_back( run_time_matrix<ns_type::host_precision> {} );
+            Map_grid_misfit_rcv.at(grid_type).push_back( 0. );
+        }
+    }
+
+    for ( const auto & iter_map : Map_Grid_pointers ) 
+    {
+        std::array<char, N_dir> grid_type = iter_map.first;
+        Class_Grid * grid_rcv = iter_map.second;
+
+        if ( static_cast<unsigned long> ( Map_grid_N_rcvs.at(grid_type) ) != Map_grid_struct_rcv_forward.at(grid_type).size()
+          || static_cast<unsigned long> ( Map_grid_N_rcvs.at(grid_type) ) != Map_grid_record_rcv.at(grid_type).size() 
+          || static_cast<unsigned long> ( Map_grid_N_rcvs.at(grid_type) ) != Map_grid_RESULT_rcv.at(grid_type).size()
+          || static_cast<unsigned long> ( Map_grid_N_rcvs.at(grid_type) ) != Map_grid_misfit_rcv.at(grid_type).size() )
+        { printf("Number of collected receivers do not match.\n"); fflush(stdout); exit(0); }
+
+        if ( Map_grid_N_rcvs.at(grid_type) != 0 )
+        {
+            printf( " ---- Collected %3d receivers on grid (%c %c)\n", Map_grid_N_rcvs.at(grid_type), grid_type.at(0), grid_type.at(1) ); fflush(stdout);
+        }
+
+        // Allocate memory to store the solution at the receivers
+        for ( auto& record_rcv : Map_grid_record_rcv.at(grid_type) ) 
+            { record_rcv.allocate_memory( grid_rcv->N_soln , Nt ); }
+        for ( auto& RESULT_rcv : Map_grid_RESULT_rcv.at(grid_type) ) 
+            { RESULT_rcv.allocate_memory( grid_rcv->N_soln , Nt ); }
     }
 } // Class_Forward_Specs::process_rcv_locations ()
 
