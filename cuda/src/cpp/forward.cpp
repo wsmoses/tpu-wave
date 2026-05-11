@@ -20,7 +20,7 @@ void Class_Forward_Specs::process_src_locations ( struct_src_input & src_input )
     for ( int i_dir = 0; i_dir < N_dir; i_dir++ ) 
     {
         num_location[i_dir] = src_input.src_location[i_dir*2  ];
-        num_location[i_dir] = src_input.src_location[i_dir*2+1];    
+        den_location[i_dir] = src_input.src_location[i_dir*2+1];    
     }
 
     // global source index
