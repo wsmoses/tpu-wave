@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
+#include <vector>
 
 template<typename T>
 class run_time_vector {
@@ -26,18 +27,31 @@ public:
     }
 };
 
-int main() {
-    int length = 361201;
-    run_time_vector<double> P(length);
-    run_time_vector<double> forward_P(length);
+class Grid {
+public:
+    std::vector<run_time_vector<double>> Vec_prmt;
 
-    std::cout << "Starting loop..." << std::endl;
-    for (int i = 0; i < P.length; i++) {
-        if (i == 359999) {
-            std::cout << "Reached 359999" << std::endl;
-        }
-        P.at(i) = 1.0 / forward_P.at(i);
+    Grid(int length) {
+        Vec_prmt.push_back(run_time_vector<double>(length));
     }
-    std::cout << "Success!" << std::endl;
+
+    void make_density_reciprocal() {
+        run_time_vector<double>& P = Vec_prmt.at(0);
+        run_time_vector<double> forward_P(P.length);
+
+        std::cout << "Starting loop..." << std::endl;
+        for (int i = 0; i < P.length; i++) {
+            if (i == 359999) {
+                std::cout << "Reached 359999" << std::endl;
+            }
+            P.at(i) = 1.0 / forward_P.at(i);
+        }
+        std::cout << "Success!" << std::endl;
+    }
+};
+
+int main() {
+    Grid g(361201);
+    g.make_density_reciprocal();
     return 0;
 }
