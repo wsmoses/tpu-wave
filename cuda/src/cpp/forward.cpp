@@ -9,10 +9,7 @@ using ns_input::bool_visual;
 
 void Class_Forward_Specs::process_src_locations ( struct_src_input & src_input )
 {
-    src_forward.src_index = src_input.src_index; // Required
-
-    // Remove loop, just access one element
-    long dummy = src_input.src_location[0];
+    src_forward.src_index = src_input.src_index; // Required to avoid out_of_range in main loop
 }
 
 void Class_Forward_Specs::process_rcv_locations ( std::vector< struct_rcv_input > & Vec_Rcv_Input ) 
