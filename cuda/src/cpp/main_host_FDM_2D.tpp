@@ -228,18 +228,6 @@ int main(int argc, char* argv[])
             for ( int i_field = 0; i_field < Fwd_Specs.Map_Grid_pointers.at(iter_grid_type)->N_soln; i_field++ )
                 { Fwd_Specs.Map_Grid_pointers.at(iter_grid_type)->Vec_soln.at(i_field).set_constant(0.); }
         }
-
-        // ---- reset the vectors that accumulates energy to zero before use
-        ns_input::Record_E_k .set_constant(0.);
-        ns_input::Record_E_p0.set_constant(0.);
-        ns_input::Record_E_p1.set_constant(0.);
-
-
-        constexpr int  cpst_N =  6;  constexpr char cpst_S = 'R';
-
-        // ---- actual simulation
-        Fwd_Specs.forward_simulation_periodic_y <cpst_N,cpst_S> ();
-
     }  
 
     return 0;
