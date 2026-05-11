@@ -1,189 +1,33 @@
-// template<typename prcs_type>
-// __global__ void cuda_update_3R ( cuda_Struct_Grid struct_grid ,
-//                                  prcs_type * R , prcs_type * P , prcs_type * S );
-// [2023/07/18]
-// NOTE: Interesting, we need a template function forward declaration above. Otherwise, the 
-//       compiler complains: 
-//       
-//         "there are no arguments to 'cuda_update_3R' that depend on a template parameter,
-//       so a declaration of 'cuda_update_3R' must be available"
-//       
-//       Moving "cuda_update_3R ()" before "kernel_launch_cuda_update ()" would resolve the 
-//       issue.
-//       
-//       In "grid_kernel_x.cut" and "grid_kernel_y.cut", the kernal definitions are placed 
-//       after the launch functions. The compiler did not complain. I think it may have to 
-//       do with kernel functions' template arguments depend on launch functions' template
-//       arguments (bool_extra is passed from launch functions to kernel functions).
-//       
-//       This SO answer ( https://stackoverflow.com/a/67975681 ) may provide some hint. It 
-//       seems that with C++20, the code may still compile without the forward declaration
-//       above. Maybe C++20 is not fully supported by cuda/12.0 yet.
-//       
-// [2023/07/18]
-// NOTE: Since we have many "update" kernels, let's place them before the launch function
-//       so that we don't have to forward declare everyone of them
-
+template<typename T>
+__device__ void device_fast2sum( T const a , T const b , T & s , T & t ) {}
 
 template<typename T>
-__device__ void device_fast2sum( T const a , T const b ,
-                                 T &     s , T &     t )
-{
-      s = a + b;
-    T z = s - a;
-      t = b - z;
-}
-// [2023/06/21]
-// NOTE: This fast2sum () assumes b is less than or equal to a in magnitude, i.e., 
-//       it's the lower bits in b that gets lost in s and tracked in t. (No branch,
-//       i.e., if test, inside the function.)
-
-
-template<typename T>
-__device__ void device_slow2sum( T const a , T const b ,
-                                 T &     s , T &     t )
-{
-        s =   a + b;
-    T p_a =   s - b;
-    T p_b =   s - p_a;
-
-    T d_a =   a - p_a;
-    T d_b =   b - p_b;
-
-        t = d_a + d_b;
-} 
-
-
-// [2023/07/19]
-// NOTE: In cpu code, fast2sum () and slow2sum () in grid.hpp are actually member 
-//       functions (of Class_grid). So we could use the same names above.
-
+__device__ void device_slow2sum( T const a , T const b , T & s , T & t ) {}
 
 template<typename prcs_type>
-__device__ void device_update_00 ( int ind , prcs_type * R , prcs_type * S )
-{
-    S[ind] += R[ind];
-    R[ind]  = 0.;
-}
-
+__device__ void device_update_00 ( int ind , prcs_type * R , prcs_type * S ) {}
 
 template<typename prcs_type>
-__device__ void device_update_3C ( int ind , prcs_type * C , prcs_type * R , prcs_type * S )
-{
-    prcs_type Y = R[ind] + C[ind];
-    prcs_type T = S[ind] + Y;
-    C[ind] = T - S[ind];
-    C[ind] = Y - C[ind];
-    S[ind] = T;
-
-    R[ind] = 0.;
-}
-
+__device__ void device_update_3C ( int ind , prcs_type * C , prcs_type * R , prcs_type * S ) {}
 
 template<typename prcs_type>
-__device__ void device_update_3C_fast2sum ( int ind , prcs_type * C , prcs_type * R , prcs_type * S )
-{
-    prcs_type Y = R[ind] + C[ind];
-    device_fast2sum <prcs_type> ( S[ind] , Y , S[ind] , C[ind] );
-    R[ind] = 0.;
-} // update_3C_fast2sum ()
-
+__device__ void device_update_3C_fast2sum ( int ind , prcs_type * C , prcs_type * R , prcs_type * S ) {}
 
 template<typename prcs_type>
-__device__ void device_update_6C_slow2sum ( int ind , prcs_type * C , prcs_type * R , prcs_type * S )
-{
-    prcs_type Y = R[ind] + C[ind];
-    device_slow2sum <prcs_type> ( S[ind] , Y , S[ind] , C[ind] );
-    R[ind] = 0.;
-} // update_6C_slow2sum ()
-
-
+__device__ void device_update_6C_slow2sum ( int ind , prcs_type * C , prcs_type * R , prcs_type * S ) {}
 
 template<typename prcs_type>
-__device__ void device_update_3R ( int ind , prcs_type * R , prcs_type * S )
-{
-    prcs_type Y = R[ind];
-    prcs_type T = S[ind] + Y;
-    R[ind] = T - S[ind];
-    R[ind] = Y - R[ind];
-    S[ind] = T;
-}
-
+__device__ void device_update_3R ( int ind , prcs_type * R , prcs_type * S ) {}
 
 template<typename prcs_type>
-__device__ void device_update_3R_fast2sum ( int ind , prcs_type * R , prcs_type * S )
-{
-    device_fast2sum <prcs_type> ( S[ind] , R[ind] , S[ind] , R[ind] );
-} // update_3R_fast2sum ()
-
+__device__ void device_update_3R_fast2sum ( int ind , prcs_type * R , prcs_type * S ) {}
 
 template<typename prcs_type>
-__device__ void device_update_6R_slow2sum ( int ind , prcs_type * R , prcs_type * S )
-{
-    device_slow2sum <prcs_type> ( S[ind] , R[ind] , S[ind] , R[ind] );
-} // update_6R_slow2sum ()
-
+__device__ void device_update_6R_slow2sum ( int ind , prcs_type * R , prcs_type * S ) {}
 
 template<typename prcs_type , int cpst_N , char cpst_S, typename GridType>
-__global__ void cuda_update ( prcs_type * C , 
-                              prcs_type * R , prcs_type * S )
-{
-    int ind_block  =  blockIdx.x;
-    int ind_thread = threadIdx.x;
-
-    int ix = ind_block;
-    {
-        for ( int iy = 0; iy < GridType::size_y; iy += blockDim.x ) 
-        {
-            int actual_iy = iy + ind_thread;
-            if (actual_iy < GridType::size_y) {
-                int ind = ix * GridType::Ly_pad + actual_iy;
-
-                     if constexpr ( cpst_N ==  0 && cpst_S == '0' ) { device_update_00          <prcs_type> ( ind ,     R , S ); } 
-
-                else if constexpr ( cpst_N == -3 && cpst_S == 'C' ) { device_update_3C          <prcs_type> ( ind , C , R , S ); }
-                else if constexpr ( cpst_N ==  3 && cpst_S == 'C' ) { device_update_3C_fast2sum <prcs_type> ( ind , C , R , S ); }
-                else if constexpr ( cpst_N ==  6 && cpst_S == 'C' ) { device_update_6C_slow2sum <prcs_type> ( ind , C , R , S ); }
-
-                else if constexpr ( cpst_N == -3 && cpst_S == 'R' ) { device_update_3R          <prcs_type> ( ind ,     R , S ); }
-                else if constexpr ( cpst_N ==  3 && cpst_S == 'R' ) { device_update_3R_fast2sum <prcs_type> ( ind ,     R , S ); }
-                else if constexpr ( cpst_N ==  6 && cpst_S == 'R' ) { device_update_6R_slow2sum <prcs_type> ( ind ,     R , S ); }
-            }
-        }
-    }
-}
-
+__global__ void cuda_update ( prcs_type * C , prcs_type * R , prcs_type * S ) {}
 
 template<char C_type_x, char C_type_y, int C_size_x, int C_size_y, int C_chunk_size>
 template<int cpst_N, char cpst_S, int N_block, int N_thread>
-void cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::kernel_launch_cuda_update ()
-{
-    cudaStream_t stream = 0;
-
-    for ( int i_soln = 0; i_soln < this->N_soln; i_soln++ )
-    {
-        ns_type::cuda_precision * C = this->Vec_cpst.at(i_soln).ptr;
-
-        ns_type::cuda_precision * R = this->Vec_rths.at(i_soln).ptr;
-        ns_type::cuda_precision * S = this->Vec_soln.at(i_soln).ptr;
-
-             if constexpr ( cpst_N ==  0 && cpst_S == '0' ) {} 
-
-        else if constexpr ( cpst_N == -3 && cpst_S == 'C' ) {}
-        else if constexpr ( cpst_N ==  3 && cpst_S == 'C' ) {}
-        else if constexpr ( cpst_N ==  6 && cpst_S == 'C' ) {}
-
-        else if constexpr ( cpst_N == -3 && cpst_S == 'R' ) {}
-        else if constexpr ( cpst_N ==  3 && cpst_S == 'R' ) {}
-        else if constexpr ( cpst_N ==  6 && cpst_S == 'R' ) {}
-        else 
-            { printf("Unrecognized option for update %s %d\n", __FILE__, __LINE__); exit(0); }
-        // [2023/07/18]
-        // NOTE: The above empty if branches are here because exit(0) cannot be called on device.
-        //       /* We may call asm(“exit;”) on device. */
-        //           It is still better that the check is on the host side - the message may not 
-        //       be eatean and may be easier to recognize.
-
-        cuda_update <ns_type::cuda_precision , cpst_N , cpst_S, GridStruct> <<< GridStruct::size_x , N_thread , 0 , stream >>> ( C , R , S );
-    }
-}
+void cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::kernel_launch_cuda_update () {}
