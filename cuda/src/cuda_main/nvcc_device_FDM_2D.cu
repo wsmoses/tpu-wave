@@ -210,14 +210,8 @@ int main(int argc, char* argv[])
     //           Decided to use Map instead of Vec since src_index may not be numbered consecutively, 
     //       or not start with zero.
 
-    if ( !Vec_Src_Input.empty() ) 
-        { printf("Vec_Src_Input should be empty to start with.\n"); fflush(stdout); exit(0); }
-    if ( !Map_Vec_Rcv_Input.empty() ) 
-        { printf("Map_Vec_Rcv_Input should be empty to start with.\n"); fflush(stdout); exit(0); }
-    
-    // The input file from where to read in the source and receiver information
-    file_name = "../../data/" + medium_name + "/SrcRcv.txt";
-    Inv_Specs.input_SrcRcv_locations( file_name );
+    Vec_Src_Input.push_back ( struct_src_input { 1 , {'N','N'} , {0,1,0,1} } );
+    Map_Vec_Rcv_Input[1] = { struct_rcv_input { 1 , 1 , {'N','N'} , {0,1,0,1} } };
 
     Inv_Specs.data_misfit = 0.;  // (re)set the aggregated data misfit for all sources to zero before 
                                  // enter the loop that goes through the sources and lauches simulations 
