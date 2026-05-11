@@ -1,12 +1,5 @@
 #include "forward.hpp"
 
-using ns_input::Nt;
-
-using ns_input::dx;
-using ns_input::dt;
-
-using ns_input::bool_visual;
-
 void Class_Forward_Specs::process_src_locations ( struct_src_input & src_input )
 {
     src_forward.src_index = src_input.src_index; // Required to avoid out_of_range in main loop
