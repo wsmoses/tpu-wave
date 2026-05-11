@@ -168,16 +168,7 @@ int main(int argc, char* argv[])
     // NOTE: max value of a parameter P can be retrieved using * std::max_element( P.begin() , P.end() );
     //       pay particular ATTENTION to the dereferencing operator *.
 
-    if ( bool_energy )
-    {
-        for ( const auto & iter_grid_type : Array_Grid_types ) 
-            { Fwd_Specs.Map_Grid_pointers.at(iter_grid_type)->define_parameters_energy (); }
-        // for ( auto & iter_grid : Grids ) { iter_grid.define_parameters_energy (); }
-
-        // DO ONE THING WELL
-        for ( const auto & iter_grid_type : Array_Grid_types ) 
-            { Fwd_Specs.Map_Grid_pointers.at(iter_grid_type)->adjust_parameters_energy_periodic (); }
-    }
+    // [2024/04/03]
 
     // [2024/04/03]
     // NOTE: Let's first see how the results look like before making changes to make_density_reciprocal ().
