@@ -14,12 +14,8 @@ void Class_Forward_Specs::process_src_locations ( struct_src_input & src_input )
 
 void Class_Forward_Specs::process_rcv_locations ( std::vector< struct_rcv_input > & Vec_Rcv_Input ) 
 {
-    constexpr int N_dir = ns_forward::N_dir;
-
-    std::array<char, N_dir> grid_type = {'M', 'M'};
-
-    // Just call .at() without the loop
-    auto& record_rcv = Map_grid_record_rcv.at(grid_type);
+    // Call .at() with a temporary key
+    auto& record_rcv = Map_grid_record_rcv.at({'M', 'M'});
     (void)record_rcv; // Suppress unused variable warning
 }
 
