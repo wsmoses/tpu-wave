@@ -201,17 +201,29 @@ class cuda_Class_Grid_Base
 
             if ( strcmp( copy_direction.c_str(), "hst_to_dev" ) == 0 )
             {
-                cudaMemcpy2D( dev_ptr, Ly_pad   * sizeof(ns_type::cuda_precision), 
-                               hst_ptr, G_size_y * sizeof(ns_type::host_precision),
-                               G_size_y * sizeof(ns_type::host_precision) , 
-                               G_size_x , cudaMemcpyHostToDevice );
+                if ( Ly_pad == G_size_y ) {
+                    cudaMemcpy( dev_ptr, hst_ptr, G_size_x * G_size_y * sizeof(ns_type::cuda_precision), cudaMemcpyHostToDevice );
+                } else {
+                    for ( int i = 0; i < G_size_x; i++ ) {
+                        cudaMemcpy( dev_ptr + i * Ly_pad, 
+                                    hst_ptr + i * G_size_y, 
+                                    G_size_y * sizeof(ns_type::cuda_precision), 
+                                    cudaMemcpyHostToDevice );
+                    }
+                }
             }
             else if ( strcmp( copy_direction.c_str(), "dev_to_hst" ) == 0 )
             {
-                cudaMemcpy2D( hst_ptr, G_size_y * sizeof(ns_type::host_precision),
-                              dev_ptr, Ly_pad   * sizeof(ns_type::cuda_precision), 
-                              G_size_y * sizeof(ns_type::host_precision) , 
-                              G_size_x , cudaMemcpyDeviceToHost );
+                if ( Ly_pad == G_size_y ) {
+                    cudaMemcpy( hst_ptr, dev_ptr, G_size_x * G_size_y * sizeof(ns_type::host_precision), cudaMemcpyDeviceToHost );
+                } else {
+                    for ( int i = 0; i < G_size_x; i++ ) {
+                        cudaMemcpy( hst_ptr + i * G_size_y, 
+                                    dev_ptr + i * Ly_pad, 
+                                    G_size_y * sizeof(ns_type::host_precision), 
+                                    cudaMemcpyDeviceToHost );
+                    }
+                }
             }
             else 
                 { printf ("%s %d Unrecognized direction.\n", __FILE__, __LINE__); fflush(stdout); exit(0); }
@@ -237,17 +249,29 @@ class cuda_Class_Grid_Base
 
             if ( strcmp( copy_direction.c_str(), "hst_to_dev" ) == 0 )
             {
-                cudaMemcpy2D( dev_ptr, Ly_pad   * sizeof(double), 
-                              hst_ptr, G_size_y * sizeof(double),
-                              G_size_y * sizeof(double) , 
-                              G_size_x , cudaMemcpyHostToDevice );
+                if ( Ly_pad == G_size_y ) {
+                    cudaMemcpy( dev_ptr, hst_ptr, G_size_x * G_size_y * sizeof(double), cudaMemcpyHostToDevice );
+                } else {
+                    for ( int i = 0; i < G_size_x; i++ ) {
+                        cudaMemcpy( dev_ptr + i * Ly_pad, 
+                                    hst_ptr + i * G_size_y, 
+                                    G_size_y * sizeof(double), 
+                                    cudaMemcpyHostToDevice );
+                    }
+                }
             }
             else if ( strcmp( copy_direction.c_str(), "dev_to_hst" ) == 0 )
             {
-                cudaMemcpy2D( hst_ptr, G_size_y * sizeof(double),
-                              dev_ptr, Ly_pad   * sizeof(double), 
-                              G_size_y * sizeof(double) , 
-                              G_size_x , cudaMemcpyDeviceToHost );
+                if ( Ly_pad == G_size_y ) {
+                    cudaMemcpy( hst_ptr, dev_ptr, G_size_x * G_size_y * sizeof(double), cudaMemcpyDeviceToHost );
+                } else {
+                    for ( int i = 0; i < G_size_x; i++ ) {
+                        cudaMemcpy( hst_ptr + i * G_size_y, 
+                                    dev_ptr + i * Ly_pad, 
+                                    G_size_y * sizeof(double), 
+                                    cudaMemcpyDeviceToHost );
+                    }
+                }
             }
             else 
                 { printf ("%s %d Unrecognized direction.\n", __FILE__, __LINE__); fflush(stdout); exit(0); }
