@@ -95,11 +95,18 @@ void Class_Forward_Specs::process_rcv_locations ( std::vector< struct_rcv_input 
             printf("ERROR: key %c%c NOT found in Map_grid_N_rcvs in second loop!\n", grid_type[0], grid_type[1]); fflush(stdout);
         }
 
-        // Allocation loops removed or kept empty
-        for ( auto& record_rcv : Map_grid_record_rcv.at(grid_type) ) 
-            { /* dummy */ }
-        for ( auto& RESULT_rcv : Map_grid_RESULT_rcv.at(grid_type) ) 
-            { /* dummy */ }
+        // Replace .at() with .find() in allocation loops too
+        auto iter_record = Map_grid_record_rcv.find(grid_type);
+        if ( iter_record != Map_grid_record_rcv.end() ) {
+            for ( auto& record_rcv : iter_record->second ) 
+                { /* dummy */ }
+        }
+        
+        auto iter_result = Map_grid_RESULT_rcv.find(grid_type);
+        if ( iter_result != Map_grid_RESULT_rcv.end() ) {
+            for ( auto& RESULT_rcv : iter_result->second ) 
+                { /* dummy */ }
+        }
     }
 } // Class_Forward_Specs::process_rcv_locations ()
 
