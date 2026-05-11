@@ -10,71 +10,61 @@
 
 namespace namespace_input
 {
-    inline std::string medium_name = "homogeneous";
+    extern std::string medium_name;
 
-    inline std::array<char,ns_forward::N_dir> bdry_type_L {'F','F'};
-    inline std::array<char,ns_forward::N_dir> bdry_type_R {'F','F'};
+    extern std::array<char,ns_forward::N_dir> bdry_type_L;
+    extern std::array<char,ns_forward::N_dir> bdry_type_R;
 
-    inline std::map< std::pair<char,char> , char > Map_bdry_type;
+    extern std::map< std::pair<char,char> , char > Map_bdry_type;
 
+    extern std::array<int, ns_forward::N_dir> prmt_M_sizes;
+    extern std::array<int, ns_forward::N_dir> soln_M_sizes;
 
-    inline std::array<int, ns_forward::N_dir> prmt_M_sizes {-1,-1};
-    inline std::array<int, ns_forward::N_dir> soln_M_sizes {-1,-1};
+    extern long Mx_soln, Nx_soln;
+    extern long My_soln, Ny_soln;
 
+    extern long Mx_prmt, Nx_prmt;
+    extern long My_prmt, Ny_prmt;
 
-    inline long Mx_soln, Nx_soln;
-    inline long My_soln, Ny_soln;
+    extern long inv_prmt_stride_x;
+    extern long inv_prmt_stride_y;
 
-
-    inline long Mx_prmt, Nx_prmt;
-    inline long My_prmt, Ny_prmt;
-
-
-    inline long inv_prmt_stride_x = -(1<<30);
-    inline long inv_prmt_stride_y = -(1<<30);
-
-    inline long        inv_prmt_size;
-    inline long PADDED_inv_prmt_size;
-
+    extern long        inv_prmt_size;
+    extern long PADDED_inv_prmt_size;
 
     // [2023/01/11]
     // NOTE: Now that we have inlcuded Mx_soln, Nx_soln, My_soln, Ny_soln and 
     //       Mx_prmt, Nx_prmt, My_prmt, Ny_prmt as inputs here, do we still 
     //       need prmt_M_sizes and soln_M_sizes as inputs?
 
-
-    inline int num_dx_prmt = -(1<<30);  
-    inline int den_dx_prmt = 1;
+    extern int num_dx_prmt;
+    extern int den_dx_prmt;
     
-    inline int num_dx_soln = -(1<<30);  
-    inline int den_dx_soln = 1;
+    extern int num_dx_soln;
+    extern int den_dx_soln;
 
-    inline int    Nt           =    -1;
-    inline double dt_max       = 1<<30;    // So that the simulation will finish really quick
-    inline double CFL_constant = 0.625;
+    extern int    Nt;
+    extern double dt_max;
+    extern double CFL_constant;
 
-    inline double central_f    = 5.;       // central frequency
-    inline double time_delay   = 0.25;     // source time delay
+    extern double central_f;
+    extern double time_delay;
 
-    inline char c_energy       = 'Y';      // character indicating the value of bool_energy
-    inline bool bool_energy    = true;
+    extern char c_energy;
+    extern bool bool_energy;
 
-    inline bool bool_visual = true;        // NOTE: If bool_visual is true, we also output the results into txt files for
-                                           //       VISUAL checking; The results are outputted to binary files regardless.
+    extern bool bool_visual;
 
-    inline double dx = (double) -(1<<30);
-    inline double dt = (double) -(1<<30);
+    extern double dx;
+    extern double dt;
 
+    extern double source_scaling;
 
-    inline double source_scaling = 1.;    // this number will be divided when applying source (to help avoid overflow)
+    extern int  device_number;
 
-
-    inline int  device_number = -1;
-
-
-    inline run_time_vector<double> Record_E_k ;
-    inline run_time_vector<double> Record_E_p0;
-    inline run_time_vector<double> Record_E_p1;
+    extern run_time_vector<double> Record_E_k;
+    extern run_time_vector<double> Record_E_p0;
+    extern run_time_vector<double> Record_E_p1;
     // [2023/06/09]
     // NOTE: Only two of them are needed.
     // [2023/06/10]
