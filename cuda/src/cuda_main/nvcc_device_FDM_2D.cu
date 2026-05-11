@@ -115,18 +115,8 @@ int main(int argc, char* argv[])
 
         printf( "    Processing receiver locations for source %d.\n", fwd_src_index );
 
-        for ( const auto & grid_type : Array_Grid_types ) { Fwd_Specs.Map_grid_N_rcvs            [grid_type] = 0;  }
-        for ( const auto & grid_type : Array_Grid_types ) { Fwd_Specs.Map_grid_struct_rcv_forward[grid_type] = {}; }
-        for ( const auto & grid_type : Array_Grid_types ) { Fwd_Specs.Map_grid_record_rcv        [grid_type] = {}; }
-        for ( const auto & grid_type : Array_Grid_types ) { Fwd_Specs.Map_grid_RESULT_rcv        [grid_type] = {}; }
-        for ( const auto & grid_type : Array_Grid_types ) { Fwd_Specs.Map_grid_misfit_rcv        [grid_type] = {}; }
-        // NOTE: In the above, we initiate an entry for each grid type, regardless of whether 
-        //       there is a receiver associated with it. Is this NECESSARY ?
-        //           For API stability, decided to keep it this way until strong reasons for 
-        //       change emerge.
 
         Fwd_Specs.process_rcv_locations ( Map_Vec_Rcv_Input.at( fwd_src_index ) );
-        // NOTE: comments on the re-initialization involved in the above function 
     }
 
     return 0;
