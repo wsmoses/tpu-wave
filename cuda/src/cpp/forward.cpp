@@ -65,6 +65,7 @@ void Class_Forward_Specs::process_rcv_locations ( std::vector< struct_rcv_input 
     for ( const auto & rcv_input : Vec_Rcv_Input ) 
     {
         std::array<char, N_dir> grid_type = rcv_input.rcv_grid_type;
+        printf("DEBUG first loop: grid_type=%c%c\n", grid_type[0], grid_type[1]); fflush(stdout);
 
         if ( true )
         {
@@ -72,16 +73,18 @@ void Class_Forward_Specs::process_rcv_locations ( std::vector< struct_rcv_input 
         }
     }
 
+    printf("DEBUG between loops\n"); fflush(stdout);
+
     for ( const auto & iter_map : Map_Grid_pointers ) 
     {
         std::array<char, N_dir> grid_type = iter_map.first;
+        printf("DEBUG second loop: grid_type=%c%c\n", grid_type[0], grid_type[1]); fflush(stdout);
 
         if ( Map_grid_N_rcvs.at(grid_type) != 0 )
         {
             printf( " ---- Collected %3d receivers on grid (%c %c)\n", Map_grid_N_rcvs.at(grid_type), grid_type.at(0), grid_type.at(1) ); fflush(stdout);
         }
 
-        // Restore allocation loops but make them empty
         for ( auto& record_rcv : Map_grid_record_rcv.at(grid_type) ) 
             { /* dummy */ }
         for ( auto& RESULT_rcv : Map_grid_RESULT_rcv.at(grid_type) ) 
