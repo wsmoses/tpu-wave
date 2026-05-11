@@ -11,8 +11,7 @@
 
 #include "namespace_device_variable.cuh"
 
-#include <thrust/device_vector.h>
-#include <thrust/reduce.h>
+
 
 
 // NOTE: cuda_Struct_Grid is intended to be passed as arguments for __global__ functions, which 
@@ -653,6 +652,15 @@ __global__ void weighted_square_SINGLE_grid ( ns_type::cuda_precision * S ,
 }
 
 
+__global__ void single_thread_reduce ( double * T , int length , double * result )
+{
+    double sum = 0;
+    for ( int i = 0; i < length; i++ ) {
+        sum += T[i];
+    }
+    *result = sum;
+}
+
 template<char C_type_x, char C_type_y, int C_size_x, int C_size_y, int C_chunk_size>
 template<int N_block, int N_thread>
 double cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::energy_calculation ()
@@ -680,8 +688,13 @@ double cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::en
         weighted_square_SINGLE_grid <GridStruct> <<< N_block , N_thread >>> ( S.ptr , P.ptr , T.ptr );
     }
 
-    thrust::device_ptr<double> d_ptr ( T.ptr );
-    double E = thrust::reduce( d_ptr, d_ptr + T.length );
+    double * d_result = nullptr;
+    cudaMalloc( &d_result , sizeof(double) );
+    single_thread_reduce <<< 1 , 1 >>> ( T.ptr , T.length , d_result );
+    
+    double E = 0;
+    cudaMemcpy( &E , d_result , sizeof(double) , cudaMemcpyDeviceToHost );
+    cudaFree( d_result );
 
     return E/2.;
 }
