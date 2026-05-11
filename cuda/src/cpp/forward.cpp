@@ -16,15 +16,7 @@ void Class_Forward_Specs::process_rcv_locations ( std::vector< struct_rcv_input 
 {
     constexpr int N_dir = ns_forward::N_dir;
 
-    for ( const auto & rcv_input : Vec_Rcv_Input ) 
-    {
-        std::array<char, N_dir> grid_type = rcv_input.rcv_grid_type;
-
-        if ( true )
-        {
-            Map_grid_N_rcvs.at(grid_type) += 1;
-        }
-    }
+    // Removed the first loop that counts receivers
 
     for ( const auto & iter_map : Map_Grid_pointers ) 
     {
