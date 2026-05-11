@@ -14,6 +14,13 @@ public:
         memset(ptr, 0, len * sizeof(T));
     }
 
+    run_time_vector(const run_time_vector& v) : length(v.length) {
+        ptr = (T*)malloc(length * sizeof(T));
+        for (int i = 0; i < length; i++) {
+            ptr[i] = v.ptr[i];
+        }
+    }
+
     ~run_time_vector() {
         free(ptr);
     }
