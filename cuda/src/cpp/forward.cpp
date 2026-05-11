@@ -11,16 +11,13 @@ void Class_Forward_Specs::process_src_locations ( struct_src_input & src_input )
 {
     constexpr int N_dir = ns_forward::N_dir;
 
-    std::array<char, N_dir> & grid_type = src_input.src_grid_type;
+    src_forward.src_index = src_input.src_index; // Required
 
-    src_forward.src_index = src_input.src_index; // Restore this to avoid out_of_range in main loop
-
-    std::array<long, N_dir> num_location {}; num_location.fill(-1);
-    std::array<long, N_dir> den_location {}; den_location.fill(-1);
+    // Simplify to just a loop accessing src_input
+    long dummy = 0;
     for ( int i_dir = 0; i_dir < N_dir; i_dir++ ) 
     {
-        num_location[i_dir] = src_input.src_location[i_dir*2  ];
-        den_location[i_dir] = src_input.src_location[i_dir*2+1];    
+        dummy += src_input.src_location[i_dir*2];
     }
 }
 
