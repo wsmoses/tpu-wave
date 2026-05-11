@@ -105,40 +105,36 @@ void Class_Forward_Specs::process_rcv_locations ( std::vector< struct_rcv_input 
 {
     constexpr int N_dir = ns_forward::N_dir;
     
-    // Construct grid_type from string to see if it triggers the bug!
-    std::string input_string = "MN";
-    std::array<char, 2> grid_type {};
-    int count = 0;
-    for ( const char& c_dir : {'X','Y'} ) { 
-        grid_type.at( ns_forward::XY_to_01(c_dir) ) = input_string.at(count); 
-        count++; 
+    // Loop through receivers but keep the body simple
+    for ( const auto & rcv_input : Vec_Rcv_Input ) 
+    {
+        std::array<char, N_dir> grid_type = rcv_input.rcv_grid_type;
+        Class_Grid * grid_rcv = Map_Grid_pointers.at(grid_type);
+
+        // Hardcode index_rcv to be inside bounds
+        std::array<long, 2> index_rcv = { 10, 400 }; // from the output
+
+        // increment the number of receivers for src_index on grid_type
+        Map_grid_N_rcvs.at(grid_type) += 1;
+
+        struct_rcv_forward rcv_forward {};
+        rcv_forward.rcv_index = rcv_input.rcv_index;
+        rcv_forward.ix_rcv = index_rcv[0] - grid_rcv->G_ix_bgn;
+        rcv_forward.iy_rcv = index_rcv[1] - grid_rcv->G_iy_bgn;
+        rcv_forward.I_RCV  = rcv_forward.ix_rcv * grid_rcv->G_size_y + rcv_forward.iy_rcv;
+
+        Map_grid_struct_rcv_forward.at(grid_type).push_back( rcv_forward );
+
+        printf( " ---- Found receiver at (%3d %3d - %9d) on grid (%c %c) of sizes (%3d %3d)\n", 
+                rcv_forward.ix_rcv, rcv_forward.iy_rcv, rcv_forward.I_RCV, 
+                grid_rcv->G_type_x,  grid_rcv->G_type_y, 
+                grid_rcv->G_size_x,  grid_rcv->G_size_y );
+        fflush(stdout);
+
+        Map_grid_record_rcv.at(grid_type).push_back( run_time_matrix<ns_type::host_precision> {} );
+        Map_grid_RESULT_rcv.at(grid_type).push_back( run_time_matrix<ns_type::host_precision> {} );
+        Map_grid_misfit_rcv.at(grid_type).push_back( 0. );
     }
-
-    Class_Grid * grid_rcv = Map_Grid_pointers.at(grid_type);
-
-    // Hardcode index_rcv to be inside bounds
-    std::array<long, 2> index_rcv = { 10, 400 }; // from the output
-
-    // increment the number of receivers for src_index on grid_type
-    Map_grid_N_rcvs.at(grid_type) += 1;
-
-    struct_rcv_forward rcv_forward {};
-    rcv_forward.rcv_index = 0;
-    rcv_forward.ix_rcv = index_rcv[0] - grid_rcv->G_ix_bgn;
-    rcv_forward.iy_rcv = index_rcv[1] - grid_rcv->G_iy_bgn;
-    rcv_forward.I_RCV  = rcv_forward.ix_rcv * grid_rcv->G_size_y + rcv_forward.iy_rcv;
-
-    Map_grid_struct_rcv_forward.at(grid_type).push_back( rcv_forward );
-
-    printf( " ---- Found receiver at (%3d %3d - %9d) on grid (%c %c) of sizes (%3d %3d)\n", 
-            rcv_forward.ix_rcv, rcv_forward.iy_rcv, rcv_forward.I_RCV, 
-            grid_rcv->G_type_x,  grid_rcv->G_type_y, 
-            grid_rcv->G_size_x,  grid_rcv->G_size_y );
-    fflush(stdout);
-
-    Map_grid_record_rcv.at(grid_type).push_back( run_time_matrix<ns_type::host_precision> {} );
-    Map_grid_RESULT_rcv.at(grid_type).push_back( run_time_matrix<ns_type::host_precision> {} );
-    Map_grid_misfit_rcv.at(grid_type).push_back( 0. );
 } // Class_Forward_Specs::process_rcv_locations ()
 
 
