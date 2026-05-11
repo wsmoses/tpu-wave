@@ -220,21 +220,6 @@ class cuda_Class_Grid : public cuda_Class_Grid_Base
 
 
 
-        //-----------------------------------------------//
-        //------------- Function defintiion -------------//
-        //-----------------------------------------------//
-        void reset_field ( std::string field_name , int ind_field )
-        {
-            ns_type::cuda_precision * dev_ptr = nullptr;
-
-                 if ( strcmp( field_name.c_str(), "drvt" ) == 0 ) { dev_ptr = this->Vec_drvt.at(ind_field).ptr; }
-            else if ( strcmp( field_name.c_str(), "soln" ) == 0 ) { dev_ptr = this->Vec_soln.at(ind_field).ptr; }
-            else if ( strcmp( field_name.c_str(), "prmt" ) == 0 ) { dev_ptr = this->Vec_prmt.at(ind_field).ptr; }
-            else 
-                { printf ("%s %d Unrecognized field name.\n", __FILE__, __LINE__); fflush(stdout); exit(0); }
-
-            cudaMemsetAsync ( dev_ptr, 0, this->length_memory * sizeof(ns_type::cuda_precision), 0 );
-        }
 
 
 
