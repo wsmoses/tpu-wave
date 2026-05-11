@@ -3,12 +3,10 @@
 int main() {
     Class_Forward_Specs Fwd_Specs;
     
-    // We need 4 grids to map to the 4 combinations of N and M
     std::array<Class_Grid, 4> Grids;
     
-    std::array<std::array<char, 2>, 4> Array_Grid_types = {{
-        {'M', 'M'}, {'M', 'N'}, {'N', 'M'}, {'N', 'N'}
-    }};
+    // Use the function from namespace_forward
+    constexpr auto Array_Grid_types = ns_forward::define_Array_Grid_types();
 
     // Initialize Map_Grid_pointers
     Fwd_Specs.Map_Grid_pointers[Array_Grid_types[0]] = &Grids[0];
