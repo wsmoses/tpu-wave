@@ -10,6 +10,11 @@ int main(int argc, char* argv[])
 
     constexpr auto Array_Grid_types = ns_forward::define_Array_Grid_types ();
 
+    Fwd_Specs.Map_Grid_pointers[Array_Grid_types.at(0)] = &Grids.at(0);
+    Fwd_Specs.Map_Grid_pointers[Array_Grid_types.at(1)] = &Grids.at(1);
+    Fwd_Specs.Map_Grid_pointers[Array_Grid_types.at(2)] = &Grids.at(2);
+    Fwd_Specs.Map_Grid_pointers[Array_Grid_types.at(3)] = &Grids.at(3);
+
     printf("Array_Grid_types size: %lu\n", Array_Grid_types.size());
     for (auto const& type : Array_Grid_types) {
         printf("Type: %c %c\n", type[0], type[1]);
