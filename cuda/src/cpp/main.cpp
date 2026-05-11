@@ -7,7 +7,6 @@ namespace namespace_input {
     long Ny_soln = 600;
     long My_soln = 600;
     
-    // Also need these for allocate_memory in set_grid_parameters
     run_time_vector<double> Record_E_k;
     run_time_vector<double> Record_E_p0;
     run_time_vector<double> Record_E_p1;
@@ -34,6 +33,14 @@ int main() {
     // Initialize the maps as in the original code
     for ( const auto & grid_type : Array_Grid_types ) { Fwd_Specs.Map_grid_N_rcvs            [grid_type] = 0;  }
     for ( const auto & grid_type : Array_Grid_types ) { Fwd_Specs.Map_grid_record_rcv        [grid_type] = {}; }
+
+    // Create a dummy source input
+    struct_src_input src_input;
+    src_input.src_index = 1;
+    src_input.src_location[0] = 10;
+    
+    printf("Calling process_src_locations...\n"); fflush(stdout);
+    Fwd_Specs.process_src_locations(src_input);
 
     // Create a dummy receiver input to trigger the first loop
     std::vector<struct_rcv_input> Vec_Rcv_Input;
