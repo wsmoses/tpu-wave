@@ -237,44 +237,6 @@ class cuda_Class_Grid : public cuda_Class_Grid_Base
         }
 
 
-        // NOTE: If the data structure are consistent between host and device fields, things would be so much simpler.
-        // [2023/07/13] 
-        // NOTE: By "consistent" above, I think we mean they have the same padding (0 is a possibility).
-        //       
-        // NOTE: The following member function has not been tested. 
-        // [2023/07/13]
-        // NOTE: The actual copying (mem_ or val_) is wrapped inside the copy_from_host and copy_to_host member functions 
-        //       of cuda_run_time_vector. 
-        //-----------------------------------------------//
-        //------------- Function defintiion -------------//
-        //-----------------------------------------------//
-        void copy_field_contiguous ( std::string field_name , int ind_field , std::string copy_direction )
-        {
-            cuda_run_time_vector<ns_type::cuda_precision> * dev_vec = nullptr;
-
-                 if ( strcmp( field_name.c_str(), "drvt" ) == 0 ) { dev_vec = & this->Vec_drvt.at(ind_field); }
-            else if ( strcmp( field_name.c_str(), "soln" ) == 0 ) { dev_vec = & this->Vec_soln.at(ind_field); }
-            else if ( strcmp( field_name.c_str(), "prmt" ) == 0 ) { dev_vec = & this->Vec_prmt.at(ind_field); }
-            else 
-                { printf ("%s %d Unrecognized field name.\n", __FILE__, __LINE__); fflush(stdout); exit(0); }
-
-            std::vector< run_time_vector<ns_type::host_precision> * > vec_hst_fields;
-
-            if ( strcmp( field_name.c_str(), "drvt" ) == 0 ) { for ( auto & iter : ptr_class_grid->Map_v_D  ) { vec_hst_fields.push_back ( & iter.second ); } }
-            if ( strcmp( field_name.c_str(), "soln" ) == 0 ) { for ( auto & iter : ptr_class_grid->Vec_soln ) { vec_hst_fields.push_back ( & iter );        } } 
-            if ( strcmp( field_name.c_str(), "prmt" ) == 0 ) { for ( auto & iter : ptr_class_grid->Vec_prmt ) { vec_hst_fields.push_back ( & iter );        } }
-
-            if ( strcmp( field_name.c_str(), "drvt" ) == 0 ) { assert ( (int) vec_hst_fields.size() == this->N_drvt ); } 
-            if ( strcmp( field_name.c_str(), "soln" ) == 0 ) { assert ( (int) vec_hst_fields.size() == this->N_soln ); } 
-            if ( strcmp( field_name.c_str(), "prmt" ) == 0 ) { assert ( (int) vec_hst_fields.size() == this->N_prmt ); } 
-            
-            run_time_vector<ns_type::host_precision> * hst_vec = vec_hst_fields.at(ind_field);
-
-                 if ( strcmp( copy_direction.c_str(), "hst_to_dev" ) == 0 ) { dev_vec->copy_from_host <ns_type::host_precision> ( * hst_vec ); }
-            else if ( strcmp( copy_direction.c_str(), "dev_to_hst" ) == 0 ) { dev_vec->copy_to_host   <ns_type::host_precision> ( * hst_vec ); }
-            else 
-                { printf ("%s %d Unrecognized direction.\n", __FILE__, __LINE__); fflush(stdout); exit(0); }
-        }
 
 
         // [2022/07/18]
