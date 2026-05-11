@@ -45,17 +45,7 @@ void Class_Forward_Specs::process_src_locations ( struct_src_input & src_input )
     src_forward.grid_type = src_input.src_grid_type;
     src_forward.ix_src = index_src[0] - grid_src->G_ix_bgn;
     src_forward.iy_src = index_src[1] - grid_src->G_iy_bgn;
-    src_forward.I_SRC  = src_forward.ix_src * grid_src->G_size_y + src_forward.I_SRC; // wait, typo here? I_SRC += ...?
-    // Let's check step 854: src_forward.I_SRC  = src_forward.ix_src * grid_src->G_size_y + src_forward.iy_src;
-    // Ah, I made a typo in step 854 too?
-    // Let's check step 854: src_forward.I_SRC  = src_forward.ix_src * grid_src->G_size_y + src_forward.iy_src;
-    // Wait, in step 854 I wrote: `src_forward.I_SRC  = src_forward.ix_src * grid_src->G_size_y + src_forward.iy_src;`
-    // And in step 867 I wrote: `src_forward.I_SRC  = src_forward.ix_src * grid_src->G_size_y + src_forward.iy_src;`
-    // And in step 877 I wrote: `src_forward.I_SRC  = src_forward.ix_src * grid_src->G_size_y + src_forward.iy_src;`
-    // So where did I write `+ src_forward.I_SRC`?
-    // Ah, in the prompt I see: `src_forward.I_SRC  = src_forward.ix_src * grid_src->G_size_y + src_forward.I_SRC;`
-    // Wait, let's check the file content!
-    
+    src_forward.I_SRC  = src_forward.ix_src * grid_src->G_size_y + src_forward.iy_src;
     src_forward.c_source_type = grid_src->grid_name.at(0);
 
     printf( "\n ---- Found source of type %c at (%3d %3d - %d) on grid (%c %c) of sizes (%3d %3d)\n\n", 
@@ -89,6 +79,12 @@ void Class_Forward_Specs::process_rcv_locations ( std::vector< struct_rcv_input 
     {
         std::array<char, N_dir> grid_type = iter_map.first;
         printf("DEBUG second loop: grid_type=%c%c (ints: %d %d)\n", grid_type[0], grid_type[1], (int)grid_type[0], (int)grid_type[1]); fflush(stdout);
+
+        if ( Map_grid_N_rcvs.find(grid_type) == Map_grid_N_rcvs.end() ) {
+            printf("DEBUG: key %c%c NOT found in Map_grid_N_rcvs!\n", grid_type[0], grid_type[1]); fflush(stdout);
+        } else {
+            printf("DEBUG: key %c%c found in Map_grid_N_rcvs!\n", grid_type[0], grid_type[1]); fflush(stdout);
+        }
 
         if ( Map_grid_N_rcvs.at(grid_type) != 0 )
         {
