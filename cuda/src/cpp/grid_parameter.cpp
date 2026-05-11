@@ -29,6 +29,11 @@ void Class_Grid::interpolate_forward_parameter ( run_time_vector< double > & inv
             long ix_M = ( num_x_loc * den_dx_prmt ) / ( den_x_loc * num_dx_prmt );
             long iy_M = ( num_y_loc * den_dx_prmt ) / ( den_y_loc * num_dx_prmt );
 
+            if ( ix_M >= Nx_prmt ) ix_M = Nx_prmt - 1;
+            if ( iy_M >= Ny_prmt ) iy_M = Ny_prmt - 1;
+            if ( ix_M < 0 ) ix_M = 0;
+            if ( iy_M < 0 ) iy_M = 0;
+
 
             // step 3): determine xi, eta
             double xi  = static_cast<double>( num_x_loc * den_dx_prmt ) / static_cast<double>( den_x_loc * num_dx_prmt ) - ix_M;
