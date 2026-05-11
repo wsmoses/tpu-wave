@@ -689,7 +689,8 @@ __global__ void weighted_square_SINGLE_grid ( ns_type::cuda_precision * S ,
 }
 
 
-__global__ void single_thread_reduce ( double * T , int length , double * result )
+template<int length>
+__global__ void single_thread_reduce ( double * T , double * result )
 {
     double sum = 0;
     for ( int i = 0; i < length; i++ ) {
@@ -727,7 +728,7 @@ double cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::en
 
     double * d_result = nullptr;
     cudaMalloc( &d_result , sizeof(double) );
-    single_thread_reduce <<< 1 , 1 >>> ( T.ptr , T.length , d_result );
+    single_thread_reduce <GridStruct::length_memory> <<< 1 , 1 >>> ( T.ptr , d_result );
     
     double E = 0;
     cudaMemcpy( &E , d_result , sizeof(double) , cudaMemcpyDeviceToHost );
