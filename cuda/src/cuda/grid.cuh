@@ -608,96 +608,29 @@ __device__ void drvt_to_rths ( ns_type::cuda_precision v_d , int i_d ,
 __global__ void cuda_apply_source ( ns_type::cuda_precision * S , int ind , 
                                     ns_type::cuda_precision * R , int i_field ,
                                     double increment )
-{
-    R [ i_field ] += increment;
-    device_slow2sum <ns_type::cuda_precision> ( S[ind] , R[i_field] , S[ind] , R[i_field] );
-}
+{}
 
 __global__ void cuda_apply_source ( ns_type::cuda_precision * S , int ind , double increment )
-{
-    S [ ind ] += increment;
-}
+{}
 
 __global__ void cuda_record_soln ( ns_type::cuda_precision * R , ns_type::cuda_precision * S , int I_RCV )
-{
-    * R = S [ I_RCV ];
-}
-
-// __global__ void cuda_print_soln ( ns_type::cuda_precision * S , int ind , int it )
-// {
-//     printf( "Time step: %6d soln: % 12.11e \n", it, (double) S [ind] );
-// }
-
-
-// NOTE: Reference: https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#function-parameters
-//
-//     __global__ function parameters are PASSED TO THE DEVICE via constant memory and are LIMITED TO 4 KB.
-//     __global__ functions cannot have a variable number of arguments.
-//     __global__ function parameters CANNOT BE PASS-BY-REFERENCE.
-//
-// Since there is a limit of 4KB (i.e., 512 doubles), let's make a struct that contains only data members.
-
+{}
 
 template<typename GridType>
 __global__ void weighted_square_NORMAL_grid ( ns_type::cuda_precision * Sxx , ns_type::cuda_precision * Syy , 
                                               double * P1  , double * P2  , 
-                                              double * T )  // T stores the intermediate output 
-{    
-    int ind_block  =  blockIdx.x;
-    int ind_thread = threadIdx.x;
-
-    int ix = ind_block;
-    if ( ix >= GridType::size_x ) return;
-
-    {
-        for ( int iy = 0; iy < GridType::size_y; iy += blockDim.x )
-        {            
-            int actual_iy = iy + ind_thread;
-            if (actual_iy < GridType::size_y) {
-                int ind = ix * GridType::Ly_pad + actual_iy;
-
-                T [ind]  = (double) Sxx [ind] * P1 [ind] * (double) Sxx [ind]
-                         + (double) Syy [ind] * P1 [ind] * (double) Syy [ind]
-                         + (double) Sxx [ind] * P2 [ind] * (double) Syy [ind];
-            }
-        }
-    }
-}
-
+                                              double * T )
+{}
 
 template<typename GridType>
 __global__ void weighted_square_SINGLE_grid ( ns_type::cuda_precision * S , 
                                               double * P , 
-                                              double * T )  // T stores the intermediate output 
-{    
-    int ind_block  =  blockIdx.x;
-    int ind_thread = threadIdx.x;
-
-    int ix = ind_block;
-    if ( ix >= GridType::size_x ) return;
-
-    {
-        for ( int iy = 0; iy < GridType::size_y; iy += blockDim.x )
-        {            
-            int actual_iy = iy + ind_thread;
-            if (actual_iy < GridType::size_y) {
-                int ind = ix * GridType::Ly_pad + actual_iy;
-                T [ind] = (double) S [ind] * P [ind] * (double) S [ind];
-            }
-        }
-    }
-}
-
+                                              double * T )
+{}
 
 template<int length>
 __global__ void single_thread_reduce ( double * T , double * result )
-{
-    double sum = 0;
-    for ( int i = 0; i < length; i++ ) {
-        sum += T[i];
-    }
-    *result = sum;
-}
+{}
 
 template<char C_type_x, char C_type_y, int C_size_x, int C_size_y, int C_chunk_size>
 template<int N_block, int N_thread>
