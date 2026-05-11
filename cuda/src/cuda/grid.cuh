@@ -447,29 +447,7 @@ class cuda_Class_Grid : public cuda_Class_Grid_Base
 };
 
 
-template<bool bool_extra=false>
-__device__ void drvt_to_rths ( ns_type::cuda_precision v_d , int i_d , 
-                               ns_type::cuda_precision * P ,
-                               ns_type::cuda_precision * P_extra ,
-                               ns_type::cuda_precision * R ,
-                               ns_type::cuda_precision * R_extra )
-{
-    // add derivative to rhs
-    R[i_d] += v_d * P[i_d];
 
-    if constexpr ( bool_extra )
-    { 
-        R_extra[i_d] += v_d * P      [i_d];
-        R_extra[i_d] += v_d * P_extra[i_d];
-    }
-    // [2023/07/15]
-    // NOTE: The meaning of R and R_extra may be slightly different from the cpu code.
-    //       We probably should change the cpu code so that they are consistent.
-}
-// [2023/07/27]
-// NOTE: When using C++17, we need to place "drvt_to_rths ()" before the following 
-//       "#include"s because it is called therein. Alternatively, we could use a 
-//       forward declaration for "drvt_to_rths ()".
 
 
 #include "grid_kernel_x.cut"
