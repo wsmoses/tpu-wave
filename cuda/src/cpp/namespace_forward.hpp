@@ -5,7 +5,7 @@
 #include <map>
 
 #include "container_compile_time.hpp"
-#include "namespace_type.hpp"
+#include "namespace_type.cuh"
 
 namespace namespace_forward
 {
