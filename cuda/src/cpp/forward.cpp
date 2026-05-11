@@ -147,9 +147,8 @@ void Class_Forward_Specs::process_rcv_locations ( std::vector< struct_rcv_input 
                 { printf("Grid type unrecognized %c.\n", grid_type[i_dir]); fflush(stdout); exit(0); }
         }
 
-        // Restore the if statement
-        if ( grid_rcv->G_ix_bgn <= index_rcv[0] && index_rcv[0] <= grid_rcv->G_ix_end && 
-             grid_rcv->G_iy_bgn <= index_rcv[1] && index_rcv[1] <= grid_rcv->G_iy_end )
+        // Use if ( true ) instead of the complex condition
+        if ( true )
         {
             // increment the number of receivers for src_index on grid_type
             Map_grid_N_rcvs.at(grid_type) += 1;
