@@ -29,15 +29,20 @@ public:
 
 class Grid {
 public:
-    std::vector<run_time_vector<double>> Vec_prmt;
+    std::vector<run_time_vector<float>> Vec_prmt;
 
     Grid(int length) {
-        Vec_prmt.push_back(run_time_vector<double>(length));
+        Vec_prmt.push_back(run_time_vector<float>(length));
     }
 
     void make_density_reciprocal() {
-        run_time_vector<double>& P = Vec_prmt.at(0);
+        run_time_vector<float>& P = Vec_prmt.at(0);
         run_time_vector<double> forward_P(P.length);
+
+        // Initialize forward_P to avoid division by zero optimization
+        for (int i = 0; i < P.length; i++) {
+            forward_P.at(i) = 2.0;
+        }
 
         std::cout << "Starting loop..." << std::endl;
         for (int i = 0; i < P.length; i++) {
