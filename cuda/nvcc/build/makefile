@@ -30,7 +30,7 @@ CUDA_INC_DIR= -I$(CUDA_PATH)/include -I$(CUDA_PATH)/samples/common/inc -I/usr/lo
 # CUDA library directory:
 CUDA_LIB_DIR= -L$(CUDA_PATH)/lib64
 # CUDA linking libraries:
-CUDA_LINK_LIBS= -lcudart
+CUDA_LINK_LIBS= # -lcudart
 
 # [2022/12/10]
 # NOTE: $(CUDA_LIB_DIR) $(CUDA_LINK_LIBS) does not need to be appended at the 
@@ -187,7 +187,7 @@ DPPFLAGS = -MMD -MP -MF "$(@:%.o=%.d)" -MT "$(@)"
 # NOTE: For some reason, we need a space after "-MF" and "-MT" for it to work with 
 # 		nvcc, while with gcc it is fine without space.
 
-LINKER_FLAGS = -lstdc++fs -lReactantExtra
+LINKER_FLAGS = -lstdc++fs -L/home/wmoses/.julia/artifacts/6a0ff8a1b4b8599188b7035c82a910c3dc1056e2/lib/ -lReactantExtra -fuse-ld=lld -L/usr/local/cuda/lib64/ -lcudart -lcuda
 # [2022/12/10] 
 # NOTE: the linker flag -lstdc++fs is needed for some older version of the compiler
 #		if in utils.hpp we need to #include <experimental/filesystem> instead of 

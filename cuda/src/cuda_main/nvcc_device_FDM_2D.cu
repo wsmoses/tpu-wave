@@ -1,12 +1,8 @@
 #include "forward.hpp"
 #include "inverse.hpp"
 
-#include "input_processing.hpp"
-
 #include "grid.cuh"
 #include "namespace_device_variable.cuh"  /* probably dummy, only the #include "namespace_type.cuh" inside it is meaningful */
-
-#include <filesystem>
 
 int main(int argc, char* argv[]) 
 {
