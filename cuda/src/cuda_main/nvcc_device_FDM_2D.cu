@@ -28,53 +28,7 @@ int main(int argc, char* argv[])
     std::string input_file_name = "/InputFile_5.txt";
 #endif
 
-    // processing the command line option to get the medium_name 
-    // (which determines the input file and data to read in)
-    command_line_input_processing( argc, argv, "medium" );
-    std::string file_name = "../../data/" + medium_name + input_file_name;  // "/InputFile.txt";    
-
-    file_input_processing( file_name );
-	input_file_name = file_name;  // this is so that we can output "input_file_name" at the end 
-								  // because file_name will be overwritten later.
-
-    // ---- rescanning the command line options to process the remaining arguments;
-    //      rescanning needed such that the arguments specified at command line can 
-    //      overwrite those specified in input file;
-    command_line_input_processing( argc, argv, "all" );
-
-    
-    if ( c_energy == 'N' ) bool_energy = false;
-    if ( c_energy == 'Y' ) bool_energy = true;
-    assert( bool_energy == true );    
-
-    ns_input_derived_variables();
-    checking_and_printouts_input_parameters();
-
-    // [2023/07/12] 
-    // NOTE: "file_input_processing ()" and "checking_and_printouts_input_parameters ()" 
-    //       are from "input_processing.cpp". Both still use "XY_to_01 ()", which maps 
-    //       'X' to 1 and 'Y' to 0. 
-    //       
-    //       This time around, we should try to get rid of "XY_to_01 ()", particularly
-    //       because in this folder we are focusing on the "correctness" of numerics 
-    //       (at lower precision).
-
-    // --------------------------------------------------- //
-    // --------------- Numerical parameters -------------- //
-    // --------------------------------------------------- //
-
-    dx = static_cast<double>( num_dx_soln ) / static_cast<double>( den_dx_soln );
-    dt = dt_max * CFL_constant; 
-
-    // dt = 0.002;
-    // we need more comments above on the types
-
-
-    // {   
-    //     // double max_velocity = 2.;
-    //     // Fwd_Specs.dt = 0.625 * ( ( dx / max_velocity ) / sqrt( static_cast<double>( N_dir ) ) );
-    //     // Fwd_Specs.dt = 1e-4;
-    // }
+    // Removed input processing
 
 
     // -------------------------------------------------- //
@@ -119,15 +73,7 @@ int main(int argc, char* argv[])
 
 
 
-    // ---- verification (overwrite the above readin parameter data)
-    for ( const std::string prmt_name : { "rho" , "vp" , "vs" } )
-        { Inv_Specs.Map_inv_prmt[ prmt_name ].allocate_memory ( ns_input::PADDED_inv_prmt_size ); }
-
-    Inv_Specs.Map_inv_prmt.at("rho").set_constant(1);
-    Inv_Specs.Map_inv_prmt.at("vp" ).set_constant(2);
-    Inv_Specs.Map_inv_prmt.at("vs" ).set_constant(1);
-    // ---- verification
-    // NOTE: I think the three parameters are indeed constant 1, 2, and 1 in the stored file.
+    // Removed physical parameters setup
 
 
     // [2024/04/03]
