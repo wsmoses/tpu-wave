@@ -161,9 +161,7 @@ int main(int argc, char* argv[])
     // NOTE: I think the three parameters are indeed constant 1, 2, and 1 in the stored file.
 
 
-    // Forward parameters are stored in Grids (interpolated from the inverse parameters).
-    for ( const auto & iter_grid_type : Array_Grid_types ) 
-        { Fwd_Specs.Map_Grid_pointers.at(iter_grid_type)->retrieve_forward_parameter ( Inv_Specs ); }
+    // [2024/04/03]
 
     // NOTE: max value of a parameter P can be retrieved using * std::max_element( P.begin() , P.end() );
     //       pay particular ATTENTION to the dereferencing operator *.
