@@ -69,31 +69,18 @@ void Class_Forward_Specs::process_rcv_locations ( std::vector< struct_rcv_input 
         if ( true )
         {
             Map_grid_N_rcvs.at(grid_type) += 1;
-            // Removed push_back calls
         }
     }
 
-    // Restore the second loop
     for ( const auto & iter_map : Map_Grid_pointers ) 
     {
         std::array<char, N_dir> grid_type = iter_map.first;
-        Class_Grid * grid_rcv = iter_map.second;
 
-        // This check will fail if we don't push_back, so let's remove the check or modify it
-        // Wait, if we remove push_back, then the sizes will be 0, but Map_grid_N_rcvs will be 1!
-        // So the check WILL fail!
-        // Let's remove the check to avoid false positives!
-        
         if ( Map_grid_N_rcvs.at(grid_type) != 0 )
         {
             printf( " ---- Collected %3d receivers on grid (%c %c)\n", Map_grid_N_rcvs.at(grid_type), grid_type.at(0), grid_type.at(1) ); fflush(stdout);
         }
-
-        // Allocate memory to store the solution at the receivers
-        for ( auto& record_rcv : Map_grid_record_rcv.at(grid_type) ) 
-            { record_rcv.allocate_memory( grid_rcv->N_soln , Nt ); }
-        for ( auto& RESULT_rcv : Map_grid_RESULT_rcv.at(grid_type) ) 
-            { RESULT_rcv.allocate_memory( grid_rcv->N_soln , Nt ); }
+        // Allocation loops removed
     }
 } // Class_Forward_Specs::process_rcv_locations ()
 
