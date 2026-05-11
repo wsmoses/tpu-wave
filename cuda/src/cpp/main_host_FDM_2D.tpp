@@ -240,47 +240,7 @@ int main(int argc, char* argv[])
         // ---- actual simulation
         Fwd_Specs.forward_simulation_periodic_y <cpst_N,cpst_S> ();
 
-        char dt_folder[32];  // Increased size to avoid overflow
-        sprintf( dt_folder, "dt_%16.15e", (double) ns_input::dt );
-        dt_folder[4] = 'p';
-
-        std::string str_precision = "Unrecognized type";
-        if ( std::is_same_v < ns_type::cuda_precision , double        > ) { str_precision = "fp64"; }
-        if ( std::is_same_v < ns_type::cuda_precision , float         > ) { str_precision = "fp32"; }
-        if ( std::is_same_v < ns_type::cuda_precision , _Float16      > ) { str_precision = "fp16"; } // this would compile?
-        // Commented out due to missing headers in this environment
-        // if ( std::is_same_v < ns_type::cuda_precision , __half        > ) { str_precision = "fp16"; }
-        // if ( std::is_same_v < ns_type::cuda_precision , __nv_bfloat16 > ) { str_precision = "bf16"; }
-        printf( "\nPrecision type: %s .\n", str_precision.c_str() );
-
-        // ---- in case when we want to check the output
-        // std::string folder_name = "../../result/" + medium_name + "/host";
-        // std::string folder_name = "./host";
-        std::string folder_name = "../../result/elastic/" + medium_name + "/host" 
-                                + "/grid_size" + "_" + std::to_string(ns_input::num_dx_soln)
-                                               + "_" + std::to_string(ns_input::den_dx_soln)
-                                + "/Nt_" + std::to_string(Nt) 
-                                + "/" + str_precision 
-                                + "/" + std::string(dt_folder) 
-                                + "/" + std::to_string(cpst_N) + "_" + cpst_S;
-    
-        std::filesystem::create_directories( folder_name );
-        std::cout << "Results will be stored in folder: \n" << folder_name << std::endl;
-
-        // ---- output the solution  
-        if ( bool_visual ) { Fwd_Specs.output_solution_record ( folder_name ); }
-        // ---- record the energy if requested        
-        if ( bool_energy ) { Fwd_Specs.output_energy ( folder_name ); }
-
-
-        // ---- reset the vectors that accumulates energy to zero after use
-        ns_input::Record_E_k .set_constant(0.);
-        ns_input::Record_E_p0.set_constant(0.);
-        ns_input::Record_E_p1.set_constant(0.);
     }  
-
-    print_precision_type ();
-    printf( "End of %s .\n", __FILE__ ); fflush(stdout);
 
     return 0;
 }
