@@ -13,6 +13,8 @@ void Class_Forward_Specs::process_src_locations ( struct_src_input & src_input )
 
     std::array<char, N_dir> & grid_type = src_input.src_grid_type;
 
+    src_forward.src_index = src_input.src_index; // Restore this to avoid out_of_range in main loop
+
     std::array<long, N_dir> num_location {}; num_location.fill(-1);
     std::array<long, N_dir> den_location {}; den_location.fill(-1);
     for ( int i_dir = 0; i_dir < N_dir; i_dir++ ) 
