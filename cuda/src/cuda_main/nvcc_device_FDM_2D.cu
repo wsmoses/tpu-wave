@@ -701,7 +701,7 @@ cudaDeviceSynchronize(); // debug
         	int ind = Fwd_Specs.src_forward.ix_src * cuda_grid_src->Ly_pad
             	    + Fwd_Specs.src_forward.iy_src;
 
-        	for ( int i_field = 0; i_field < cuda_grid_src->N_soln; i_field++ )
+        	// for ( int i_field = 0; i_field < cuda_grid_src->N_soln; i_field++ )
             	// { cuda_print_soln <<< 1 , 1 >>> ( cuda_grid_src->Vec_soln.at(i_field).ptr , ind , it ); }
         }
         // [2024/03/27]
@@ -741,8 +741,8 @@ printf("\n");
     if ( std::is_same_v < ns_type::cuda_precision , double        > ) { str_precision = "fp64"; }
     if ( std::is_same_v < ns_type::cuda_precision , float         > ) { str_precision = "fp32"; }
     if ( std::is_same_v < ns_type::cuda_precision , _Float16      > ) { str_precision = "fp16"; } // this would compile?
-    if ( std::is_same_v < ns_type::cuda_precision , __half        > ) { str_precision = "fp16"; }
-    if ( std::is_same_v < ns_type::cuda_precision , __nv_bfloat16 > ) { str_precision = "bf16"; }
+    // if ( std::is_same_v < ns_type::cuda_precision , __half        > ) { str_precision = "fp16"; }
+    // if ( std::is_same_v < ns_type::cuda_precision , __nv_bfloat16 > ) { str_precision = "bf16"; }
     printf( "\nPrecision type: %s .\n", str_precision.c_str() );
 
     std::string folder_name = "../../result/elastic/" + medium_name + "/device" 
