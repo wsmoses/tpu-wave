@@ -16,15 +16,11 @@ void Class_Forward_Specs::process_rcv_locations ( std::vector< struct_rcv_input 
 {
     constexpr int N_dir = ns_forward::N_dir;
 
-    // Removed the first loop that counts receivers
+    // Hardcode the key to see if .at() fails without the loop over Map_Grid_pointers
+    std::array<char, N_dir> grid_type = {'M', 'M'};
 
-    for ( const auto & iter_map : Map_Grid_pointers ) 
-    {
-        std::array<char, N_dir> grid_type = iter_map.first;
-
-        for ( auto& record_rcv : Map_grid_record_rcv.at(grid_type) ) 
-            { /* dummy */ }
-    }
+    for ( auto& record_rcv : Map_grid_record_rcv.at(grid_type) ) 
+        { /* dummy */ }
 }
 
 void Class_Forward_Specs::output_solution_record ( std::string folder_name ) {}
