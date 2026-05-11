@@ -80,7 +80,12 @@ void Class_Forward_Specs::process_rcv_locations ( std::vector< struct_rcv_input 
         {
             printf( " ---- Collected %3d receivers on grid (%c %c)\n", Map_grid_N_rcvs.at(grid_type), grid_type.at(0), grid_type.at(1) ); fflush(stdout);
         }
-        // Allocation loops removed
+
+        // Restore allocation loops but make them empty
+        for ( auto& record_rcv : Map_grid_record_rcv.at(grid_type) ) 
+            { /* dummy */ }
+        for ( auto& RESULT_rcv : Map_grid_RESULT_rcv.at(grid_type) ) 
+            { /* dummy */ }
     }
 } // Class_Forward_Specs::process_rcv_locations ()
 
