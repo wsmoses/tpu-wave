@@ -69,7 +69,12 @@ void Class_Forward_Specs::process_rcv_locations ( std::vector< struct_rcv_input 
 
         if ( true )
         {
-            Map_grid_N_rcvs.at(grid_type) += 1;
+            auto iter = Map_grid_N_rcvs.find(grid_type);
+            if ( iter != Map_grid_N_rcvs.end() ) {
+                iter->second += 1;
+            } else {
+                printf("ERROR: key %c%c NOT found in Map_grid_N_rcvs in first loop!\n", grid_type[0], grid_type[1]); fflush(stdout);
+            }
         }
     }
 
@@ -80,17 +85,17 @@ void Class_Forward_Specs::process_rcv_locations ( std::vector< struct_rcv_input 
         std::array<char, N_dir> grid_type = iter_map.first;
         printf("DEBUG second loop: grid_type=%c%c (ints: %d %d)\n", grid_type[0], grid_type[1], (int)grid_type[0], (int)grid_type[1]); fflush(stdout);
 
-        if ( Map_grid_N_rcvs.find(grid_type) == Map_grid_N_rcvs.end() ) {
-            printf("DEBUG: key %c%c NOT found in Map_grid_N_rcvs!\n", grid_type[0], grid_type[1]); fflush(stdout);
+        auto iter = Map_grid_N_rcvs.find(grid_type);
+        if ( iter != Map_grid_N_rcvs.end() ) {
+            if ( iter->second != 0 )
+            {
+                printf( " ---- Collected %3d receivers on grid (%c %c)\n", iter->second, grid_type.at(0), grid_type.at(1) ); fflush(stdout);
+            }
         } else {
-            printf("DEBUG: key %c%c found in Map_grid_N_rcvs!\n", grid_type[0], grid_type[1]); fflush(stdout);
+            printf("ERROR: key %c%c NOT found in Map_grid_N_rcvs in second loop!\n", grid_type[0], grid_type[1]); fflush(stdout);
         }
 
-        if ( Map_grid_N_rcvs.at(grid_type) != 0 )
-        {
-            printf( " ---- Collected %3d receivers on grid (%c %c)\n", Map_grid_N_rcvs.at(grid_type), grid_type.at(0), grid_type.at(1) ); fflush(stdout);
-        }
-
+        // Allocation loops removed or kept empty
         for ( auto& record_rcv : Map_grid_record_rcv.at(grid_type) ) 
             { /* dummy */ }
         for ( auto& RESULT_rcv : Map_grid_RESULT_rcv.at(grid_type) ) 
