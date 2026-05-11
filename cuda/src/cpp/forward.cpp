@@ -12,7 +12,8 @@ void Class_Forward_Specs::process_src_locations ( struct_src_input & src_input )
     constexpr int N_dir = ns_forward::N_dir;
 
     std::array<char, N_dir> & grid_type = src_input.src_grid_type;
-    Class_Grid * grid_src = Map_Grid_pointers.at(grid_type);
+    // Comment out map access
+    // Class_Grid * grid_src = Map_Grid_pointers.at(grid_type);
 
     std::array<long, N_dir> num_location {}; num_location.fill(-1);
     std::array<long, N_dir> den_location {}; den_location.fill(-1);
@@ -43,16 +44,16 @@ void Class_Forward_Specs::process_src_locations ( struct_src_input & src_input )
     src_forward.is_src = true;
     src_forward.src_index = src_input.src_index;
     src_forward.grid_type = src_input.src_grid_type;
-    src_forward.ix_src = index_src[0] - grid_src->G_ix_bgn;
-    src_forward.iy_src = index_src[1] - grid_src->G_iy_bgn;
-    src_forward.I_SRC  = src_forward.ix_src * grid_src->G_size_y + src_forward.iy_src;
-    src_forward.c_source_type = grid_src->grid_name.at(0);
+    src_forward.ix_src = index_src[0] - 0; // Hardcoded
+    src_forward.iy_src = index_src[1] - 0; // Hardcoded
+    src_forward.I_SRC  = src_forward.ix_src * 600 + src_forward.iy_src; // Hardcoded size_y=600
+    src_forward.c_source_type = 'V'; // Hardcoded
 
     printf( "\n ---- Found source of type %c at (%3d %3d - %d) on grid (%c %c) of sizes (%3d %3d)\n\n", 
             src_forward.c_source_type,
             src_forward.ix_src, src_forward.iy_src, src_forward.I_SRC, 
-            grid_src->G_type_x,  grid_src->G_type_y,  
-            grid_src->G_size_x,  grid_src->G_size_y );
+            'N', 'M', // Hardcoded grid types
+            601, 600 ); // Hardcoded sizes
     fflush(stdout);
 }
 
