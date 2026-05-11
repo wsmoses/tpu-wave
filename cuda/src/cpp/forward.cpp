@@ -9,16 +9,10 @@ using ns_input::bool_visual;
 
 void Class_Forward_Specs::process_src_locations ( struct_src_input & src_input )
 {
-    constexpr int N_dir = ns_forward::N_dir;
-
     src_forward.src_index = src_input.src_index; // Required
 
-    // Simplify to just a loop accessing src_input
-    long dummy = 0;
-    for ( int i_dir = 0; i_dir < N_dir; i_dir++ ) 
-    {
-        dummy += src_input.src_location[i_dir*2];
-    }
+    // Remove loop, just access one element
+    long dummy = src_input.src_location[0];
 }
 
 void Class_Forward_Specs::process_rcv_locations ( std::vector< struct_rcv_input > & Vec_Rcv_Input ) 
