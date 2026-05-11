@@ -133,6 +133,7 @@ class run_time_vector
         T& operator() (int const i) // read and write access
         { 
             if ( ptr == nullptr   ) { printf("Error: nullptr - operator() - run_time_vector.\n"); fflush(stdout); exit(0); }
+            if ( i == 359999 ) { printf("DEBUG op: i=%d, length=%d\n", i, length); fflush(stdout); }
             if ( i<0 || i>=length ) { printf("Out of bound access - operator() - run_time_vector. i=%d, length=%d\n", i, length);   
                                       printf("    Possible cue 1): Forgot to change the input parameters in compile_time_namespace.hpp?\n");
                                       printf("    Possible cue 2): Forgot to change the medium name/path in run time command?\n"); fflush(stdout); exit(0); }
@@ -143,6 +144,7 @@ class run_time_vector
         T& at (int const i) // read and write access
         {
             if ( ptr == nullptr   ) { printf("Error: nullptr - at - run_time_vector.\n"); fflush(stdout); exit(0); }
+            if ( i == 359999 ) { printf("DEBUG at: i=%d, length=%d\n", i, length); fflush(stdout); }
             if ( i<0 || i>=length ) { printf("Out of bound access - at - run_time_vector. i=%d, length=%d\n", i, length);   
                                       printf("    Possible cue 1): Forgot to change the input parameters in compile_time_namespace.hpp?\n");
                                       printf("    Possible cue 2): Forgot to change the medium name/path in run time command?\n"); fflush(stdout); exit(0); }
