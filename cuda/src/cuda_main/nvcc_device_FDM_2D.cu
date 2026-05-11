@@ -101,27 +101,19 @@ int main(int argc, char* argv[])
     //           Decided to use Map instead of Vec since src_index may not be numbered consecutively, 
     //       or not start with zero.
 
-    Vec_Src_Input.push_back ( struct_src_input { 1 , {'N','N'} , {0,1,0,1} } );
+		    struct_src_input iter_vec { 1 , {'N','N'} , {0,1,0,1} };
     Map_Vec_Rcv_Input[1] = { struct_rcv_input { 1 , 1 , {'N','N'} , {0,1,0,1} } };
 
     Inv_Specs.data_misfit = 0.;  // (re)set the aggregated data misfit for all sources to zero before 
                                  // enter the loop that goes through the sources and lauches simulations 
 
-    for ( auto & iter_vec : Vec_Src_Input )  // NOTE: this for loop will disappear (naturally) in the MPI environment
-    {
+    for (int i=0; i<1; i++) {
         // ---- Process the source and receiver location 
 
-        Fwd_Specs.process_src_locations ( iter_vec );
-        int & fwd_src_index = Fwd_Specs.src_forward.src_index;
+        //Fwd_Specs.process_src_locations ( iter_vec );
+        int fwd_src_index = 1;//Fwd_Specs.src_forward.src_index;
 
         printf( "    Processing receiver locations for source %d.\n", fwd_src_index );
-        if ( Map_Vec_Rcv_Input.at( fwd_src_index ).size() <= 0 )
-            { printf( "No receiver found for source %d.\n", fwd_src_index ); fflush(stdout); exit(0); }
-
-        printf("Array_Grid_types size: %lu\n", Array_Grid_types.size());
-        for (auto const& type : Array_Grid_types) {
-            printf("Type: %c %c\n", type[0], type[1]);
-        }
 
         for ( const auto & grid_type : Array_Grid_types ) { Fwd_Specs.Map_grid_N_rcvs            [grid_type] = 0;  }
         for ( const auto & grid_type : Array_Grid_types ) { Fwd_Specs.Map_grid_struct_rcv_forward[grid_type] = {}; }
