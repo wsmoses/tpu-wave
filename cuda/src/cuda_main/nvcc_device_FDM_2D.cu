@@ -448,30 +448,6 @@ cudaDeviceSynchronize(); // debug
         if ( bool_energy ) { ns_input::Record_E_p0.at(it) += cuda_Class_Grid_SMM.energy_calculation (); }
         if ( bool_energy ) { ns_input::Record_E_p0.at(it) += cuda_Class_Grid_SNN.energy_calculation (); }
 
-cudaDeviceSynchronize(); // debug
-
-        // ---- V
-        // NOTE: reset the derivatives is absorbed in their calculation.
-
-
-        // below is important: Sxy should finish updating a lot quicker than SNN; we should dispatch those work that only requires Sxy
-        //                     as soon as Sxy is ready, rather than waiting for SNN        
-
-
-        // NOTE: Below is important: the update of Sxy and SNN may start around the 
-        //       same time, but Sxy will finish sooner; we should dispatch those 
-        //       work that requires only Sxy as soon as Sxy is ready, and not to 
-        //       wait for the update of SNN to finish - this leads to significant 
-        //       improvement in performance. (Similar ordering does not show much 
-        //       benefit for the update of Vx and Vy, presumbly because they took
-        //       roughly the same time.)
-
-
-        // NOTE: Pay attention to the XY and xy distinction. When Sxy is ready, 
-        //       the y derivative of NM grid can be calculated, which is where 
-        //       Vy is, not Vx.
-
-cudaDeviceSynchronize(); // debug
 
         if ( (it % 1000) == 0 )
         {
