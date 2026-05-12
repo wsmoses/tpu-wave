@@ -304,7 +304,18 @@ class cuda_Class_Grid : public cuda_Class_Grid_Base
 
             // Removed asserts
 
-            // Removed all assignments
+            this->N_modulo_x = class_grid->N_modulo_x;
+            this->N_modulo_y = class_grid->N_modulo_y;
+
+            this->SL_external = class_grid->SL_external;
+            this->SL_internal = class_grid->SL_internal;
+
+            this->free_surface_update = class_grid->free_surface_update;
+
+            this->N_drvt = ns_forward::N_dir;
+            this->N_soln = class_grid->N_soln;
+            this->N_prmt = class_grid->N_prmt;
+            this->N_enrg = class_grid->N_enrg;
 
             for ( const char & c_dir : {'x'} )
             {
@@ -320,26 +331,9 @@ class cuda_Class_Grid : public cuda_Class_Grid_Base
             }
 
 
-            this->Map_interior_BGN = class_grid->Map_interior_BGN;
-            this->Map_interior_END = class_grid->Map_interior_END;
-
-
-            this->stencil_dt_dx.make_shallow_copy ( stencil_dt_dx_shallow_copy );
-
-            for ( const auto & iter_map : Map_stencil_shift ) 
-                { iter_map.second.make_shallow_copy ( Map_stencil_shift_shallow_copy [iter_map.first] ); }
-
-            for ( const auto & iter_map : Map_D_bdry ) 
-                { iter_map.second.make_shallow_copy ( Map_D_bdry_shallow_copy [iter_map.first] ); }
-
-            for ( const auto & iter_map : Map_projection ) 
-                { iter_map.second.make_shallow_copy ( Map_projection_shallow_copy [iter_map.first] ); }
-
-            for ( const auto & iter_map : Map_A_inv_projection ) 
-                { iter_map.second.make_shallow_copy ( Map_A_inv_projection_shallow_copy [iter_map.first] ); }
+            // Removed more assignments and shallow copies
             
-            for ( const auto & iter_map : Map_A_bdry_diag ) 
-                { iter_map.second.make_shallow_copy ( Map_A_bdry_diag_shallow_copy [iter_map.first] ); }
+            // Removed last shallow copy loop
 
         } // cuda_Class_Grid_initialize()
 
