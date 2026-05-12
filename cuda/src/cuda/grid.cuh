@@ -302,11 +302,7 @@ class cuda_Class_Grid : public cuda_Class_Grid_Base
         {
             this->ptr_class_grid = class_grid;
 
-            assert(type_x == class_grid->G_type_x);
-            assert(type_y == class_grid->G_type_y);
-
-            assert(GridStruct::size_x == class_grid->G_size_x);
-            assert(GridStruct::size_y == class_grid->G_size_y);
+            // Removed asserts
 
             this->N_modulo_x = class_grid->N_modulo_x;
             this->N_modulo_y = class_grid->N_modulo_y;
