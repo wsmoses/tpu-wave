@@ -473,22 +473,6 @@ cudaDeviceSynchronize(); // debug
 
 cudaDeviceSynchronize(); // debug
 
-        // y derivative of Vy
-        cuda_Class_Grid_SNM.kernel_launch_cuda_periodic_y_modulo <false, 'N', 'N'> ();
-
-cudaDeviceSynchronize(); // debug
-
-        // x derivative of Vx
-        {
-            cuda_Class_Grid_SMN.kernel_launch_cuda_interior_x ();
-
-            cuda_Class_Grid_SMN.kernel_launch_cuda_boundary_x ( 'L' );
-            cuda_Class_Grid_SMN.kernel_launch_cuda_boundary_x ( 'R' );
-
-            cuda_Class_Grid_SMN.kernel_launch_cuda_secure_bdry_x ( 'L' );
-            cuda_Class_Grid_SMN.kernel_launch_cuda_secure_bdry_x ( 'R' );
-        }
-
         if ( (it % 1000) == 0 )
         {
         	printf( "\n" ); fflush(stdout);
