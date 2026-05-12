@@ -348,7 +348,7 @@ class cuda_Class_Grid : public cuda_Class_Grid_Base
             // Removed Vec_prmt_enrg, Vec_cpst, and Vec_rths allocations
 
 
-            if ( this->N_enrg > 0 ) { this->thrust_memory.allocate_memory( this->length_memory ); }
+            // Removed thrust_memory allocation
 
 
             this->src_cpst.allocate_memory ( class_grid->N_soln );  // assume memory is set to zero            
