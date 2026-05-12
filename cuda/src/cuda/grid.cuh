@@ -351,7 +351,7 @@ class cuda_Class_Grid : public cuda_Class_Grid_Base
             // Removed thrust_memory allocation
 
 
-            this->src_cpst.allocate_memory ( class_grid->N_soln );  // assume memory is set to zero            
+            // Removed src_cpst allocation
 
            
 			this->stencil_dt_dx.allocate_memory ( class_grid->stencil_dt_dx.length );
