@@ -115,42 +115,6 @@ int main(int argc, char* argv[])
         { Fwd_Specs.Map_Grid_pointers.at(iter_grid_type)->set_grid_pointers ( Fwd_Specs.Map_Grid_pointers ); }
 
 
-    // -------------------------------------------------------------- //
-    // ---------------- Input the physical parameters --------------- //
-    // -------------------------------------------------------------- //
-
-/*
-    // Inverse parameters are stored in Inv_Specs.
-    for ( const std::string prmt_name : { "rho" , "vp" , "vs" } )
-    {
-        file_name = "../../data/" + medium_name + "/" + prmt_name + ".bin";
-        // NOTE: During testing, trying to keep only one copy of each input file so that
-        //       we don't need to worry whether the input files are the intended version.
-
-        Inv_Specs.input_inverse_parameter ( file_name , prmt_name );
-    }
-    // NOTE: The inverse parameters stored in Inv_Specs have been PADDED with an extra number 
-    //       on each direction to avoid the 'ghostly' bug caused by stepping out of bound.
-    //           PAY SPECIAL ATTENTION to the size and stride of the inverse parameters 
-    //       acutally stored in Inv_Specs : THE SIZE IS 
-    //              ns_input::PADDED_inv_prmt_size = ( Nx_model + 1 ) * ( Ny_model + 1 )
-    //           THE STRIDE IS 
-    //              ( Ny_model + 1 ).
-*/
-    // for ( const std::string prmt_name : { "rho" , "vp" , "vs" } )
-    // {
-    //     auto v = Inv_Specs.Map_inv_prmt.at(prmt_name);
-    //     printf( "%16.15e %16.15e\n", *std::min_element(v.begin(),v.end())
-    //                                , *std::max_element(v.begin(),v.end()) );
-    // }
-    // [2023/09/24]
-    // NOTE: min are zero because of the padding.
-    // [2023/09/24]
-    // NOTE: min_element and max_element cannot be called on __half.
-
-
-
-    // ---- verification (overwrite the above readin parameter data)
     for ( const std::string prmt_name : { "rho" , "vp" , "vs" } )
         { Inv_Specs.Map_inv_prmt[ prmt_name ].allocate_memory ( ns_input::PADDED_inv_prmt_size ); }
 
@@ -302,16 +266,6 @@ int main(int argc, char* argv[])
 
 
 
-printf("gpu parameter initialized.\n");
-
-{
-    // ns_type::cuda_precision dt_hst = static_cast<ns_type::cuda_precision> (ns_input::dt);
-    // cudaMemcpyToSymbol ( ns_dev_var::dt, &dt_hst, sizeof(ns_type::cuda_precision) );
-    // printf(" dt on host and device\n %16.15e\n", (double) ns_input::dt);
-    // cuda_print_dt<<<1,1>>> ();
-}
-cudaDeviceSynchronize();
-
 
 // ---- function body of forward_simulation is copied below so that 
 //      we can experiment incrementally (one kernel at a time)
@@ -350,94 +304,6 @@ cudaDeviceSynchronize();
     }
 
 
-    for ( const auto & iter_grid_type : Array_Grid_types ) 
-    {
-        cuda_Class_Grid_Base * grid = cuda_Map_Class_Grid_pointers.at(iter_grid_type);
-
-
-
-        // NOTE: stream_drvt is removed since reseting derivatives to zero is absorbed in their
-        //       calculations - on gpu, the loop ordering does not affect the performance that 
-        //       much. It's not as critical as on cpu, where the loop ordering can affect the
-        //       performance of SIMD quite significantly. This has something to do with the 
-        //       memory access pattern. On GPU, each thread access individual memory address, 
-        //       the memory addresses accessed by a warp of threads need to be contiguous for
-        //       good performance. On CPU, 1 thread needs to access contiguous memory addresses
-        //       for them to be combined into SIMD operation.
-
-        // NOTE: Because reseting derivative to zero is absorbed in their calculation, the 
-        //       _secure_bdry_ function needs to be placed in the same stream as calculate_bdry
-        //       and strictly afterwards (reset is done in calculate_bdry). stream_bx_L and
-        //       stream_bx_R are therefore removed.
-
-        // NOTE: The two functions _projection_ and _secure_boundary_ are now combined into a
-        //       single function _secure_bdry_ and we indeed observe significant speed up. It 
-        //       may be due to kernel launch overhead, or it may be due to the cache being "hot".
-        //       However, when attempted to further combine the left and right sides of the 
-        //       operations, the performance slowed down. (Curious why; maybe because this way
-        //       we impose more and unnecessary dependence which makes it harder for the runtime 
-        //       to schedule operations and use full capacity of the machine.) Therefore, it is 
-        //       more likely to be due to the cache being hot.
-
-        // NOTE: On CPU, replacing the single loop that use % operator with three loops that do 
-        //       not use % operator leads to almost twice speedup. On GPU, we didn't observe the
-        //       same thing, it actually slows the program down. Further, by removing the % from 
-        //       the loop, i.e., performing incorrect simulation, the speedup is negligible. It 
-        //       seems that GPU is not affected much by the % operator. On the other hand, when 
-        //       we use three loops, it seems that the interior loop (the bulk part of the work) 
-        //       has the following behavior - starting from zero and covering all points leads to
-        //       faster program than covering only the interior points, i.e., more work version
-        //       finishes sooner.
-        //           Since the three-loop version does not show benefit, we remove them and the 
-        //       associated streams and go light. 
-
-        // NOTE: Events are removed since it seems to incur overhead when used inside for loop.
-    }
-
-
-printf("gpu stream created.\n");
-
-
-    // NOTE: Using stream in combination with cudaDeviceSynchronize() seems to help; 
-    //       using event doesn't seem to offer much benefit; there seems to be a claim 
-    //       (look for cudaflow on youtube) that recording and waiting event can have 
-    //       significant overhead, particularly when they are inside a loop; it's more 
-    //       efficient to use graph, but cuda's graph API is not very easy to use - it
-    //       can be cumbersome and error-prone to define the graph.
-    //           We should probably save this for future, hence the event part of the 
-    //       code is commented out above, and at the end of this file.
-
-
-cudaDeviceSynchronize();
-
-#ifndef CPSTFLAG
-    constexpr int cpst_N = 0;  constexpr char cpst_S = '0';
-#endif
-
-#ifdef CPSTFLAG
-#if CPSTFLAG == 0
-    constexpr int cpst_N = 0;  constexpr char cpst_S = '0';
-#elif CPSTFLAG == 3
-    constexpr int cpst_N = 3;  constexpr char cpst_S = 'R';
-#elif CPSTFLAG == 6
-    constexpr int cpst_N = 6;  constexpr char cpst_S = 'R';
-#endif
-#endif
-// [2024/04/03]
-// NOTE: The "#ifdef CPSTFLAG" is needed because "#if CPSTFLAG == 0"
-//       would evaluate to "true" if "CPSTFLAG" is undefined, which
-//       would lead to double declaration of "cpst_N" and "cpst_S".
-
-
-    // constexpr int  cpst_N =  0;  constexpr char cpst_S = '0';
-
-    // constexpr int  cpst_N = -3;  constexpr char cpst_S = 'C';
-    // constexpr int  cpst_N =  3;  constexpr char cpst_S = 'C';
-    // constexpr int  cpst_N =  6;  constexpr char cpst_S = 'C';
-
-    // constexpr int  cpst_N = -3;  constexpr char cpst_S = 'R';
-    // constexpr int  cpst_N =  3;  constexpr char cpst_S = 'R';
-    // constexpr int  cpst_N =  6;  constexpr char cpst_S = 'R';
 
 
     for (int it=0; it<Nt; it++) 
