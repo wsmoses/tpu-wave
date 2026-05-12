@@ -312,10 +312,7 @@ class cuda_Class_Grid : public cuda_Class_Grid_Base
 
             this->free_surface_update = class_grid->free_surface_update;
 
-            this->N_drvt = ns_forward::N_dir;
-            this->N_soln = class_grid->N_soln;
-            this->N_prmt = class_grid->N_prmt;
-            this->N_enrg = class_grid->N_enrg;
+            // Removed N_drvt, N_soln, N_prmt, N_enrg assignments
 
             for ( const char & c_dir : {'x'} )
             {
