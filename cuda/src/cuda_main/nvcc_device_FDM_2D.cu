@@ -444,8 +444,8 @@ cudaDeviceSynchronize();
     {
 
 
-		ns_input::Record_E_p0.at(it) += cuda_Class_Grid_SMM.energy_calculation ();
-		ns_input::Record_E_p0.at(it) += cuda_Class_Grid_SNN.energy_calculation ();
+		cuda_Class_Grid_SMM.energy_calculation ();
+		cuda_Class_Grid_SNN.energy_calculation ();
 
     }  // for (int it=0; it<Nt; it++) 
 
