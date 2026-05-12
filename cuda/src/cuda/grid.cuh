@@ -302,10 +302,25 @@ class cuda_Class_Grid : public cuda_Class_Grid_Base
         {
             this->ptr_class_grid = class_grid;
 
-            // Removed assignments
+            assert(type_x == class_grid->G_type_x);
+            assert(type_y == class_grid->G_type_y);
 
+            assert(GridStruct::size_x == class_grid->G_size_x);
+            assert(GridStruct::size_y == class_grid->G_size_y);
 
-            // Removed more assignments
+            this->N_modulo_x = class_grid->N_modulo_x;
+            this->N_modulo_y = class_grid->N_modulo_y;
+
+            this->SL_external = class_grid->SL_external;
+            this->SL_internal = class_grid->SL_internal;
+
+            this->grid_name           = class_grid->grid_name;
+            this->free_surface_update = class_grid->free_surface_update;
+
+            this->N_drvt = ns_forward::N_dir;
+            this->N_soln = class_grid->N_soln;
+            this->N_prmt = class_grid->N_prmt;
+            this->N_enrg = class_grid->N_enrg;
 
 
             // Removed reserve calls
