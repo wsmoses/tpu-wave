@@ -367,43 +367,7 @@ class cuda_Class_Grid : public cuda_Class_Grid_Base
             //       single (or half) on device, or with _Float16 on host and __half on device.
 
 
-            for ( const char& c_dir : {'x','y'} )
-            {
-                this->Map_stencil_shift   [c_dir].allocate_memory ( class_grid->Map_stencil_shift.at(c_dir).length );
-                this->Map_stencil_shift.at(c_dir).template copy_from_host <int> ( class_grid->Map_stencil_shift.at(c_dir) );
-            }
-            // NOTE: Pay special attention to if the stencil_shift on cpu and gpu have the same 
-            //       definition, i.e., are they multiplied by the strides already or not.
-
-            // NOTE: We assume that x boundaries are weak; y is strong.
-            for ( const char& c_dir : {'x'} )
-            {
-                for ( const char& c_LR : {'L','R'} )
-                {
-                    auto & host_D_bdry = class_grid->Map_D_bdry.at( { c_dir , c_LR } );
-
-                    this->Map_D_bdry   [ { c_dir , c_LR } ].allocate_memory ( host_D_bdry.rows , host_D_bdry.cols );
-                    this->Map_D_bdry.at( { c_dir , c_LR } ).template copy_from_host <ns_type::host_precision> ( host_D_bdry );
-
-
-                    auto & host_projection = class_grid->Map_projection.at( { c_dir , c_LR } );
-
-                    this->Map_projection   [ { c_dir , c_LR } ].allocate_memory ( host_projection.length );
-                    this->Map_projection.at( { c_dir , c_LR } ).template copy_from_host <ns_type::host_precision> ( host_projection );
-
-
-                    auto & host_A_inv_projection = class_grid->Map_A_inv_projection.at( { c_dir , c_LR } );
-
-                    this->Map_A_inv_projection   [ { c_dir , c_LR } ].allocate_memory ( host_A_inv_projection.length );
-                    this->Map_A_inv_projection.at( { c_dir , c_LR } ).template copy_from_host <ns_type::host_precision> ( host_A_inv_projection );
-
-
-                    auto & host_A_bdry_diag = class_grid->Map_A_bdry_diag.at( { c_dir , c_LR } );
-
-                    this->Map_A_bdry_diag   [ { c_dir , c_LR } ].allocate_memory ( host_A_bdry_diag.length );
-                    this->Map_A_bdry_diag.at( { c_dir , c_LR } ).template copy_from_host <ns_type::host_precision> ( host_A_bdry_diag );
-                }
-            }
+            // Removed Map allocations
 
 
             // NOTE: We assume that x boundaries are weak; y is strong.
