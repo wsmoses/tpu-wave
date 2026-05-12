@@ -443,26 +443,9 @@ cudaDeviceSynchronize();
     for (int it=0; it<Nt; it++) 
     {
 
-cudaDeviceSynchronize(); // debug
 
         if ( bool_energy ) { ns_input::Record_E_p0.at(it) += cuda_Class_Grid_SMM.energy_calculation (); }
         if ( bool_energy ) { ns_input::Record_E_p0.at(it) += cuda_Class_Grid_SNN.energy_calculation (); }
-
-
-        if ( (it % 1000) == 0 )
-        {
-        	printf( "\n" ); fflush(stdout);
-    		auto const & cuda_grid_src = cuda_Map_Class_Grid_pointers.at( Fwd_Specs.src_forward.grid_type );
-        	int ind = Fwd_Specs.src_forward.ix_src * cuda_grid_src->Ly_pad
-            	    + Fwd_Specs.src_forward.iy_src;
-
-        	// for ( int i_field = 0; i_field < cuda_grid_src->N_soln; i_field++ )
-            	// { cuda_print_soln <<< 1 , 1 >>> ( cuda_grid_src->Vec_soln.at(i_field).ptr , ind , it ); }
-        }
-        // [2024/03/27]
-        // NOTE: Made the above changes on the printing out the solution at the src location. Before, we always print out
-        //       Sxx and Syy - this can lead to mismatch in nvcc_host_FDM_2D.exe and nvcc_device_FDM_2D.exe when the src
-        //       is not applied on the {Sxx;Syy} grid. The reason is that the device code uses padding.
 
     }  // for (int it=0; it<Nt; it++) 
 
