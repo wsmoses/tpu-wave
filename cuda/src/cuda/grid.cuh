@@ -343,14 +343,9 @@ class cuda_Class_Grid : public cuda_Class_Grid_Base
             if ( this->N_soln > 0 ) { this->Vec_cpst     .reserve (this->N_soln); }
             if ( this->N_soln > 0 ) { this->Vec_rths     .reserve (this->N_soln); }
 
-            for ( int i = 0; i < this->N_drvt; i++ ) { this->Vec_drvt     .push_back ( cuda_run_time_vector<ns_type::cuda_precision> { this->length_memory } ); }
-            for ( int i = 0; i < this->N_soln; i++ ) { this->Vec_soln     .push_back ( cuda_run_time_vector<ns_type::cuda_precision> { this->length_memory } ); }
-            for ( int i = 0; i < this->N_prmt; i++ ) { this->Vec_prmt     .push_back ( cuda_run_time_vector<ns_type::cuda_precision> { this->length_memory } ); }
+            // Removed Vec_drvt, Vec_soln, and Vec_prmt allocations
             
-            for ( int i = 0; i < this->N_enrg; i++ ) { this->Vec_prmt_enrg.push_back ( cuda_run_time_vector< double > { this->length_memory } ); }
-
-            for ( int i = 0; i < this->N_soln; i++ ) { this->Vec_cpst     .push_back ( cuda_run_time_vector<ns_type::cuda_precision> { this->length_memory } ); }
-            for ( int i = 0; i < this->N_soln; i++ ) { this->Vec_rths     .push_back ( cuda_run_time_vector<ns_type::cuda_precision> { this->length_memory } ); }
+            // Removed Vec_prmt_enrg, Vec_cpst, and Vec_rths allocations
 
 
             if ( this->N_enrg > 0 ) { this->thrust_memory.allocate_memory( this->length_memory ); }

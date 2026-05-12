@@ -284,21 +284,7 @@ int main(int argc, char* argv[])
     for ( const auto & iter_grid_type : Array_Grid_types ) 
         { cuda_Map_Class_Grid_pointers.at(iter_grid_type)->cuda_Class_Grid_initialize ( Fwd_Specs.Map_Grid_pointers.at(iter_grid_type) ); }
 
-    for ( const auto & iter_grid_type : Array_Grid_types ) 
-        { cuda_Map_Class_Grid_pointers.at(iter_grid_type)->set_grid_pointers ( cuda_Map_Class_Grid_pointers ); }
-
-    // NOTE: copy the parameters from hst to dev to start the simulation on device
-    for ( const auto & iter_grid_type : Array_Grid_types ) 
-    {
-        cuda_Class_Grid_Base * cuda_class_grid = cuda_Map_Class_Grid_pointers.at(iter_grid_type);
-        for ( int i_field = 0; i_field < cuda_class_grid->N_prmt; i_field++ )
-        { 
-            cuda_class_grid->copy_field_pitched ( "prmt" , i_field , "hst_to_dev" ); 
-            
-            if ( bool_energy )
-                { cuda_class_grid->copy_field_pitched_enrg ( "enrg" , i_field , "hst_to_dev" ); }
-        }
-    }
+    // Removed loops after cuda_Class_Grid_initialize
 
 
 
