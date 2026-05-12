@@ -711,34 +711,8 @@ cudaDeviceSynchronize(); // debug
 
     }  // for (int it=0; it<Nt; it++) 
 
-cudaDeviceSynchronize();
-printf("\n");
-
-
-    // copy RESULT to host memory
-    for ( const auto & iter_grid_type : Array_Grid_types )  // go through the possible grid types
-    {
-        if ( Fwd_Specs.Map_grid_N_rcvs.at(iter_grid_type) > 0 )     // if number of receiver on this grid is larger than 0
-        {
-            auto &      grid_rcv =  Fwd_Specs.Map_Grid_pointers.at(iter_grid_type);
-            auto & cuda_grid_rcv = cuda_Map_Class_Grid_pointers.at(iter_grid_type);
-            for ( int i_rcv = 0; i_rcv < Fwd_Specs.Map_grid_N_rcvs.at(iter_grid_type); i_rcv++ )  // loop through the receivers
-            { 
-                cudaMemcpy ( Fwd_Specs.Map_grid_RESULT_rcv.at(iter_grid_type).at(i_rcv).ptr ,
-                             cuda_grid_rcv->Vec_RESULT_rcv.at(i_rcv).ptr , 
-                             cuda_grid_rcv->N_soln * Nt * sizeof(ns_type::cuda_precision) , 
-                             cudaMemcpyDeviceToHost );
-            }
-        }
-    }
-
-
-
 
 } 
-
-    // print_precision_type ();
-    printf( "End of %s .\n", __FILE__ ); fflush(stdout);
 
     return 0;
 }
