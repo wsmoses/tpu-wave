@@ -312,7 +312,8 @@ class cuda_Class_Grid : public cuda_Class_Grid_Base
 
             this->free_surface_update = class_grid->free_surface_update;
 
-            // Removed N_drvt, N_soln, N_prmt, N_enrg assignments
+            // Removed N_drvt, N_soln, N_prmt assignments
+            this->N_enrg = class_grid->N_enrg;
 
             for ( const char & c_dir : {'x'} )
             {
