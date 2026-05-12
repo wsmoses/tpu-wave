@@ -302,46 +302,13 @@ class cuda_Class_Grid : public cuda_Class_Grid_Base
         {
             this->ptr_class_grid = class_grid;
 
-            // NOTE: This function achieves set_grid_parameters () and set_forward_operators () 
-            //       for the equivalent cpu class; We mostly copy from the equivalent cpu class, 
-            //       except for containers that need to hold gpu memory, and _pad and stride_.
-
-            assert(type_x == class_grid->G_type_x);
-            assert(type_y == class_grid->G_type_y);
-
-            assert(GridStruct::size_x == class_grid->G_size_x);
-            assert(GridStruct::size_y == class_grid->G_size_y);
-
-            // Pads and strides are already initialized in struct_grid constructor.
+            // Removed assignments
 
 
-            this->N_modulo_x = class_grid->N_modulo_x;
-            this->N_modulo_y = class_grid->N_modulo_y;
+            // Removed more assignments
 
 
-            this->SL_external = class_grid->SL_external;
-            this->SL_internal = class_grid->SL_internal;
-
-
-            this->grid_name           = class_grid->grid_name;
-            this->free_surface_update = class_grid->free_surface_update;
-
-
-            this->N_drvt = ns_forward::N_dir;
-            this->N_soln = class_grid->N_soln;
-            this->N_prmt = class_grid->N_prmt;
-            this->N_enrg = class_grid->N_enrg;
-
-
-            // allocate space for derivative, solution, and parameter fields
-            if ( this->N_drvt > 0 ) { this->Vec_drvt     .reserve (this->N_drvt); }
-            if ( this->N_soln > 0 ) { this->Vec_soln     .reserve (this->N_soln); }
-            if ( this->N_prmt > 0 ) { this->Vec_prmt     .reserve (this->N_prmt); }
-
-            if ( this->N_enrg > 0 ) { this->Vec_prmt_enrg.reserve (this->N_enrg); }
-
-            if ( this->N_soln > 0 ) { this->Vec_cpst     .reserve (this->N_soln); }
-            if ( this->N_soln > 0 ) { this->Vec_rths     .reserve (this->N_soln); }
+            // Removed reserve calls
 
             // Removed Vec_drvt, Vec_soln, and Vec_prmt allocations
             
