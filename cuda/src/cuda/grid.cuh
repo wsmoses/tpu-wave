@@ -354,7 +354,7 @@ class cuda_Class_Grid : public cuda_Class_Grid_Base
             // Removed src_cpst allocation
 
            
-			this->stencil_dt_dx.allocate_memory ( class_grid->stencil_dt_dx.length );
+            // Removed stencil_dt_dx allocation
             // Removed copy_from_host
 
             // [2023/06/22]
