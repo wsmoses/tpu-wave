@@ -360,7 +360,7 @@ class cuda_Class_Grid : public cuda_Class_Grid_Base
 
            
 			this->stencil_dt_dx.allocate_memory ( class_grid->stencil_dt_dx.length );
-            this->stencil_dt_dx.copy_from_host <ns_type::host_precision> ( class_grid->stencil_dt_dx );
+            // Removed copy_from_host
 
             // [2023/06/22]
             // NOTE: We should change copy_from_host to mem_copy_from_host and add a new function
