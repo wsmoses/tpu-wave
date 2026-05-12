@@ -314,7 +314,7 @@ class cuda_Class_Grid : public cuda_Class_Grid_Base
             this->SL_external = class_grid->SL_external;
             this->SL_internal = class_grid->SL_internal;
 
-            this->grid_name           = class_grid->grid_name;
+            // Removed grid_name assignment
             this->free_surface_update = class_grid->free_surface_update;
 
             this->N_drvt = ns_forward::N_dir;
@@ -322,37 +322,6 @@ class cuda_Class_Grid : public cuda_Class_Grid_Base
             this->N_prmt = class_grid->N_prmt;
             this->N_enrg = class_grid->N_enrg;
 
-
-            // Removed reserve calls
-
-            // Removed Vec_drvt, Vec_soln, and Vec_prmt allocations
-            
-            // Removed Vec_prmt_enrg, Vec_cpst, and Vec_rths allocations
-
-
-            // Removed thrust_memory allocation
-
-
-            // Removed src_cpst allocation
-
-           
-            // Removed stencil_dt_dx allocation
-            // Removed copy_from_host
-
-            // [2023/06/22]
-            // NOTE: We should change copy_from_host to mem_copy_from_host and add a new function
-            //       val_copy_from_host. The mem_copy_from_host version calls "cudaMemcpy", which
-            //       requires the same data representation on host and device for correctness. The 
-            //       val_copy_from_host version should copy in the unit of data item, and make the 
-            //       appropriate conversion when necessary, which can be used in situations where 
-            //       the host and device use different data formats, e.g., with double on host and 
-            //       single (or half) on device, or with _Float16 on host and __half on device.
-
-
-            // Removed Map allocations
-
-
-            // NOTE: We assume that x boundaries are weak; y is strong.
             for ( const char & c_dir : {'x'} )
             {
                 for ( const char & c_LR : {'L','R'} )
@@ -390,10 +359,6 @@ class cuda_Class_Grid : public cuda_Class_Grid_Base
 
         } // cuda_Class_Grid_initialize()
 
-
-        //-----------------------------------------------//
-        //------------- Function defintiion -------------//
-        //-----------------------------------------------//
         void set_grid_pointers ( std::map< std::array<char, ns_forward::N_dir> , cuda_Class_Grid_Base * > & Map_cuda_grid_pointers ) override
         {
             char P_type_x = ( G_type_x == 'N' ? 'M' : 'N' );
