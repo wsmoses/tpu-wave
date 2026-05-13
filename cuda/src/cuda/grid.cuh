@@ -682,7 +682,7 @@ __global__ void weighted_square_SINGLE_grid ( ns_type::cuda_precision * S ,
             int actual_iy = iy + ind_thread;
             if (actual_iy < GridType::size_y) {
                 int ind = ix * GridType::Ly_pad + actual_iy;
-                T [ind] = (double) S [ind] * P [ind] * (double) S [ind];
+                T [ind] = S [ind] * P [ind];
             }
         }
     }
