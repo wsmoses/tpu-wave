@@ -1,13 +1,4 @@
-
-#include <iostream>
-#include <vector>
-#include <string>
-#include <array>
-
-#include "namespace_type.cuh"
-#include "cuda_container_run_time.cuh"
-
-__global__ void weighted_square_NORMAL_grid ( ns_type::cuda_precision * Sxx , ns_type::cuda_precision * Syy , 
+__global__ void weighted_square_NORMAL_grid ( double * Sxx , double * Syy , 
                                               double * P1  , double * P2  , 
                                               double * T ,
                                               int size_x, int size_y, int Ly_pad )
@@ -30,7 +21,7 @@ __global__ void weighted_square_NORMAL_grid ( ns_type::cuda_precision * Sxx , ns
     }
 }
 
-__global__ void weighted_square_SINGLE_grid ( ns_type::cuda_precision * S , 
+__global__ void weighted_square_SINGLE_grid ( double * S , 
                                               double * P , 
                                               double * T ,
                                               int size_x, int size_y, int Ly_pad )
@@ -78,24 +69,24 @@ int main(int argc, char* argv[])
     double dt = 0.0001 * CFL_constant; // Assuming dt_max was 0.0001 based on previous logs
 
     // Grid SMM variables
-    ns_type::cuda_precision * Sxx_MM = nullptr;
-    ns_type::cuda_precision * Syy_MM = nullptr;
+    double * Sxx_MM = nullptr;
+    double * Syy_MM = nullptr;
     double * P1_MM = nullptr;
     double * P2_MM = nullptr;
     double * T_MM = nullptr;
 
-    cudaMalloc( &Sxx_MM, 369664 * sizeof(ns_type::cuda_precision) );
-    cudaMalloc( &Syy_MM, 369664 * sizeof(ns_type::cuda_precision) );
+    cudaMalloc( &Sxx_MM, 369664 * sizeof(double) );
+    cudaMalloc( &Syy_MM, 369664 * sizeof(double) );
     cudaMalloc( &P1_MM, 369664 * sizeof(double) );
     cudaMalloc( &P2_MM, 369664 * sizeof(double) );
     cudaMalloc( &T_MM, 369664 * sizeof(double) );
 
     // Grid SNN variables
-    ns_type::cuda_precision * S_NN = nullptr;
+    double * S_NN = nullptr;
     double * P_NN = nullptr;
     double * T_NN = nullptr;
 
-    cudaMalloc( &S_NN, 369664 * sizeof(ns_type::cuda_precision) );
+    cudaMalloc( &S_NN, 369664 * sizeof(double) );
     cudaMalloc( &P_NN, 369664 * sizeof(double) );
     cudaMalloc( &T_NN, 369664 * sizeof(double) );
 
@@ -122,14 +113,5 @@ int main(int argc, char* argv[])
         }
 
     }  // for (int it=0; it<Nt; it++) 
-
-    cudaFree( Sxx_MM );
-    cudaFree( Syy_MM );
-    cudaFree( P1_MM );
-    cudaFree( P2_MM );
-    cudaFree( T_MM );
-    cudaFree( S_NN );
-    cudaFree( P_NN );
-    cudaFree( T_NN );
     return 0;
 }
