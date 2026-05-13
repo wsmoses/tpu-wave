@@ -114,7 +114,7 @@ class cuda_Class_Grid : public cuda_Class_Grid_Base
 
 
             // allocate space for derivative, solution, and parameter fields
-            if ( this->N_soln > 0 ) { this->Vec_soln     .reserve (this->N_soln); }
+		    this->Vec_soln     .reserve (this->N_soln); 
 
             if ( this->N_enrg > 0 ) { this->Vec_prmt_enrg.reserve (this->N_enrg); }
 
