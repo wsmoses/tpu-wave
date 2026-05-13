@@ -116,7 +116,7 @@ class cuda_Class_Grid : public cuda_Class_Grid_Base
             // allocate space for derivative, solution, and parameter fields
 		    this->Vec_soln     .reserve (this->N_soln); 
 
-            if ( this->N_enrg > 0 ) { this->Vec_prmt_enrg.reserve (this->N_enrg); }
+		    this->Vec_prmt_enrg.reserve (this->N_enrg); 
 
             for ( int i = 0; i < this->N_soln; i++ ) { this->Vec_soln     .push_back ( cuda_run_time_vector<ns_type::cuda_precision> { this->length_memory } ); } 
             for ( int i = 0; i < this->N_enrg; i++ ) { this->Vec_prmt_enrg.push_back ( cuda_run_time_vector< double > { this->length_memory } ); }
