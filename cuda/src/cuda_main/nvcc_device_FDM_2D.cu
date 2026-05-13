@@ -149,23 +149,6 @@ int main(int argc, char* argv[])
         if ( strcmp( grid->grid_name.c_str(), "Vx" ) == 0 || strcmp( grid->grid_name.c_str(), "Vy" ) == 0 )
             { grid->make_density_reciprocal ( Inv_Specs ); }
     }
-    // [2024/04/03]
-    // NOTE: Let's first see how the results look like before making changes to make_density_reciprocal ().
-
-    
-    print_discretization_parameters ( 1. , 2. );
-
-
-// -------------------------------- WARNING -------------------------------- //
-// [2023/07/18]                                                              //
-// NOTE: We assume that density is made reciprocal on cpu at some point for  //
-//       both cpu and gpu simulations.                                       //
-// -------------------------------- WARNING -------------------------------- //
-
-
-    // ---------------------------------------------------------------------------- //
-    // ---------------- Process the source and receiver information --------------- //
-    // ---------------------------------------------------------------------------- //
 
     std::vector< struct_src_input >                   & Vec_Src_Input     = Inv_Specs.Vec_Src_Input;
     std::map< int , std::vector< struct_rcv_input > > & Map_Vec_Rcv_Input = Inv_Specs.Map_Vec_Rcv_Input;
@@ -240,9 +223,6 @@ int main(int argc, char* argv[])
     cuda_Map_Class_Grid_pointers [{'N','M'}] = &grid_SNM;
 
 
-    if ( cuda_Map_Class_Grid_pointers.size() != 2<<(N_dir-1) ) 
-        { printf( "Grid pointers is supposed to have size %d.\n", 2<<(N_dir-1) ); fflush(stdout); exit(0); }
-
 
     // initialize cuda_class_grid
     for ( const auto & iter_grid_type : Array_Grid_types ) 
@@ -270,48 +250,13 @@ int main(int argc, char* argv[])
 // ---- function body of forward_simulation is copied below so that 
 //      we can experiment incrementally (one kernel at a time)
 {
-    Class_Grid & Grid_SNN = * ( Fwd_Specs.Map_Grid_pointers.at( {'N','N'} ) );
-    Class_Grid & Grid_SMM = * ( Fwd_Specs.Map_Grid_pointers.at( {'M','M'} ) );
-
-    Class_Grid & Grid_SMN  = * ( Fwd_Specs.Map_Grid_pointers.at( {'M','N'} ) );  // Pay attention here; we are using small 'x'
-    Class_Grid & Grid_SNM  = * ( Fwd_Specs.Map_Grid_pointers.at( {'N','M'} ) );  // Pay attention here; we are using small 'y'
-
-    auto & cuda_Class_Grid_SNN = grid_SNN;
-    auto & cuda_Class_Grid_SMM = grid_SMM;
-
-    auto & cuda_Class_Grid_SMN = grid_SMN;
-    auto & cuda_Class_Grid_SNM = grid_SNM;
-
-
-    // NOTE: It is very important that we don't forget the reference (&); otherwise, new objects will be
-    //       instantiated while the interacting grid pointers they carried still point to the original ones.
-
-
-    // ---- reset cpu memory to simulate again
-    for ( const auto & iter_grid_type : Array_Grid_types ) 
-        { for ( auto & iter : Fwd_Specs.Map_Grid_pointers.at(iter_grid_type)->Vec_soln ) { iter.set_constant(0.); } }
-
-
-    // Allocate device memory to store RESULT
-    for ( const auto & iter_grid_type : Array_Grid_types )  // go through the possible grid types
-    {
-        if ( Fwd_Specs.Map_grid_N_rcvs.at(iter_grid_type) > 0 )     // if number of receiver on this grid is larger than 0
-        {
-            auto & cuda_grid_rcv = cuda_Map_Class_Grid_pointers.at(iter_grid_type);
-            for ( int i_rcv = 0; i_rcv < Fwd_Specs.Map_grid_N_rcvs.at(iter_grid_type); i_rcv++ )  // loop through the receivers
-                { cuda_grid_rcv->Vec_RESULT_rcv.push_back ( cuda_run_time_matrix<ns_type::cuda_precision> { cuda_grid_rcv->N_soln , Nt } ); }
-        }
-    }
-
-
-
 
     for (int it=0; it<Nt; it++) 
     {
 
 
-		cuda_Class_Grid_SMM.energy_calculation ();
-		cuda_Class_Grid_SNN.energy_calculation ();
+		grid_SMM.energy_calculation ();
+		grid_SNN.energy_calculation ();
 
     }  // for (int it=0; it<Nt; it++) 
 
