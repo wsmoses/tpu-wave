@@ -62,38 +62,14 @@ class cuda_Class_Grid_Base
 
         cuda_Class_Grid_Base(char tx, char ty, int sx, int sy, int chunk, int lx, int ly, int len, int strx, int stry) 
             : G_type_x(tx), G_type_y(ty), G_size_x(sx), G_size_y(sy), chunk_size(chunk), Lx_pad(lx), Ly_pad(ly), length_memory(len), stride_x(strx), stride_y(stry) {}
-
-
-        int N_modulo_x = 1<<30;  // Used to map the indices for periodic BC; needed when using OR not using the % operator
-        int N_modulo_y = 1<<30;  // Used to map the indices for periodic BC; needed when using OR not using the % operator
-
-
-        // pointers to the three grids that that this grid interacts with
-        cuda_Class_Grid_Base * pntr_Grid_x;
-        cuda_Class_Grid_Base * pntr_Grid_y;
-        std::map< char , cuda_Class_Grid_Base * > Map_pntr_grid;   // char : c_dir
-
-        std::map< char , cuda_run_time_vector<ns_type::cuda_precision> * > Map_pntr_soln;
         
-        std::vector< cuda_run_time_vector<ns_type::cuda_precision> > Vec_drvt;
         std::vector< cuda_run_time_vector<ns_type::cuda_precision> > Vec_soln;
-        std::vector< cuda_run_time_vector<ns_type::cuda_precision> > Vec_prmt;
         
         std::vector< cuda_run_time_vector< double > > Vec_prmt_enrg;
-
-
-        std::vector< cuda_run_time_vector<ns_type::cuda_precision> > Vec_cpst;
-        std::vector< cuda_run_time_vector<ns_type::cuda_precision> > Vec_rths;
-
-        
-        cuda_run_time_vector<ns_type::cuda_precision> src_cpst;
-
 
         cuda_run_time_vector<double> thrust_memory;
 
 
-        // ---- the number of derivative fields associated with this grid (always ns_forward::N_dir for the elastic case)
-        int N_drvt = ns_forward::N_dir;
         // ---- the number of (wave)fields associated with this grid
         int N_soln = -1;         // 2 for NN ; 0 for MM ; 1 for the others
         // ---- the number of parameters associated with this grid
