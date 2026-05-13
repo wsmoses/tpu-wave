@@ -312,7 +312,6 @@ class cuda_run_time_matrix
             cudaError_t malloc_result = cudaMalloc( &ptr, M*N*sizeof(T) );
             if ( malloc_result != cudaSuccess ) 
                 { printf( "cudaMalloc unsuccessful: %s.\n", cudaGetErrorString(malloc_result) ); exit(0); }
-            cudaMemset ( ptr, 0, M*N*sizeof(T) );        // Memory is not cleared with cudaMalloc;
             // NOTE: cudaMalloc should account for alignment.
         }
         // NOTE: If empty constructor (currently the default constructor) is called, the above
