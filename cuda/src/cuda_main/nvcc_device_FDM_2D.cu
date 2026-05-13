@@ -81,10 +81,6 @@ int main(int argc, char* argv[])
     // --------------- Define the classes --------------- //
     // -------------------------------------------------- //
 
-    if ( bool_energy ) { ns_input::Record_E_k .allocate_memory (Nt); }
-    if ( bool_energy ) { ns_input::Record_E_p0.allocate_memory (Nt); }
-    if ( bool_energy ) { ns_input::Record_E_p1.allocate_memory (Nt); }
-
     std::array< Class_Grid , 2<<(N_dir-1) > Grids;    // NOTE: use bit shift to take the power of 2 (only works when base is 2); 
                                                       //       reason - std::pow () promotes int to float.
 
@@ -113,35 +109,6 @@ int main(int argc, char* argv[])
 
     for ( const auto & iter_grid_type : Array_Grid_types ) 
         { Fwd_Specs.Map_Grid_pointers.at(iter_grid_type)->set_grid_pointers ( Fwd_Specs.Map_Grid_pointers ); }
-
-
-    for ( const std::string prmt_name : { "rho" , "vp" , "vs" } )
-        { Inv_Specs.Map_inv_prmt[ prmt_name ].allocate_memory ( ns_input::PADDED_inv_prmt_size ); }
-
-    Inv_Specs.Map_inv_prmt.at("rho").set_constant(1);
-    Inv_Specs.Map_inv_prmt.at("vp" ).set_constant(2);
-    Inv_Specs.Map_inv_prmt.at("vs" ).set_constant(1);
-    // ---- verification
-    // NOTE: I think the three parameters are indeed constant 1, 2, and 1 in the stored file.
-
-
-    // Forward parameters are stored in Grids (interpolated from the inverse parameters).
-    for ( const auto & iter_grid_type : Array_Grid_types ) 
-        { Fwd_Specs.Map_Grid_pointers.at(iter_grid_type)->retrieve_forward_parameter ( Inv_Specs ); }
-
-    // NOTE: max value of a parameter P can be retrieved using * std::max_element( P.begin() , P.end() );
-    //       pay particular ATTENTION to the dereferencing operator *.
-
-    if ( bool_energy )
-    {
-        for ( const auto & iter_grid_type : Array_Grid_types ) 
-            { Fwd_Specs.Map_Grid_pointers.at(iter_grid_type)->define_parameters_energy (); }
-        // for ( auto & iter_grid : Grids ) { iter_grid.define_parameters_energy (); }
-
-        // DO ONE THING WELL
-        for ( const auto & iter_grid_type : Array_Grid_types ) 
-            { Fwd_Specs.Map_Grid_pointers.at(iter_grid_type)->adjust_parameters_energy_periodic (); }
-    }
 
 
     cuda_Class_Grid<'N', 'N', 601, 601> grid_SNN;
