@@ -58,10 +58,6 @@ namespace namespace_input
     inline double source_scaling = 1.;
 
     inline int  device_number = -1;
-
-    inline run_time_vector<double> Record_E_k;
-    inline run_time_vector<double> Record_E_p0;
-    inline run_time_vector<double> Record_E_p1;
 }
 namespace ns_input = namespace_input;
 
@@ -91,12 +87,6 @@ inline void ns_input_derived_variables ()
     Map_bdry_type[{'x','L'}] = bdry_type_L.at(0);
     Map_bdry_type[{'x','R'}] = bdry_type_R.at(0);
 
-    Map_bdry_type[{'y','L'}] = bdry_type_L.at(1);
-    Map_bdry_type[{'y','R'}] = bdry_type_R.at(1);
-
-    for ( const char c_dir : {'x','y'} )
-    for ( const char c_LR  : {'L','R'} )
-    { assert ( ( Map_bdry_type.at( {c_dir,c_LR} ) == 'F' ) ); }
 }
 
 #endif
