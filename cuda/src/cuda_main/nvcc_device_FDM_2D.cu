@@ -78,51 +78,58 @@ int main(int argc, char* argv[])
     double dt = 0.0001 * CFL_constant; // Assuming dt_max was 0.0001 based on previous logs
 
     // Grid SMM variables
-    cuda_run_time_vector<ns_type::cuda_precision> Sxx_MM;
-    cuda_run_time_vector<ns_type::cuda_precision> Syy_MM;
-    cuda_run_time_vector<double> P1_MM;
-    cuda_run_time_vector<double> P2_MM;
-    cuda_run_time_vector<double> T_MM;
+    ns_type::cuda_precision * Sxx_MM = nullptr;
+    ns_type::cuda_precision * Syy_MM = nullptr;
+    double * P1_MM = nullptr;
+    double * P2_MM = nullptr;
+    double * T_MM = nullptr;
 
-    Sxx_MM.allocate_memory( 369664 );
-    Syy_MM.allocate_memory( 369664 );
-    P1_MM.allocate_memory( 369664 );
-    P2_MM.allocate_memory( 369664 );
-    T_MM.allocate_memory( 369664 );
+    cudaMalloc( &Sxx_MM, 369664 * sizeof(ns_type::cuda_precision) );
+    cudaMalloc( &Syy_MM, 369664 * sizeof(ns_type::cuda_precision) );
+    cudaMalloc( &P1_MM, 369664 * sizeof(double) );
+    cudaMalloc( &P2_MM, 369664 * sizeof(double) );
+    cudaMalloc( &T_MM, 369664 * sizeof(double) );
 
     // Grid SNN variables
-    cuda_run_time_vector<ns_type::cuda_precision> S_NN;
-    cuda_run_time_vector<double> P_NN;
-    cuda_run_time_vector<double> T_NN;
+    ns_type::cuda_precision * S_NN = nullptr;
+    double * P_NN = nullptr;
+    double * T_NN = nullptr;
 
-    S_NN.allocate_memory( 369664 );
-    P_NN.allocate_memory( 369664 );
-    T_NN.allocate_memory( 369664 );
+    cudaMalloc( &S_NN, 369664 * sizeof(ns_type::cuda_precision) );
+    cudaMalloc( &P_NN, 369664 * sizeof(double) );
+    cudaMalloc( &T_NN, 369664 * sizeof(double) );
 
     for (int it=0; it<Nt; it++) 
     {
         // Inlined energy_calculation for grid_SMM
         {
-            weighted_square_NORMAL_grid <<< 600 , 32 >>> ( Sxx_MM.ptr , Syy_MM.ptr , P1_MM.ptr , P2_MM.ptr , T_MM.ptr, 600, 600, 608 );
+            weighted_square_NORMAL_grid <<< 600 , 32 >>> ( Sxx_MM , Syy_MM , P1_MM , P2_MM , T_MM, 600, 600, 608 );
 
             double * d_result = nullptr;
             cudaMalloc( &d_result , sizeof(double) );
-            single_thread_reduce <<< 1 , 1 >>> ( T_MM.ptr , d_result, 369664 );
+            single_thread_reduce <<< 1 , 1 >>> ( T_MM , d_result, 369664 );
             cudaFree( d_result );
         }
 
         // Inlined energy_calculation for grid_SNN
         {
-            weighted_square_SINGLE_grid <<< 601 , 32 >>> ( S_NN.ptr , P_NN.ptr , T_NN.ptr, 601, 601, 608 );
+            weighted_square_SINGLE_grid <<< 601 , 32 >>> ( S_NN , P_NN , T_NN, 601, 601, 608 );
 
             double * d_result = nullptr;
             cudaMalloc( &d_result , sizeof(double) );
-            single_thread_reduce <<< 1 , 1 >>> ( T_NN.ptr , d_result, 369664 );
+            single_thread_reduce <<< 1 , 1 >>> ( T_NN , d_result, 369664 );
             cudaFree( d_result );
         }
 
     }  // for (int it=0; it<Nt; it++) 
 
-
+    cudaFree( Sxx_MM );
+    cudaFree( Syy_MM );
+    cudaFree( P1_MM );
+    cudaFree( P2_MM );
+    cudaFree( T_MM );
+    cudaFree( S_NN );
+    cudaFree( P_NN );
+    cudaFree( T_NN );
     return 0;
 }
