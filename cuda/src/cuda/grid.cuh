@@ -2,27 +2,10 @@
 #define GRID_CUH
 
 #include <iostream>
-#include <math.h>
-
-#include "grid.hpp"
-
 #include "namespace_type.cuh"
 #include "cuda_container_run_time.cuh"
-
-#include "namespace_device_variable.cuh"
-
-
-
-
-// NOTE: cuda_Struct_Grid is intended to be passed as arguments for __global__ functions, which 
-//       has a limit of 4KB and can only be passed by value, thus this struct needs to be small.
-//       No member function should be allowed for the same token. 
-
-
-// NOTE: On the other hand, cuda_Class_Grid is intended to be used on the host side to prepare
-//       and organize data for kernel launch, we can be "liberal" with it.
-
-
+#include <vector>
+#include <string>
 template<char G_type_x, char G_type_y, int G_size_x, int G_size_y, int chunk_size = 32>
 struct cuda_Struct_Grid
 {
@@ -40,13 +23,11 @@ struct cuda_Struct_Grid
     static constexpr int stride_x = Ly_pad;
     static constexpr int stride_y = 1;
 };
-// if "cuda_Struct_Grid" is intended to pass between host and device, we can remove the "cuda_" prefix from naming
-
 
 class cuda_Class_Grid_Base 
 {
     public:
-        Class_Grid * ptr_class_grid; 
+        // Removed ptr_class_grid 
         
         char G_type_x;
         char G_type_y;
@@ -82,7 +63,7 @@ class cuda_Class_Grid_Base
 
         virtual ~cuda_Class_Grid_Base() {}
 
-        virtual void cuda_Class_Grid_initialize ( Class_Grid * class_grid ) = 0;
+        virtual void cuda_Class_Grid_initialize ( std::string name, int soln, int enrg ) = 0;
 };
 
 
@@ -102,15 +83,15 @@ class cuda_Class_Grid : public cuda_Class_Grid_Base
         // constructor
         // cuda_Class_Grid ( ) { }
         // [2024/04/03] NOTE: commented out since we added a constructor above.
-        void cuda_Class_Grid_initialize ( Class_Grid * class_grid ) override
+        void cuda_Class_Grid_initialize ( std::string name, int soln, int enrg ) override
         {
 
 
-            this->grid_name           = class_grid->grid_name;
+            this->grid_name           = name;
 
 
-            this->N_soln = class_grid->N_soln;
-            this->N_enrg = class_grid->N_enrg;
+            this->N_soln = soln;
+            this->N_enrg = enrg;
 
 
             // allocate space for derivative, solution, and parameter fields
