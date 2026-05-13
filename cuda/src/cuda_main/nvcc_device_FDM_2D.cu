@@ -23,7 +23,6 @@ int main(int argc, char* argv[])
 
 
     ns_input_derived_variables();
-    checking_and_printouts_input_parameters();
 
 
     dx = static_cast<double>( num_dx_soln ) / static_cast<double>( den_dx_soln );
