@@ -119,7 +119,6 @@ class cuda_Class_Grid : public cuda_Class_Grid_Base
 
 
             this->grid_name           = class_grid->grid_name;
-            this->free_surface_update = class_grid->free_surface_update;
 
 
             this->N_soln = class_grid->N_soln;
