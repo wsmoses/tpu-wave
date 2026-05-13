@@ -19,9 +19,21 @@ int main(int argc, char* argv[])
     cuda_Class_Grid<'N', 'N', 601, 601> grid_SNN;
     cuda_Class_Grid<'M', 'M', 600, 600> grid_SMM;
 
-    grid_SMM.cuda_Class_Grid_initialize ( "SMM", 2, 2 );
-    grid_SNN.cuda_Class_Grid_initialize ( "Sxy", 1, 1 );
-{
+    // Inlined cuda_Class_Grid_initialize for grid_SMM
+    grid_SMM.grid_name = "SMM";
+    grid_SMM.N_soln = 2;
+    grid_SMM.N_enrg = 2;
+    for ( int i = 0; i < 2; i++ ) { grid_SMM.Vec_soln[i].allocate_memory( grid_SMM.length_memory ); }
+    for ( int i = 0; i < 2; i++ ) { grid_SMM.Vec_prmt_enrg[i].allocate_memory( grid_SMM.length_memory ); }
+    grid_SMM.thrust_memory.allocate_memory( grid_SMM.length_memory );
+
+    // Inlined cuda_Class_Grid_initialize for grid_SNN
+    grid_SNN.grid_name = "Sxy";
+    grid_SNN.N_soln = 1;
+    grid_SNN.N_enrg = 1;
+    for ( int i = 0; i < 1; i++ ) { grid_SNN.Vec_soln[i].allocate_memory( grid_SNN.length_memory ); }
+    for ( int i = 0; i < 1; i++ ) { grid_SNN.Vec_prmt_enrg[i].allocate_memory( grid_SNN.length_memory ); }
+    grid_SNN.thrust_memory.allocate_memory( grid_SNN.length_memory );
 
     for (int it=0; it<Nt; it++) 
     {
@@ -59,8 +71,6 @@ int main(int argc, char* argv[])
 
     }  // for (int it=0; it<Nt; it++) 
 
-
-} 
 
     return 0;
 }
