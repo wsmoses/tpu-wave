@@ -656,7 +656,7 @@ __global__ void weighted_square_NORMAL_grid ( ns_type::cuda_precision * Sxx , ns
             if (actual_iy < GridType::size_y) {
                 int ind = ix * GridType::Ly_pad + actual_iy;
 
-                T [ind]  = (double) Sxx [ind] * P1 [ind] * (double) Sxx [ind]
+                T [ind]  = (double) Sxx [ind] * P1 [ind]
                          + (double) Sxx [ind] * P2 [ind] * (double) Syy [ind];
             }
         }
