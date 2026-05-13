@@ -1,9 +1,6 @@
 #include "grid.cuh"
-#include "namespace_forward.hpp"
-
 int main(int argc, char* argv[]) 
 {
-    using ns_forward::N_dir;
 
     int prmt_M_sizes[2] = {600, 600};
     int soln_M_sizes[2] = {600, 600};
