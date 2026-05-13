@@ -227,7 +227,7 @@ double cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::en
     cudaMemcpy( &E , T.ptr , sizeof(double) , cudaMemcpyDeviceToHost );
     cudaFree( d_result );
 
-    return E/2.;
+    return E;
 }
 
 
