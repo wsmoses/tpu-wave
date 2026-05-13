@@ -8,30 +8,17 @@ int main(int argc, char* argv[])
     using ns_forward::N_dir;
     using namespace ns_input;
 
-#ifndef GRIDFLAG
-    std::string input_file_name = "/InputFile.txt";
-#endif
-
-#if GRIDFLAG == 1
-    std::string input_file_name = "/InputFile_1.txt";
-#elif GRIDFLAG == 3
-    std::string input_file_name = "/InputFile_3.txt";
-#elif GRIDFLAG == 5
-    std::string input_file_name = "/InputFile_5.txt";
-#endif
-
-    // processing the command line option to get the medium_name 
-    // (which determines the input file and data to read in)
-    command_line_input_processing( argc, argv, "medium" );
-    std::string file_name = "../../data/" + medium_name + input_file_name;  // "/InputFile.txt";    
-
-    file_input_processing( file_name );
-	input_file_name = file_name;  // this is so that we can output "input_file_name" at the end 
-								  // because file_name will be overwritten later.
-
-    // ---- rescanning the command line options to process the remaining arguments;
-    //      rescanning needed such that the arguments specified at command line can 
-    //      overwrite those specified in input file;
+    prmt_M_sizes[0] = 600;
+    prmt_M_sizes[1] = 600;
+    soln_M_sizes[0] = 600;
+    soln_M_sizes[1] = 600;
+    num_dx_prmt = 8;
+    den_dx_prmt = 1000;
+    num_dx_soln = 8;
+    den_dx_soln = 1000;
+    Nt = 60000;
+    CFL_constant = 0.625;
+    c_energy = 'Y';
 	    bool_energy = true;
 
 
