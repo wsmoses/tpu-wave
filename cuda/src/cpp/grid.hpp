@@ -24,17 +24,10 @@ class Class_Grid
         int N_modulo_x = 1<<30;
         int N_modulo_y = 1<<30;
 
-        std::map< char , int > Map_interior_BGN;
-        std::map< char , int > Map_interior_END;
-
         int SL_external = 1<<30;
         int SL_internal = 1<<30;
 
-        std::map< std::pair<char,char> , run_time_matrix<ns_type::host_precision> > Map_D_bdry;
         std::map< char , run_time_vector<int> > Map_stencil_shift;
-        std::map< std::pair<char,char> , run_time_vector<ns_type::host_precision> > Map_projection;
-        std::map< std::pair<char,char> , run_time_vector<ns_type::host_precision> > Map_A_inv_projection;
-        std::map< std::pair<char,char> , run_time_vector<ns_type::host_precision> > Map_A_bdry_diag;
         std::map< std::pair<char,char> , run_time_vector<ns_type::host_precision> > Map_buffer;
         run_time_vector<ns_type::host_precision> stencil_dt_dx;
 
