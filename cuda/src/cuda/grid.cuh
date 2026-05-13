@@ -302,10 +302,6 @@ class cuda_Class_Grid : public cuda_Class_Grid_Base
         {
 
 
-            this->SL_external = class_grid->SL_external;
-            this->SL_internal = class_grid->SL_internal;
-
-
             this->grid_name           = class_grid->grid_name;
             this->free_surface_update = class_grid->free_surface_update;
 
