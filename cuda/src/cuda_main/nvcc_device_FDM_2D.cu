@@ -84,32 +84,11 @@ int main(int argc, char* argv[])
     std::array< Class_Grid , 2<<(N_dir-1) > Grids;    // NOTE: use bit shift to take the power of 2 (only works when base is 2); 
                                                       //       reason - std::pow () promotes int to float.
 
-    constexpr auto Array_Grid_types = ns_forward::define_Array_Grid_types ();
-    if ( Array_Grid_types.size() != Grids.size() )  // change to assert
-    { 
-        printf( "Array_Grid_types size and Grids size do not agree %ld %ld.\n", Array_Grid_types.size(), Grids.size() ); 
-        fflush(stdout); exit(0); 
-    }
-
-    // ---- Assign to the map from grid types to pointers of Class_Grid
-    Fwd_Specs.Map_Grid_pointers[Array_Grid_types.at(0)] = &Grids.at(0);
-    Fwd_Specs.Map_Grid_pointers[Array_Grid_types.at(1)] = &Grids.at(1);
-    Fwd_Specs.Map_Grid_pointers[Array_Grid_types.at(2)] = &Grids.at(2);
-    Fwd_Specs.Map_Grid_pointers[Array_Grid_types.at(3)] = &Grids.at(3);
-
-    if ( Fwd_Specs.Map_Grid_pointers.size() != Grids.size() )  // change to assert
-        { printf( "Map_Grid_pointers is supposed to have size %d.\n", 2<<(N_dir-1) ); fflush(stdout); exit(0); }
-
-
-    for ( const auto & iter_grid_type : Array_Grid_types ) 
-        { Fwd_Specs.Map_Grid_pointers.at(iter_grid_type)->set_grid_parameters ( iter_grid_type , bool_energy ); }
-
-    for ( const auto & iter_grid_type : Array_Grid_types ) 
-        { Fwd_Specs.Map_Grid_pointers.at(iter_grid_type)->set_forward_operators (); }
-
-    for ( const auto & iter_grid_type : Array_Grid_types ) 
-        { Fwd_Specs.Map_Grid_pointers.at(iter_grid_type)->set_grid_pointers ( Fwd_Specs.Map_Grid_pointers ); }
-
+    Grids[0].set_grid_parameters ( {'N', 'N'} , bool_energy );
+    Grids[3].set_grid_parameters ( {'M', 'M'} , bool_energy );
+    
+    Grids[0].set_forward_operators (); 
+    Grids[3].set_forward_operators (); 
 
     cuda_Class_Grid<'N', 'N', 601, 601> grid_SNN;
     cuda_Class_Grid<'M', 'M', 600, 600> grid_SMM;
