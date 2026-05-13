@@ -12,22 +12,15 @@
 #include "namespace_forward.hpp"
 #include "namespace_input.hpp"
 
-class Class_Inverse_Specs;
-
 class Class_Grid 
 {
     public:
         char G_type_x;
         char G_type_y;
-        std::map< char , char > Map_G_type;
-
         int  G_size_x;
         int  G_size_y;
-
         int stride_x;
         int stride_y;
-        std::map< char , int > Map_stride;
-
         int N_modulo_x = 1<<30;
         int N_modulo_y = 1<<30;
 
@@ -58,9 +51,6 @@ class Class_Grid
             if ( GT.at(0) == 'N' || GT.at(0) == 'M' ) { G_type_x = GT.at(0); } else { printf("Grid type can only be N or M.\n"); exit(0); }
             if ( GT.at(1) == 'N' || GT.at(1) == 'M' ) { G_type_y = GT.at(1); } else { printf("Grid type can only be N or M.\n"); exit(0); }
 
-            this->Map_G_type['x'] = G_type_x;
-            this->Map_G_type['y'] = G_type_y;
-
             if ( G_type_x == 'N' && G_type_y == 'N' ) { this->grid_name = "Sxy"; }
             if ( G_type_x == 'M' && G_type_y == 'M' ) { this->grid_name = "SMM"; }
             if ( G_type_x == 'M' && G_type_y == 'N' ) { this->grid_name = "Vx";  }
@@ -87,14 +77,12 @@ class Class_Grid
             this->stride_x = this->G_size_y;
             this->stride_y =              1;
 
-            this->Map_stride['x'] = this->stride_x;
-            this->Map_stride['y'] = this->stride_y;
-
             for ( const char& c_dir : {'x','y'} )
             {
                 this->Map_stencil_shift[c_dir].allocate_memory( 4 );
-                if ( this->Map_G_type.at(c_dir) == 'N' ) { this->Map_stencil_shift.at(c_dir) = {-2, -1, 0, 1}; }
-                if ( this->Map_G_type.at(c_dir) == 'M' ) { this->Map_stencil_shift.at(c_dir) = {-1,  0, 1, 2}; }
+                char g_type = (c_dir == 'x') ? G_type_x : G_type_y;
+                if ( g_type == 'N' ) { this->Map_stencil_shift.at(c_dir) = {-2, -1, 0, 1}; }
+                if ( g_type == 'M' ) { this->Map_stencil_shift.at(c_dir) = {-1,  0, 1, 2}; }
             }
 
             // Dummy implementation to keep it compiling without full operators
