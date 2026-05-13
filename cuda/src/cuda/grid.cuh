@@ -73,28 +73,16 @@ class cuda_Class_Grid_Base
         // ---- the number of (wave)fields associated with this grid
         int N_soln = -1;         // 2 for NN ; 0 for MM ; 1 for the others
         // ---- the number of parameters associated with this grid
-        int N_prmt = -1;         // 2 for NN ; 0 for MM ; 1 for the others
-        // ---- the number of parameters associated with this grid
         int N_enrg = -1;         // 2 for NN ; 0 for MM ; 1 for the others
 
         
         std::string grid_name; 
-        bool free_surface_update = false;    // set to true for Vx, Vy, Vz ; false for all stresses
 
 
 
         virtual ~cuda_Class_Grid_Base() {}
 
-        void copy_field_pitched ( std::string field_name , int ind_field , std::string copy_direction )
-        {
-        }
-
-        void copy_field_pitched_enrg ( std::string field_name , int ind_field , std::string copy_direction )
-        {
-        }
-
         virtual void cuda_Class_Grid_initialize ( Class_Grid * class_grid ) = 0;
-        virtual void set_grid_pointers ( std::map< std::array<char, ns_forward::N_dir> , cuda_Class_Grid_Base * > & Map_cuda_grid_pointers ) = 0;
 };
 
 
@@ -137,41 +125,6 @@ class cuda_Class_Grid : public cuda_Class_Grid_Base
 
         } // cuda_Class_Grid_initialize()
 
-
-        //-----------------------------------------------//
-        //------------- Function defintiion -------------//
-        //-----------------------------------------------//
-        void set_grid_pointers ( std::map< std::array<char, ns_forward::N_dir> , cuda_Class_Grid_Base * > & Map_cuda_grid_pointers ) override
-        {
-
-        } // set_grid_pointers()
-
-
-
-
-
-        //-----------------------------------------------//
-        //------------- Function defintiion -------------//
-        //-----------------------------------------------//
-        void reset_field ( std::string field_name , int ind_field )
-        {
-        }
-
-
-        // NOTE: If the data structure are consistent between host and device fields, things would be so much simpler.
-        // [2023/07/13] 
-        // NOTE: By "consistent" above, I think we mean they have the same padding (0 is a possibility).
-        //       
-        // NOTE: The following member function has not been tested. 
-        // [2023/07/13]
-        // NOTE: The actual copying (mem_ or val_) is wrapped inside the copy_from_host and copy_to_host member functions 
-        //       of cuda_run_time_vector. 
-        //-----------------------------------------------//
-        //------------- Function defintiion -------------//
-        //-----------------------------------------------//
-        void copy_field_contiguous ( std::string field_name , int ind_field , std::string copy_direction )
-        {
-        }
 
 
 
