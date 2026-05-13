@@ -6,6 +6,7 @@
 #include "cuda_container_run_time.cuh"
 #include <vector>
 #include <string>
+#include <array>
 template<char G_type_x, char G_type_y, int G_size_x, int G_size_y, int chunk_size = 32>
 struct cuda_Struct_Grid
 {
@@ -44,9 +45,9 @@ class cuda_Class_Grid_Base
         cuda_Class_Grid_Base(char tx, char ty, int sx, int sy, int chunk, int lx, int ly, int len, int strx, int stry) 
             : G_type_x(tx), G_type_y(ty), G_size_x(sx), G_size_y(sy), chunk_size(chunk), Lx_pad(lx), Ly_pad(ly), length_memory(len), stride_x(strx), stride_y(stry) {}
         
-        std::vector< cuda_run_time_vector<ns_type::cuda_precision> > Vec_soln;
+        std::array< cuda_run_time_vector<ns_type::cuda_precision>, 2 > Vec_soln;
         
-        std::vector< cuda_run_time_vector< double > > Vec_prmt_enrg;
+        std::array< cuda_run_time_vector< double >, 2 > Vec_prmt_enrg;
 
         cuda_run_time_vector<double> thrust_memory;
 
@@ -94,13 +95,10 @@ class cuda_Class_Grid : public cuda_Class_Grid_Base
             this->N_enrg = enrg;
 
 
-            // allocate space for derivative, solution, and parameter fields
-		    this->Vec_soln     .reserve (this->N_soln); 
-
-		    this->Vec_prmt_enrg.reserve (this->N_enrg); 
-
-            for ( int i = 0; i < this->N_soln; i++ ) { this->Vec_soln     .push_back ( cuda_run_time_vector<ns_type::cuda_precision> { this->length_memory } ); } 
-            for ( int i = 0; i < this->N_enrg; i++ ) { this->Vec_prmt_enrg.push_back ( cuda_run_time_vector< double > { this->length_memory } ); }
+            // Removed reserve 
+            // Removed reserve 2 
+            for ( int i = 0; i < this->N_soln; i++ ) { this->Vec_soln[i].allocate_memory( this->length_memory ); }
+            for ( int i = 0; i < this->N_enrg; i++ ) { this->Vec_prmt_enrg[i].allocate_memory( this->length_memory ); }
 
 	    this->thrust_memory.allocate_memory( this->length_memory );
 
@@ -172,14 +170,12 @@ __global__ void single_thread_reduce ( double * T , double * result )
     }
     *result = sum;
 }
-
 template<char C_type_x, char C_type_y, int C_size_x, int C_size_y, int C_chunk_size>
 template<int N_block, int N_thread>
 double cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::energy_calculation ()
 {
     auto & T = this->thrust_memory;
-
-    if ( strcmp( grid_name.c_str(), "SMM" ) == 0 )
+    if constexpr ( C_type_x == 'M' && C_type_y == 'M' )
     {
         auto & Sxx = Vec_soln .at(0);
         auto & Syy = Vec_soln .at(1);
@@ -195,7 +191,6 @@ double cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::en
     {
         auto & S = Vec_soln .at(0);
         auto & P = Vec_prmt_enrg.at(0);        
-        auto & T = this->thrust_memory;
 
         weighted_square_SINGLE_grid <GridStruct> <<< N_block , N_thread >>> ( S.ptr , P.ptr , T.ptr );
     }
