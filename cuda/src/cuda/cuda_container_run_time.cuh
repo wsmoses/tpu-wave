@@ -32,24 +32,15 @@ class cuda_run_time_vector
         {
             if ( ptr != nullptr ) 
             { 
-                printf( "%s %d: ptr is already allocated for %s.\n", 
-                        __FILE__, __LINE__, this->name.c_str() ); fflush(stdout); exit(0); 
+		exit(1); 
             }
 
             if (L <= 0) 
             { 
-                printf( "%s %d: L <= 0 for %s.\n", 
-                        __FILE__, __LINE__, this->name.c_str() ); fflush(stdout); exit(0); 
+		exit(2); 
             }
 
             cudaError_t malloc_result = cudaMalloc( &ptr, L*sizeof(T) );
-            if ( malloc_result != cudaSuccess ) 
-            { 
-                printf( "(%s) for %s %d %s.\n", cudaGetErrorString(malloc_result),
-                        __FILE__, __LINE__, this->name.c_str() ); fflush(stdout); exit(0); 
-            }
-            cudaMemset ( ptr, 0, L*sizeof(T) );    // Memory is not cleared with cudaMalloc;
-            // NOTE: Alignment should have been accounted for by cudaMalloc.
 
 
             this->length  =  L;
