@@ -17,7 +17,6 @@ namespace namespace_input
     inline std::array<char,ns_forward::N_dir> bdry_type_L {'F','F'};
     inline std::array<char,ns_forward::N_dir> bdry_type_R {'F','F'};
 
-    inline std::map< std::pair<char,char> , char > Map_bdry_type;
 
     inline std::array<int, ns_forward::N_dir> prmt_M_sizes {-1,-1};
     inline std::array<int, ns_forward::N_dir> soln_M_sizes {-1,-1};
@@ -83,9 +82,6 @@ inline void ns_input_derived_variables ()
 
     Mx_soln = soln_M_sizes.at(0);  Nx_soln = Mx_soln + 1; 
     My_soln = soln_M_sizes.at(1);  Ny_soln = My_soln + 1; 
-
-    Map_bdry_type[{'x','L'}] = bdry_type_L.at(0);
-    Map_bdry_type[{'x','R'}] = bdry_type_R.at(0);
 
 }
 
