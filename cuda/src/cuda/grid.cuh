@@ -731,7 +731,7 @@ double cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::en
     single_thread_reduce <GridStruct::length_memory> <<< 1 , 1 >>> ( T.ptr , d_result );
     
     double E = 0;
-    cudaMemcpy( &E , d_result , sizeof(double) , cudaMemcpyDeviceToHost );
+    cudaMemcpy( &E , T.ptr , sizeof(double) , cudaMemcpyDeviceToHost );
     cudaFree( d_result );
 
     return E/2.;
