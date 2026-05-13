@@ -27,8 +27,6 @@ class Class_Grid
         int SL_external = 1<<30;
         int SL_internal = 1<<30;
 
-        std::map< char , run_time_vector<int> > Map_stencil_shift;
-        std::map< std::pair<char,char> , run_time_vector<ns_type::host_precision> > Map_buffer;
         run_time_vector<ns_type::host_precision> stencil_dt_dx;
 
         int N_soln = -1;
@@ -70,13 +68,7 @@ class Class_Grid
             this->stride_x = this->G_size_y;
             this->stride_y =              1;
 
-            for ( const char& c_dir : {'x','y'} )
-            {
-                this->Map_stencil_shift[c_dir].allocate_memory( 4 );
-                char g_type = (c_dir == 'x') ? G_type_x : G_type_y;
-                if ( g_type == 'N' ) { this->Map_stencil_shift.at(c_dir) = {-2, -1, 0, 1}; }
-                if ( g_type == 'M' ) { this->Map_stencil_shift.at(c_dir) = {-1,  0, 1, 2}; }
-            }
+            // Removed Map_stencil_shift allocation
 
             // Dummy implementation to keep it compiling without full operators
             // if they are needed by cuda_Class_Grid_initialize.

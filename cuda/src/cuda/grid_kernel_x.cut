@@ -39,51 +39,7 @@ __global__ void cuda_interior_x ( ns_type::cuda_precision * stencil_dt_dx_ptr ,
 } // cuda_interior_x_I ()
 
 
-template<char C_type_x, char C_type_y, int C_size_x, int C_size_y, int C_chunk_size>
-template<bool bool_extra, int N_block, int N_thread>
-void cuda_Class_Grid<C_type_x, C_type_y, C_size_x, C_size_y, C_chunk_size>::kernel_launch_cuda_interior_x ()
-{
-    ns_type::cuda_precision * S = this->Map_pntr_soln.at('x')->ptr;
-
-    ns_type::cuda_precision * R       = this->Vec_rths.at(0).ptr;
-    ns_type::cuda_precision * P       = this->Vec_prmt.at(0).ptr;
-
-    ns_type::cuda_precision * R_extra = nullptr;
-    ns_type::cuda_precision * P_extra = nullptr;
-
-    if ( bool_extra ) 
-    {
-        // [2023/07/17]
-        // NOTE: It would be great if we could "static assert" here to check which grid is calling.
-        //       Even better, if we have a member variable "bool_normal" of the grid class that is 
-        //       available at compile time, we could use that variable for the "if test" instead. 
-        //       Moreover, instead of having 'y' as part of the function name, maybe we can change
-        //       it to a template parameter.
-
-        R       = this->Vec_rths.at(1).ptr;  // 0 corresponds to 'y'
-        R_extra = this->Vec_rths.at(0).ptr;  // 1 corresponds to 'x', which needs extra work
-
-        P       = this->Vec_prmt.at(0).ptr;  // lambda
-        P_extra = this->Vec_prmt.at(1).ptr;  // 2 * mu
-    }
-
-
-    constexpr int INT_bound_BGN_x = (C_type_x == 'N' ? 4 : 3);
-    constexpr int INT_bound_END_x = (C_type_x == 'N' ? C_size_x - 4 : C_size_x - 3);
-    constexpr int num_blocks = INT_bound_END_x - INT_bound_BGN_x;
-
-    constexpr char P_type_x = ( C_type_x == 'N' ? 'M' : 'N' );
-    constexpr int P_size_x = ( C_type_x == 'N' ? C_size_x - 1 : C_size_x + 1 );
-    using InteractingGridStructX = cuda_Struct_Grid<P_type_x, C_type_y, P_size_x, C_size_y, C_chunk_size>;
-
-    cudaStream_t stream = 0;
-
-    auto stencil_dt_dx    = this->stencil_dt_dx_shallow_copy;
-    auto stencil_shift = this->Map_stencil_shift_shallow_copy.at('x');
-
-    cuda_interior_x <bool_extra, num_blocks, 4, GridStruct, InteractingGridStructX> <<< num_blocks , N_thread , 0 , stream >>> 
-        ( stencil_dt_dx.ptr, stencil_shift.ptr, INT_bound_BGN_x , S , P , P_extra , R , R_extra );
-}
+// Removed kernel_launch_cuda_interior_x
 
 
 
