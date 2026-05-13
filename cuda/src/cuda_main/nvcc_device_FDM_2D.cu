@@ -212,8 +212,8 @@ int main(int argc, char* argv[])
     cuda_Class_Grid<'N', 'N', 601, 601> grid_SNN;
     cuda_Class_Grid<'M', 'M', 600, 600> grid_SMM;
 
-		grid_SMM.cuda_Class_Grid_initialize ( Fwd_Specs.Map_Grid_pointers.at({'M', 'M'}) );
-		grid_SNN.cuda_Class_Grid_initialize ( Fwd_Specs.Map_Grid_pointers.at({'N', 'N'}) );
+		grid_SMM.cuda_Class_Grid_initialize ( &Grids.at(3) );
+		grid_SNN.cuda_Class_Grid_initialize ( &Grids.at(0) );
     // NOTE: copy the parameters from hst to dev to start the simulation on device
     for ( cuda_Class_Grid_Base * cuda_class_grid : {(cuda_Class_Grid_Base *)&grid_SMM, (cuda_Class_Grid_Base *)&grid_SNN} ) 
     {
