@@ -300,23 +300,6 @@ class cuda_Class_Grid : public cuda_Class_Grid_Base
         // [2024/04/03] NOTE: commented out since we added a constructor above.
         void cuda_Class_Grid_initialize ( Class_Grid * class_grid ) override
         {
-            this->ptr_class_grid = class_grid;
-
-            // NOTE: This function achieves set_grid_parameters () and set_forward_operators () 
-            //       for the equivalent cpu class; We mostly copy from the equivalent cpu class, 
-            //       except for containers that need to hold gpu memory, and _pad and stride_.
-
-            assert(type_x == class_grid->G_type_x);
-            assert(type_y == class_grid->G_type_y);
-
-            assert(GridStruct::size_x == class_grid->G_size_x);
-            assert(GridStruct::size_y == class_grid->G_size_y);
-
-            // Pads and strides are already initialized in struct_grid constructor.
-
-
-            this->N_modulo_x = class_grid->N_modulo_x;
-            this->N_modulo_y = class_grid->N_modulo_y;
 
 
             this->SL_external = class_grid->SL_external;
