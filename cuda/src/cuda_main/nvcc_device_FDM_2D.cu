@@ -58,23 +58,6 @@ int main(int argc, char* argv[])
 
 		grid_SMM.cuda_Class_Grid_initialize ( &GridMM );
 		grid_SNN.cuda_Class_Grid_initialize ( &GridNN );
-    // NOTE: copy the parameters from hst to dev to start the simulation on device
-    for ( cuda_Class_Grid_Base * cuda_class_grid : {(cuda_Class_Grid_Base *)&grid_SMM, (cuda_Class_Grid_Base *)&grid_SNN} ) 
-    {
-        for ( int i_field = 0; i_field < cuda_class_grid->N_prmt; i_field++ )
-        { 
-            cuda_class_grid->copy_field_pitched ( "prmt" , i_field , "hst_to_dev" ); 
-            
-            if ( bool_energy )
-                { cuda_class_grid->copy_field_pitched_enrg ( "enrg" , i_field , "hst_to_dev" ); }
-        }
-    }
-
-
-
-
-// ---- function body of forward_simulation is copied below so that 
-//      we can experiment incrementally (one kernel at a time)
 {
 
     for (int it=0; it<Nt; it++) 
