@@ -328,30 +328,6 @@ class cuda_Class_Grid : public cuda_Class_Grid_Base
         //-----------------------------------------------//
         void set_grid_pointers ( std::map< std::array<char, ns_forward::N_dir> , cuda_Class_Grid_Base * > & Map_cuda_grid_pointers ) override
         {
-            char P_type_x = ( G_type_x == 'N' ? 'M' : 'N' );
-            char P_type_y = ( G_type_y == 'N' ? 'M' : 'N' );
-
-            this->pntr_Grid_x = Map_cuda_grid_pointers.at( { P_type_x , G_type_y } ) ; 
-            this->pntr_Grid_y = Map_cuda_grid_pointers.at( { G_type_x , P_type_y } ) ; 
-
-            Map_pntr_grid['x'] = pntr_Grid_x;
-            Map_pntr_grid['y'] = pntr_Grid_y;
-
-
-            // check the sizes
-            if ( G_type_x == 'N' ) assert ( G_size_x - pntr_Grid_x->G_size_x ==  1 );
-            if ( G_type_x == 'M' ) assert ( G_size_x - pntr_Grid_x->G_size_x == -1 );
-
-            if ( G_type_y == 'N' ) assert ( G_size_y - pntr_Grid_y->G_size_y ==  1 );
-            if ( G_type_y == 'M' ) assert ( G_size_y - pntr_Grid_y->G_size_y == -1 );
-
-
-            // assign to pointers the solution variables on the interacting grids
-            if ( pntr_Grid_x->N_soln == 2 ) { Map_pntr_soln['x'] = & pntr_Grid_x->Vec_soln.at(0); }
-            if ( pntr_Grid_y->N_soln == 2 ) { Map_pntr_soln['y'] = & pntr_Grid_y->Vec_soln.at(1); }
-
-            if ( pntr_Grid_x->N_soln == 1 ) { Map_pntr_soln['x'] = & pntr_Grid_x->Vec_soln.at(0); }
-            if ( pntr_Grid_y->N_soln == 1 ) { Map_pntr_soln['y'] = & pntr_Grid_y->Vec_soln.at(0); }
 
         } // set_grid_pointers()
 
@@ -364,15 +340,6 @@ class cuda_Class_Grid : public cuda_Class_Grid_Base
         //-----------------------------------------------//
         void reset_field ( std::string field_name , int ind_field )
         {
-            ns_type::cuda_precision * dev_ptr = nullptr;
-
-                 if ( strcmp( field_name.c_str(), "drvt" ) == 0 ) { dev_ptr = this->Vec_drvt.at(ind_field).ptr; }
-            else if ( strcmp( field_name.c_str(), "soln" ) == 0 ) { dev_ptr = this->Vec_soln.at(ind_field).ptr; }
-            else if ( strcmp( field_name.c_str(), "prmt" ) == 0 ) { dev_ptr = this->Vec_prmt.at(ind_field).ptr; }
-            else 
-                { printf ("%s %d Unrecognized field name.\n", __FILE__, __LINE__); fflush(stdout); exit(0); }
-
-            cudaMemsetAsync ( dev_ptr, 0, this->length_memory * sizeof(ns_type::cuda_precision), 0 );
         }
 
 
@@ -389,127 +356,13 @@ class cuda_Class_Grid : public cuda_Class_Grid_Base
         //-----------------------------------------------//
         void copy_field_contiguous ( std::string field_name , int ind_field , std::string copy_direction )
         {
-            cuda_run_time_vector<ns_type::cuda_precision> * dev_vec = nullptr;
-
-                 if ( strcmp( field_name.c_str(), "drvt" ) == 0 ) { dev_vec = & this->Vec_drvt.at(ind_field); }
-            else if ( strcmp( field_name.c_str(), "soln" ) == 0 ) { dev_vec = & this->Vec_soln.at(ind_field); }
-            else if ( strcmp( field_name.c_str(), "prmt" ) == 0 ) { dev_vec = & this->Vec_prmt.at(ind_field); }
-            else 
-                { printf ("%s %d Unrecognized field name.\n", __FILE__, __LINE__); fflush(stdout); exit(0); }
-
-            std::vector< run_time_vector<ns_type::host_precision> * > vec_hst_fields;
-
-            if ( strcmp( field_name.c_str(), "drvt" ) == 0 ) { for ( auto & iter : ptr_class_grid->Map_v_D  ) { vec_hst_fields.push_back ( & iter.second ); } }
-            if ( strcmp( field_name.c_str(), "soln" ) == 0 ) { for ( auto & iter : ptr_class_grid->Vec_soln ) { vec_hst_fields.push_back ( & iter );        } } 
-            if ( strcmp( field_name.c_str(), "prmt" ) == 0 ) { for ( auto & iter : ptr_class_grid->Vec_prmt ) { vec_hst_fields.push_back ( & iter );        } }
-
-            if ( strcmp( field_name.c_str(), "drvt" ) == 0 ) { assert ( (int) vec_hst_fields.size() == this->N_drvt ); } 
-            if ( strcmp( field_name.c_str(), "soln" ) == 0 ) { assert ( (int) vec_hst_fields.size() == this->N_soln ); } 
-            if ( strcmp( field_name.c_str(), "prmt" ) == 0 ) { assert ( (int) vec_hst_fields.size() == this->N_prmt ); } 
-            
-            run_time_vector<ns_type::host_precision> * hst_vec = vec_hst_fields.at(ind_field);
-
-                 if ( strcmp( copy_direction.c_str(), "hst_to_dev" ) == 0 ) { dev_vec->copy_from_host <ns_type::host_precision> ( * hst_vec ); }
-            else if ( strcmp( copy_direction.c_str(), "dev_to_hst" ) == 0 ) { dev_vec->copy_to_host   <ns_type::host_precision> ( * hst_vec ); }
-            else 
-                { printf ("%s %d Unrecognized direction.\n", __FILE__, __LINE__); fflush(stdout); exit(0); }
         }
 
 
-        // [2022/07/18]
-        // NOTE: In the following function names, _x and _y refer to the "data" direction, 
-        //       not the "physical" direction.
-        template<bool bool_extra=false, int N_block=600, int N_thread=32>
-        void kernel_launch_cuda_interior_x ();
-        
-        template<bool bool_extra=false, int N_block=600, int N_thread=32>
-        void kernel_launch_cuda_boundary_x ( char c_LR );
-
-        template<bool bool_extra=false, int N_block=1, int N_thread=32>
-        void kernel_launch_cuda_secure_bdry_x ( char c_LR );
-
-        template<bool bool_extra=false, char soln_type_x='N', char soln_type_y='N', int N_block=600, int N_thread=32>
-        void kernel_launch_cuda_periodic_y_modulo ();
-
-        template<int cpst_N = 0 , char cpst_S = '0', int N_block=600, int N_thread=32>
-        void kernel_launch_cuda_update ();
 
         template<int N_block=600, int N_thread=32>
         double energy_calculation ();
 };
-
-
-template<bool bool_extra=false>
-__device__ void drvt_to_rths ( ns_type::cuda_precision v_d , int i_d , 
-                               ns_type::cuda_precision * P ,
-                               ns_type::cuda_precision * P_extra ,
-                               ns_type::cuda_precision * R ,
-                               ns_type::cuda_precision * R_extra )
-{
-    // add derivative to rhs
-    R[i_d] += v_d * P[i_d];
-
-    if constexpr ( bool_extra )
-    { 
-        R_extra[i_d] += v_d * P      [i_d];
-        R_extra[i_d] += v_d * P_extra[i_d];
-    }
-    // [2023/07/15]
-    // NOTE: The meaning of R and R_extra may be slightly different from the cpu code.
-    //       We probably should change the cpu code so that they are consistent.
-}
-// [2023/07/27]
-// NOTE: When using C++17, we need to place "drvt_to_rths ()" before the following 
-//       "#include"s because it is called therein. Alternatively, we could use a 
-//       forward declaration for "drvt_to_rths ()".
-
-
-#include "grid_kernel_x.cut"
-
-#include "grid_kernel_y.cut"
-
-#include "grid_update.cut"
-
-
-// [2023/07/17]
-// NOTE: We really should use either a template parameter or static constepxr boolean to 
-//       indicate if a grid is NORMAL or SINGLE - it will simplify the implementation a 
-//       lot; static constexpr may involve less code change. (Need to check if a static
-//       constexpr variable of a regular class can be accessed at compile time.)
-
-
-__global__ void cuda_apply_source ( ns_type::cuda_precision * S , int ind , 
-                                    ns_type::cuda_precision * R , int i_field ,
-                                    double increment )
-{
-    R [ i_field ] += increment;
-    device_slow2sum <ns_type::cuda_precision> ( S[ind] , R[i_field] , S[ind] , R[i_field] );
-}
-
-__global__ void cuda_apply_source ( ns_type::cuda_precision * S , int ind , double increment )
-{
-    S [ ind ] += increment;
-}
-
-__global__ void cuda_record_soln ( ns_type::cuda_precision * R , ns_type::cuda_precision * S , int I_RCV )
-{
-    * R = S [ I_RCV ];
-}
-
-// __global__ void cuda_print_soln ( ns_type::cuda_precision * S , int ind , int it )
-// {
-//     printf( "Time step: %6d soln: % 12.11e \n", it, (double) S [ind] );
-// }
-
-
-// NOTE: Reference: https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#function-parameters
-//
-//     __global__ function parameters are PASSED TO THE DEVICE via constant memory and are LIMITED TO 4 KB.
-//     __global__ functions cannot have a variable number of arguments.
-//     __global__ function parameters CANNOT BE PASS-BY-REFERENCE.
-//
-// Since there is a limit of 4KB (i.e., 512 doubles), let's make a struct that contains only data members.
-
 
 template<typename GridType>
 __global__ void weighted_square_NORMAL_grid ( ns_type::cuda_precision * Sxx , ns_type::cuda_precision * Syy , 
