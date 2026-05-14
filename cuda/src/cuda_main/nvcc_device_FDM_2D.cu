@@ -185,36 +185,6 @@ int main(int argc, char* argv[])
         if ( strcmp( grid->grid_name.c_str(), "Vx" ) == 0 || strcmp( grid->grid_name.c_str(), "Vy" ) == 0 )
             { grid->make_density_reciprocal ( Inv_Specs ); }
     }
-    // [2024/04/03]
-    // NOTE: Let's first see how the results look like before making changes to make_density_reciprocal ().
-
-    
-    print_discretization_parameters ( 1. , 2. );
-
-
-// -------------------------------- WARNING -------------------------------- //
-// [2023/07/18]                                                              //
-// NOTE: We assume that density is made reciprocal on cpu at some point for  //
-//       both cpu and gpu simulations.                                       //
-// -------------------------------- WARNING -------------------------------- //
-
-
-    // ---------------------------------------------------------------------------- //
-    // ---------------- Process the source and receiver information --------------- //
-    // ---------------------------------------------------------------------------- //
-
-    std::vector< struct_src_input >                   & Vec_Src_Input     = Inv_Specs.Vec_Src_Input;
-    std::map< int , std::vector< struct_rcv_input > > & Map_Vec_Rcv_Input = Inv_Specs.Map_Vec_Rcv_Input;
-    // NOTE: In the above type definition for Map_Vec_Rcv_Input, the map key index through src_index; 
-    //       Vec index through rcv_index for this src_index. 
-    //           Decided to use Map instead of Vec since src_index may not be numbered consecutively, 
-    //       or not start with zero.
-
-    if ( !Vec_Src_Input.empty() ) 
-        { printf("Vec_Src_Input should be empty to start with.\n"); fflush(stdout); exit(0); }
-    if ( !Map_Vec_Rcv_Input.empty() ) 
-        { printf("Map_Vec_Rcv_Input should be empty to start with.\n"); fflush(stdout); exit(0); }
-    
 
     return 0;
 }
