@@ -62,9 +62,9 @@ void Class_Grid::adjust_parameters_energy_periodic ()
     // NOTE: The suffix "periodic" means periodic boundary condition is imposed on y direction;
     //       x direction is still associated with free surface boundary condition.
 
-    for ( int i_p = 0; i_p < N_enrg; i_p++ )
+    for ( int i_p = 0; i_p < 1; i_p++ )
     {
-        run_time_vector< double > & P = Vec_prmt_enrg.at(i_p);
+        run_time_vector< double > & P = Vec_prmt_enrg.at(0);
 
         for ( const char& c_dir : {'x'} )
         {
