@@ -66,7 +66,6 @@ namespace namespace_input
 
 inline void print_discretization_parameters ( double const min_velocity , double const max_velocity, InputParams &params )
 {
-    using namespace ns_input;
     using ns_forward::N_dir;
 
     printf("\n");
@@ -104,8 +103,6 @@ inline void print_discretization_parameters ( double const min_velocity , double
 
 inline void ns_input_derived_variables (InputParams &params)
 {
-    using namespace ns_input;
-
     // ---- inv
 
     params.Mx_prmt = params.prmt_M_sizes.at(0);  params.Nx_prmt = params.Mx_prmt + 1;

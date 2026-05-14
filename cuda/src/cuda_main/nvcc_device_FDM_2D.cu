@@ -13,9 +13,9 @@ int main(int argc, char* argv[])
 	file_input_processing( file_name, params );
 	ns_input_derived_variables( params );
 
-    Class_Grid Grid;
+    Class_Grid Grid(params);
     constexpr auto Array_Grid_types = ns_forward::define_Array_Grid_types ();
-    Grid.set_grid_parameters ( Array_Grid_types[0] , true, params );
+    Grid.set_grid_parameters ( Array_Grid_types[0] , true );
     Grid.set_forward_operators ();
     Grid.define_parameters_energy ();
     Grid.adjust_parameters_energy_periodic ();
