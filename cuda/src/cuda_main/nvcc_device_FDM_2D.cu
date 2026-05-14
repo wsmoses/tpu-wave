@@ -250,58 +250,5 @@ int main(int argc, char* argv[])
         // NOTE: comments on the re-initialization involved in the above function 
     }
 
-
-    // cudaSetDevice(ns_input::device_number);   // select which device to run; 0 is default;
-                           // the number of devices can be retrieved by 
-                           // cudaGetDeviceCount(&devicesCount);
-// Actually, we set it to -1, which is the reason it causes error on sirius (CUDA 12.9)
-// I don't feel device_number should be part of the input file or command line; instead,
-// should determine it inside the code based on how many src we have.
-
-
-    // cudaDeviceSetCacheConfig ( cudaFuncCachePreferL1 );
-
-
-    cuda_Class_Grid<'N', 'N', 601, 601> grid_SNN;
-    cuda_Class_Grid<'M', 'M', 600, 600> grid_SMM;
-    cuda_Class_Grid<'M', 'N', 600, 601> grid_SMN;
-    cuda_Class_Grid<'N', 'M', 601, 600> grid_SNM;
-
-    std::map< std::array<char, ns_forward::N_dir> , cuda_Class_Grid_Base * > cuda_Map_Class_Grid_pointers  {};    
-
-    // ---- Assign to the map from grid types to pointers of cuda_Class_Grid
-    cuda_Map_Class_Grid_pointers [{'N','N'}] = &grid_SNN;
-    cuda_Map_Class_Grid_pointers [{'M','M'}] = &grid_SMM;
-    cuda_Map_Class_Grid_pointers [{'M','N'}] = &grid_SMN;
-    cuda_Map_Class_Grid_pointers [{'N','M'}] = &grid_SNM;
-
-
-    if ( cuda_Map_Class_Grid_pointers.size() != 2<<(N_dir-1) ) 
-        { printf( "Grid pointers is supposed to have size %d.\n", 2<<(N_dir-1) ); fflush(stdout); exit(0); }
-
-
-    // initialize cuda_class_grid
-    for ( const auto & iter_grid_type : Array_Grid_types ) 
-        { cuda_Map_Class_Grid_pointers.at(iter_grid_type)->cuda_Class_Grid_initialize ( Fwd_Specs.Map_Grid_pointers.at(iter_grid_type) ); }
-
-    for ( const auto & iter_grid_type : Array_Grid_types ) 
-        { cuda_Map_Class_Grid_pointers.at(iter_grid_type)->set_grid_pointers ( cuda_Map_Class_Grid_pointers ); }
-
-    // NOTE: copy the parameters from hst to dev to start the simulation on device
-    for ( const auto & iter_grid_type : Array_Grid_types ) 
-    {
-        cuda_Class_Grid_Base * cuda_class_grid = cuda_Map_Class_Grid_pointers.at(iter_grid_type);
-        for ( int i_field = 0; i_field < cuda_class_grid->N_prmt; i_field++ )
-        { 
-            cuda_class_grid->copy_field_pitched ( "prmt" , i_field , "hst_to_dev" ); 
-            
-            if ( bool_energy )
-                { cuda_class_grid->copy_field_pitched_enrg ( "enrg" , i_field , "hst_to_dev" ); }
-        }
-    }
-
-
-
-
     return 0;
 }
