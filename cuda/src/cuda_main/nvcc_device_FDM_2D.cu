@@ -215,40 +215,6 @@ int main(int argc, char* argv[])
     if ( !Map_Vec_Rcv_Input.empty() ) 
         { printf("Map_Vec_Rcv_Input should be empty to start with.\n"); fflush(stdout); exit(0); }
     
-    // The input file from where to read in the source and receiver information
-    file_name = "../../data/" + medium_name + "/SrcRcv.txt";
-    Inv_Specs.input_SrcRcv_locations( file_name );
-
-    Inv_Specs.data_misfit = 0.;  // (re)set the aggregated data misfit for all sources to zero before 
-                                 // enter the loop that goes through the sources and lauches simulations 
-
-    for ( auto & iter_vec : Vec_Src_Input )  // NOTE: this for loop will disappear (naturally) in the MPI environment
-    {
-        // ---- Process the source and receiver location 
-
-        printf( "Processing source locations for source %d.\n", iter_vec.src_index );
-        Fwd_Specs.process_src_locations ( iter_vec );           // NOTE: This function should return some information so that 
-                                                                //       I can know if the src process is successful.
-        int & fwd_src_index = Fwd_Specs.src_forward.src_index;
-
-
-        printf( "    Processing receiver locations for source %d.\n", fwd_src_index );
-        if ( Map_Vec_Rcv_Input.at( fwd_src_index ).size() <= 0 )
-            { printf( "No receiver found for source %d.\n", fwd_src_index ); fflush(stdout); exit(0); }
-
-        for ( const auto & grid_type : Array_Grid_types ) { Fwd_Specs.Map_grid_N_rcvs            [grid_type] = 0;  }
-        for ( const auto & grid_type : Array_Grid_types ) { Fwd_Specs.Map_grid_struct_rcv_forward[grid_type] = {}; }
-        for ( const auto & grid_type : Array_Grid_types ) { Fwd_Specs.Map_grid_record_rcv        [grid_type] = {}; }
-        for ( const auto & grid_type : Array_Grid_types ) { Fwd_Specs.Map_grid_RESULT_rcv        [grid_type] = {}; }
-        for ( const auto & grid_type : Array_Grid_types ) { Fwd_Specs.Map_grid_misfit_rcv        [grid_type] = {}; }
-        // NOTE: In the above, we initiate an entry for each grid type, regardless of whether 
-        //       there is a receiver associated with it. Is this NECESSARY ?
-        //           For API stability, decided to keep it this way until strong reasons for 
-        //       change emerge.
-
-        Fwd_Specs.process_rcv_locations ( Map_Vec_Rcv_Input.at( fwd_src_index ) );
-        // NOTE: comments on the re-initialization involved in the above function 
-    }
 
     return 0;
 }
