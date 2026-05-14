@@ -141,15 +141,6 @@ void Class_Grid::adjust_parameters_energy_periodic ()
                 }
             }
 
-            if ( G_type_y == 'N' )
-            {
-                int iy = G_size_y - 1;
-                for ( int ix = 0; ix < G_size_x; ix++ )
-                {
-                    int i_v = ix * G_size_y + iy;
-                    P.at(i_v) = P.at(i_v) * 0.; // 1/2; // Oooo, please, tripped by integer division again ? 03/23/2022
-                }
-            }
         }
 
         // Warning: Because of the strongly imposed periodic boundary condition, the first and last 
