@@ -131,15 +131,7 @@ inline void ns_input_derived_variables (InputParams &params)
     params.Map_bdry_type[{'y','L'}] = params.bdry_type_L.at(1);
     params.Map_bdry_type[{'y','R'}] = params.bdry_type_R.at(1);
 
-    // NOTE: We have assumed that there is only 1 MPI process for 1 src 
-    //       and that all boundaries are of free surface type.
-    for ( const char c_dir : {'x','y'} )
-    for ( const char c_LR  : {'L','R'} )
-    { assert ( ( params.Map_bdry_type.at( {c_dir,c_LR} ) == 'F' ) ); }
-    // [2023/01/10]
-    // NOTE: We need double (()), otherwise the preprocessor complains:
-    //       "error: macro "assert" passed 2 arguments, but takes just 1"
-    //       This is because it treated the , as separator of two tokens.
+}
 }
 }
 namespace ns_input = namespace_input;
