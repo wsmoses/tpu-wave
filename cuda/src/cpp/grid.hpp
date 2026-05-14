@@ -576,7 +576,7 @@ class Class_Grid
         double energy_calculation ();
 
         template<typename T>
-        void interpolate_forward_parameter ( run_time_vector<double> & inverse_P , 
+        void interpolate_forward_parameter (  
                                              run_time_vector< T > & forward_P );
 
         void retrieve_forward_parameter ( Class_Inverse_Specs &Inv_Specs );

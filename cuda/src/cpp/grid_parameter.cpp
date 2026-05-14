@@ -4,42 +4,11 @@
 #include "namespace_input.hpp"
 
 template<typename T>
-void Class_Grid::interpolate_forward_parameter ( run_time_vector< double > & inverse_P , 
+void Class_Grid::interpolate_forward_parameter ( 
                                                  run_time_vector< T > & forward_P )
 {
     using namespace ns_input;
 
-
-    for ( int ix_S = 0; ix_S < G_size_x; ix_S++ ) 
-    { 
-        for ( int iy_S = 0; iy_S < G_size_y; iy_S++ ) 
-        { 
-            // step 1): determine location in 'physical' units
-            long num_x_loc = 1 << 30;  long den_x_loc = -1;
-            long num_y_loc = 1 << 30;  long den_y_loc = -1;
-
-            if ( G_type_x == 'N' ) { num_x_loc =             ix_S * num_dx_soln;  den_x_loc =     den_dx_soln; }
-            if ( G_type_y == 'N' ) { num_y_loc =             iy_S * num_dx_soln;  den_y_loc =     den_dx_soln; }
-
-            if ( G_type_x == 'M' ) { num_x_loc = ( 2 * ix_S + 1 ) * num_dx_soln;  den_x_loc = 2 * den_dx_soln; }
-            if ( G_type_y == 'M' ) { num_y_loc = ( 2 * iy_S + 1 ) * num_dx_soln;  den_y_loc = 2 * den_dx_soln; }
-
-
-            // step 2): determine ix_M, iy_M (did we assume dxM >= dxS in the following ?)
-            long ix_M = ( num_x_loc * den_dx_prmt ) / ( den_x_loc * num_dx_prmt );
-            long iy_M = ( num_y_loc * den_dx_prmt ) / ( den_y_loc * num_dx_prmt );
-
-            if ( ix_M >= Nx_prmt ) ix_M = Nx_prmt - 1;
-            if ( iy_M >= Ny_prmt ) iy_M = Ny_prmt - 1;
-            if ( ix_M < 0 ) ix_M = 0;
-            if ( iy_M < 0 ) iy_M = 0;
-
-
-            forward_P( ix_S * G_size_y + iy_S ) = 0;
-
-
-        }
-    }
 
 } // interpolate_forward_parameter
 
@@ -84,15 +53,15 @@ void Class_Grid::retrieve_forward_parameter ( Class_Inverse_Specs &Inv_Specs )
             V_LAMBDA (i) =     V_RHO (i) * V_VP (i) * V_VP (i) - V_2_MU (i);
         }
 
-        interpolate_forward_parameter <ns_type::host_precision> ( V_LAMBDA , Vec_prmt.at(0) );
-        interpolate_forward_parameter <ns_type::host_precision> ( V_2_MU   , Vec_prmt.at(1) );
+        interpolate_forward_parameter <ns_type::host_precision> ( Vec_prmt.at(0) );
+        interpolate_forward_parameter <ns_type::host_precision> ( Vec_prmt.at(1) );
     }
 
 
     // if ( (G_type_x - 'M') + (G_type_y - 'M') == ('N' - 'M') * 1 )  // {Vx;Vy}
     if ( strcmp( grid_name.c_str(), "Vx" ) == 0 || strcmp( grid_name.c_str(), "Vy" ) == 0 ) 
     {
-        interpolate_forward_parameter <ns_type::host_precision> ( V_RHO , Vec_prmt.at(0) );
+        interpolate_forward_parameter <ns_type::host_precision> ( Vec_prmt.at(0) );
     }
 
 
@@ -104,7 +73,7 @@ void Class_Grid::retrieve_forward_parameter ( Class_Inverse_Specs &Inv_Specs )
         for ( int i = 0; i < ns_input::PADDED_inv_prmt_size; i++ )
             { V_MU (i) = V_RHO (i) * V_VS (i) * V_VS (i); }
 
-        interpolate_forward_parameter <ns_type::host_precision> ( V_MU , Vec_prmt.at(0) );
+        interpolate_forward_parameter <ns_type::host_precision> ( Vec_prmt.at(0) );
     }
 
 } // retrieve_forward_parameter
