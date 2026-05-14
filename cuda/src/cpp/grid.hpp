@@ -143,7 +143,7 @@ class Class_Grid
         //-----------------------------------------------//
         //------------- Function defintiion -------------//
         //-----------------------------------------------//
-        void set_grid_parameters ( std::array<char,ns_forward::N_dir> GT , bool bool_energy ) 
+        void set_grid_parameters ( std::array<char,ns_forward::N_dir> GT , bool bool_energy, ns_input::InputParams &params ) 
         {
             // Grid type
             if ( GT.at(0) == 'N' || GT.at(0) == 'M' ) { G_type_x = GT.at(0); } else { printf("Grid type can only be N or M.\n"); fflush(stdout); exit(0); }
@@ -165,8 +165,8 @@ class Class_Grid
             if ( strcmp( grid_name.c_str(), "Vx" ) == 0 || strcmp( grid_name.c_str(), "Vy" ) == 0 ) { this->free_surface_update = true; }
 
             // Grid size 
-            if ( G_type_x == 'N' ) { G_size_x = ns_input::Nx_soln; }  if ( G_type_x == 'M' ) { G_size_x = ns_input::Mx_soln; }
-            if ( G_type_y == 'N' ) { G_size_y = ns_input::Ny_soln; }  if ( G_type_y == 'M' ) { G_size_y = ns_input::My_soln; }
+            if ( G_type_x == 'N' ) { G_size_x = params.Nx_soln; }  if ( G_type_x == 'M' ) { G_size_x = params.Mx_soln; }
+            if ( G_type_y == 'N' ) { G_size_y = params.Ny_soln; }  if ( G_type_y == 'M' ) { G_size_y = params.My_soln; }
             
             this->Map_G_size['x'] = G_size_x;
             this->Map_G_size['y'] = G_size_y;
