@@ -57,7 +57,7 @@ void Class_Grid::define_parameters_energy ()
 //       duplication on N grids anymore.
 void Class_Grid::adjust_parameters_energy_periodic ()
 {
-    using ns_input::dx;
+    double dx = params.dx;
     
     // NOTE: The suffix "periodic" means periodic boundary condition is imposed on y direction;
     //       x direction is still associated with free surface boundary condition.
