@@ -96,8 +96,6 @@ int main(int argc, char* argv[])
     Fwd_Specs[Array_Grid_types.at(2)] = &Grids.at(2);
     Fwd_Specs[Array_Grid_types.at(3)] = &Grids.at(3);
 
-    if ( Fwd_Specs.size() != Grids.size() )  // change to assert
-        { printf( "Map_Grid_pointers is supposed to have size %d.\n", 2<<(N_dir-1) ); fflush(stdout); exit(0); }
 
 
     for ( const auto & iter_grid_type : Array_Grid_types ) 
@@ -149,17 +147,10 @@ int main(int argc, char* argv[])
     for ( const std::string prmt_name : { "rho" , "vp" , "vs" } )
         { Inv_Specs.Map_inv_prmt[ prmt_name ].allocate_memory ( ns_input::PADDED_inv_prmt_size ); }
 
-    Inv_Specs.Map_inv_prmt.at("rho").set_constant(1);
-    Inv_Specs.Map_inv_prmt.at("vp" ).set_constant(2);
-    Inv_Specs.Map_inv_prmt.at("vs" ).set_constant(1);
-    // ---- verification
-    // NOTE: I think the three parameters are indeed constant 1, 2, and 1 in the stored file.
-
-
     Grids[0].retrieve_forward_parameter ( Inv_Specs );
 
-	Grids[0].define_parameters_energy ();
-	Grids[0].adjust_parameters_energy_periodic ();
+    Grids[0].define_parameters_energy ();
+    Grids[0].adjust_parameters_energy_periodic ();
 
     return 0;
 }

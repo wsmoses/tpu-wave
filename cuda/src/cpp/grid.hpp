@@ -581,7 +581,6 @@ class Class_Grid
 
         void retrieve_forward_parameter ( Class_Inverse_Specs &Inv_Specs );
 
-        void make_density_reciprocal ( Class_Inverse_Specs &Inv_Specs );
 
 };
 
