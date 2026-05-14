@@ -22,25 +22,13 @@ int main(int argc, char* argv[])
 
     // processing the command line option to get the medium_name 
     // (which determines the input file and data to read in)
-    command_line_input_processing( argc, argv, "medium" );
     std::string file_name = "../../data/" + medium_name + input_file_name;  // "/InputFile.txt";    
 
     file_input_processing( file_name );
 	input_file_name = file_name;  // this is so that we can output "input_file_name" at the end 
-								  // because file_name will be overwritten later.
 
-    // ---- rescanning the command line options to process the remaining arguments;
-    //      rescanning needed such that the arguments specified at command line can 
-    //      overwrite those specified in input file;
-    command_line_input_processing( argc, argv, "all" );
-
-    
-    if ( c_energy == 'N' ) bool_energy = false;
-    if ( c_energy == 'Y' ) bool_energy = true;
-    assert( bool_energy == true );    
 
     ns_input_derived_variables();
-    checking_and_printouts_input_parameters();
 
     // [2023/07/12] 
     // NOTE: "file_input_processing ()" and "checking_and_printouts_input_parameters ()" 
