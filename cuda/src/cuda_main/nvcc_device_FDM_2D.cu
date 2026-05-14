@@ -84,71 +84,8 @@ int main(int argc, char* argv[])
                                                       //       reason - std::pow () promotes int to float.
 
     constexpr auto Array_Grid_types = ns_forward::define_Array_Grid_types ();
-    if ( Array_Grid_types.size() != Grids.size() )  // change to assert
-    { 
-        printf( "Array_Grid_types size and Grids size do not agree %ld %ld.\n", Array_Grid_types.size(), Grids.size() ); 
-        fflush(stdout); exit(0); 
-    }
-
-    // ---- Assign to the map from grid types to pointers of Class_Grid
-    Fwd_Specs[Array_Grid_types.at(0)] = &Grids.at(0);
-    Fwd_Specs[Array_Grid_types.at(1)] = &Grids.at(1);
-    Fwd_Specs[Array_Grid_types.at(2)] = &Grids.at(2);
-    Fwd_Specs[Array_Grid_types.at(3)] = &Grids.at(3);
-
-
-
-    for ( const auto & iter_grid_type : Array_Grid_types ) 
-        { Fwd_Specs.at(iter_grid_type)->set_grid_parameters ( iter_grid_type , bool_energy ); }
-
-    for ( const auto & iter_grid_type : Array_Grid_types ) 
-        { Fwd_Specs.at(iter_grid_type)->set_forward_operators (); }
-
-    for ( const auto & iter_grid_type : Array_Grid_types ) 
-        { Fwd_Specs.at(iter_grid_type)->set_grid_pointers ( Fwd_Specs ); }
-
-
-    // -------------------------------------------------------------- //
-    // ---------------- Input the physical parameters --------------- //
-    // -------------------------------------------------------------- //
-
-/*
-    // Inverse parameters are stored in Inv_Specs.
-    for ( const std::string prmt_name : { "rho" , "vp" , "vs" } )
-    {
-        file_name = "../../data/" + medium_name + "/" + prmt_name + ".bin";
-        // NOTE: During testing, trying to keep only one copy of each input file so that
-        //       we don't need to worry whether the input files are the intended version.
-
-        Inv_Specs.input_inverse_parameter ( file_name , prmt_name );
-    }
-    // NOTE: The inverse parameters stored in Inv_Specs have been PADDED with an extra number 
-    //       on each direction to avoid the 'ghostly' bug caused by stepping out of bound.
-    //           PAY SPECIAL ATTENTION to the size and stride of the inverse parameters 
-    //       acutally stored in Inv_Specs : THE SIZE IS 
-    //              ns_input::PADDED_inv_prmt_size = ( Nx_model + 1 ) * ( Ny_model + 1 )
-    //           THE STRIDE IS 
-    //              ( Ny_model + 1 ).
-*/
-    // for ( const std::string prmt_name : { "rho" , "vp" , "vs" } )
-    // {
-    //     auto v = Inv_Specs.Map_inv_prmt.at(prmt_name);
-    //     printf( "%16.15e %16.15e\n", *std::min_element(v.begin(),v.end())
-    //                                , *std::max_element(v.begin(),v.end()) );
-    // }
-    // [2023/09/24]
-    // NOTE: min are zero because of the padding.
-    // [2023/09/24]
-    // NOTE: min_element and max_element cannot be called on __half.
-
-
-
-    // ---- verification (overwrite the above readin parameter data)
-    for ( const std::string prmt_name : { "rho" , "vp" , "vs" } )
-        { Inv_Specs.Map_inv_prmt[ prmt_name ].allocate_memory ( ns_input::PADDED_inv_prmt_size ); }
-
-    Grids[0].retrieve_forward_parameter ( Inv_Specs );
-
+    Grids[0].set_grid_parameters ( Array_Grid_types[0] , bool_energy );
+    Grids[0].set_forward_operators ();
     Grids[0].define_parameters_energy ();
     Grids[0].adjust_parameters_energy_periodic ();
 
