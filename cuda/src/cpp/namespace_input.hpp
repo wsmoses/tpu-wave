@@ -62,8 +62,6 @@ namespace namespace_input
         run_time_vector<double> Record_E_p0;
         run_time_vector<double> Record_E_p1;
     };
-}
-namespace ns_input = namespace_input;
 
 
 inline void print_discretization_parameters ( double const min_velocity , double const max_velocity, InputParams &params )
@@ -146,6 +144,8 @@ inline void ns_input_derived_variables (InputParams &params)
     //       "error: macro "assert" passed 2 arguments, but takes just 1"
     //       This is because it treated the , as separator of two tokens.
 }
+}
+namespace ns_input = namespace_input;
 
 
 #endif

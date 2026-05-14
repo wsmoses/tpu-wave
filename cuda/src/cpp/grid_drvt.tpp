@@ -537,29 +537,6 @@ void secure_bdry ( char c_dir )
     //       i_dir needs to be dereferenced before using as index.
 
 
-    // NOTE: In this function, the convention of organization and notation is carried over from 
-    //       calculate_derivative (). For example, i_dir is introduced to avoid if statements.
-    //           But the interpretation of the details may be slightly different. For example,
-    //       the indices ix and iy are meant to go through "pntr" grid BEFORE 'SEND' and 'RECV' 
-    //       and "this" grid AFTER 'SEND' and 'RECV'. 
-    //           That being said, there is no difference between calculating the loop bounds 
-    //       using the sizes from "this" grid or "pntr" grid in the following. This is because,
-    //       essentially, the loops before 'SEND' and 'RECV' projects the data on 'a' plane 
-    //       (not 'the' plane, but 'a' plane in the sense that its location on "dir" direction
-    //       is not 'determined', and is not relevant) perpendicular to the "dir" direction; 
-    //       the loops after 'SEND' and 'RECV' uses data projected to the plane for update.
-    //           This plane, being perpendicular to the "dir" direction, has its sizes consistent
-    //       with both "this" grid and "pntr" grid on the other two directions. 
-    //           On "dir" direction, the variable that i_dir aliasing to is essentially a 'dummy'
-    //       variable : as long as *_bound_END_* - *_bound_BGN_* == 1 (equals for being a plane
-    //       on "dir" direction), the result should be the same. This is because, effectively, 
-    //       the variable that i_dir aliasing to is not used in calculating the 2D vector index :
-    //       it shows up in the formulas but is effectively 'substituted' by iw.
-    //           Although these 'choices' do not make a difference in terms of the semantics to
-    //       computers, they can still make a difference in terms of the comprehensibility and 
-    //       expressiveness to human programmers.
-
-
     // Project data to the left boundary 
 
     // ---- loop bounds
@@ -572,8 +549,8 @@ void secure_bdry ( char c_dir )
     int LFT_bound_END_w = projection_L.length;
 
     // ---- projection
-    if ( ns_input::Map_bdry_type.at({ c_dir , 'L' }) != 'F'                                  // if the boundary is 'internal' (MPI boundary)
-    || ( ns_input::Map_bdry_type.at({ c_dir , 'L' }) == 'F' && this->free_surface_update ) ) // if the boundary is 'external' and THIS grid
+    if ( params.Map_bdry_type.at({ c_dir , 'L' }) != 'F'                                  // if the boundary is 'internal' (MPI boundary)
+    || ( params.Map_bdry_type.at({ c_dir , 'L' }) == 'F' && this->free_surface_update ) ) // if the boundary is 'external' and THIS grid
     {                                                                                     // requires penalty terms to update (Vx,Vy)
         int i_p = 0;
 
@@ -606,8 +583,8 @@ void secure_bdry ( char c_dir )
     int RHT_bound_END_w = pntr->Map_G_size.at(c_dir);
 
     // ---- projection
-    if ( ns_input::Map_bdry_type.at({ c_dir , 'R' }) != 'F'                                  // if the boundary is 'internal' (MPI boundary)
-    || ( ns_input::Map_bdry_type.at({ c_dir , 'R' }) == 'F' && this->free_surface_update ) ) // if the boundary is 'external' and THIS grid
+    if ( params.Map_bdry_type.at({ c_dir , 'R' }) != 'F'                                  // if the boundary is 'internal' (MPI boundary)
+    || ( params.Map_bdry_type.at({ c_dir , 'R' }) == 'F' && this->free_surface_update ) ) // if the boundary is 'external' and THIS grid
     {                                                                                     // requires penalty terms to update (Vx,Vy)
         int i_p = 0;
 
@@ -629,13 +606,13 @@ void secure_bdry ( char c_dir )
 
     // copy (send) data for the left boundary update and set the penalty parameter
     ns_type::host_precision eta_L = 0.; 
-    if ( ns_input::Map_bdry_type.at({ c_dir , 'L' }) != 'F'                              ) { eta_L =   1./2.; RECV_L = SEND_R;         }
-    if ( ns_input::Map_bdry_type.at({ c_dir , 'L' }) == 'F' && this->free_surface_update ) { eta_L =   1.   ; RECV_L.set_constant(0.); }
+    if ( params.Map_bdry_type.at({ c_dir , 'L' }) != 'F'                              ) { eta_L =   1./2.; RECV_L = SEND_R;         }
+    if ( params.Map_bdry_type.at({ c_dir , 'L' }) == 'F' && this->free_surface_update ) { eta_L =   1.   ; RECV_L.set_constant(0.); }
     
     // copy (send) data for the right boundary update and set the penalty parameter
     ns_type::host_precision eta_R = 0.;
-    if ( ns_input::Map_bdry_type.at({ c_dir , 'R' }) != 'F'                              ) { eta_R = - 1./2.; RECV_R = SEND_L;         }
-    if ( ns_input::Map_bdry_type.at({ c_dir , 'R' }) == 'F' && this->free_surface_update ) { eta_R = - 1.   ; RECV_R.set_constant(0.); }
+    if ( params.Map_bdry_type.at({ c_dir , 'R' }) != 'F'                              ) { eta_R = - 1./2.; RECV_R = SEND_L;         }
+    if ( params.Map_bdry_type.at({ c_dir , 'R' }) == 'F' && this->free_surface_update ) { eta_R = - 1.   ; RECV_R.set_constant(0.); }
 
 
     // update the left boundary
@@ -643,8 +620,8 @@ void secure_bdry ( char c_dir )
     LFT_bound_BGN_w = 0;
     LFT_bound_END_w = A_inv_projection_L.length;
 
-    if ( ns_input::Map_bdry_type.at({ c_dir , 'L' }) != 'F'                                  // if the boundary is 'internal' (MPI boundary)
-    || ( ns_input::Map_bdry_type.at({ c_dir , 'L' }) == 'F' && this->free_surface_update ) ) // if the boundary is 'external' and THIS grid
+    if ( params.Map_bdry_type.at({ c_dir , 'L' }) != 'F'                                  // if the boundary is 'internal' (MPI boundary)
+    || ( params.Map_bdry_type.at({ c_dir , 'L' }) == 'F' && this->free_surface_update ) ) // if the boundary is 'external' and THIS grid
     {                                                                                        // requires penalty terms to update (Vx,Vy)
         int i_p = 0;
 
@@ -670,8 +647,8 @@ void secure_bdry ( char c_dir )
     RHT_bound_BGN_w = this->Map_G_size.at(c_dir) - A_inv_projection_R.length;
     RHT_bound_END_w = this->Map_G_size.at(c_dir);
 
-    if ( ns_input::Map_bdry_type.at({ c_dir , 'R' }) != 'F'                                  // if the boundary is 'internal' (MPI boundary)
-    || ( ns_input::Map_bdry_type.at({ c_dir , 'R' }) == 'F' && this->free_surface_update ) ) // if the boundary is 'external' and THIS grid
+    if ( params.Map_bdry_type.at({ c_dir , 'R' }) != 'F'                                  // if the boundary is 'internal' (MPI boundary)
+    || ( params.Map_bdry_type.at({ c_dir , 'R' }) == 'F' && this->free_surface_update ) ) // if the boundary is 'external' and THIS grid
     {                                                                                        // requires penalty terms to update (Vx,Vy)
         int i_p = 0;
 

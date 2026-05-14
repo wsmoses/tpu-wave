@@ -136,14 +136,16 @@ class Class_Grid
         std::map< std::pair<char,char> , run_time_vector<ns_type::host_precision> > Map_A_inv_projection;    // key : { c_dir , c_LR }
 
 
+        ns_input::InputParams &params;
+
         // constructor
-        Class_Grid ( ) { }        
+        Class_Grid ( ns_input::InputParams &p ) : params(p) { }        
 
         
         //-----------------------------------------------//
         //------------- Function defintiion -------------//
         //-----------------------------------------------//
-        void set_grid_parameters ( std::array<char,ns_forward::N_dir> GT , bool bool_energy, ns_input::InputParams &params ) 
+        void set_grid_parameters ( std::array<char,ns_forward::N_dir> GT , bool bool_energy ) 
         {
             // Grid type
             if ( GT.at(0) == 'N' || GT.at(0) == 'M' ) { G_type_x = GT.at(0); } else { printf("Grid type can only be N or M.\n"); fflush(stdout); exit(0); }
@@ -273,8 +275,8 @@ class Class_Grid
         //-----------------------------------------------//
         void set_forward_operators ()
         {
-            using ns_input::dt;
-            using ns_input::dx;
+            double dt = params.dt;
+            double dx = params.dx;
 
             assert ( this->stencil_dt_dx.length == ns_forward::stencil.length );
 
