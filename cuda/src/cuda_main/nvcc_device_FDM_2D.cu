@@ -1,20 +1,12 @@
-#include "forward.hpp"
-#include "inverse.hpp"
-
 #include "input_processing.hpp"
 
 #include "grid.cuh"
 #include "namespace_device_variable.cuh"  /* probably dummy, only the #include "namespace_type.cuh" inside it is meaningful */
 
-#include <filesystem>
-
 int main(int argc, char* argv[]) 
 {
     using ns_forward::N_dir;
     using namespace ns_input;
-
-    std::map< std::array<char, ns_forward::N_dir> , Class_Grid * > Fwd_Specs;
-    Class_Inverse_Specs Inv_Specs;
 
 #ifndef GRIDFLAG
     std::string input_file_name = "/InputFile.txt";
@@ -80,14 +72,12 @@ int main(int argc, char* argv[])
     if ( bool_energy ) { ns_input::Record_E_p0.allocate_memory (Nt); }
     if ( bool_energy ) { ns_input::Record_E_p1.allocate_memory (Nt); }
 
-    std::array< Class_Grid , 2<<(N_dir-1) > Grids;    // NOTE: use bit shift to take the power of 2 (only works when base is 2); 
-                                                      //       reason - std::pow () promotes int to float.
-
+    Class_Grid Grid;
     constexpr auto Array_Grid_types = ns_forward::define_Array_Grid_types ();
-    Grids[0].set_grid_parameters ( Array_Grid_types[0] , bool_energy );
-    Grids[0].set_forward_operators ();
-    Grids[0].define_parameters_energy ();
-    Grids[0].adjust_parameters_energy_periodic ();
+    Grid.set_grid_parameters ( Array_Grid_types[0] , bool_energy );
+    Grid.set_forward_operators ();
+    Grid.define_parameters_energy ();
+    Grid.adjust_parameters_energy_periodic ();
 
     return 0;
 }
