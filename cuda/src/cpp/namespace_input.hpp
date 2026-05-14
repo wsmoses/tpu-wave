@@ -133,7 +133,6 @@ inline void ns_input_derived_variables (InputParams &params)
 
 }
 }
-}
 namespace ns_input = namespace_input;
 
 
