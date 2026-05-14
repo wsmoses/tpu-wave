@@ -171,8 +171,6 @@ int main(int argc, char* argv[])
 
 	Grids[0].adjust_parameters_energy_periodic ();
 	Grids[1].adjust_parameters_energy_periodic ();
-	Grids[2].adjust_parameters_energy_periodic ();
-	Grids[3].adjust_parameters_energy_periodic ();
     }
 
     return 0;
