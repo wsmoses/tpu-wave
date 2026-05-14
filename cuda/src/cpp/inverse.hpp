@@ -2,6 +2,7 @@
 #define INVERSE_H
 
 #include "src_rcv.hpp"
+#include "namespace_input.hpp"
 
 class Class_Inverse_Specs 
 {
@@ -30,13 +31,13 @@ class Class_Inverse_Specs
         //       back here again. We may add the following struct Map_Src_Forward as a member
         //       variable of this class:
         //           std::map< int , struct_src_forward > Map_Src_Forward;
-
+ 
         double data_misfit;         // aggregated data misfit for all sources
-
+ 
         // constructor
         // Class_Inverse_Specs () {}
-
-        void input_inverse_parameter ( std::string file_name, std::string prmt_name );
+ 
+        void input_inverse_parameter ( std::string file_name, std::string prmt_name, ns_input::InputParams &params );
 
         void input_SrcRcv_locations ( std::string file_name ); 
 

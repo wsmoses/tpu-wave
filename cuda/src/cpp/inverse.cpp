@@ -3,7 +3,7 @@
 
 #include <set>
 
-void Class_Inverse_Specs::input_inverse_parameter ( std::string file_name, std::string prmt_name )
+void Class_Inverse_Specs::input_inverse_parameter ( std::string file_name, std::string prmt_name, ns_input::InputParams &params )
 {
     using namespace ns_input;
     using namespace std;
@@ -46,10 +46,10 @@ void Class_Inverse_Specs::input_inverse_parameter ( std::string file_name, std::
         { printf( "Unable to open file: %s\n", file_name.c_str() ); fflush(stdout); exit(0); }
     
     // check the size
-    if ( static_cast<long>( inv_prmt_size * sizeof( prmt_data_type ) ) != static_cast<long>( byte_size ) ) 
+    if ( static_cast<long>( params.inv_prmt_size * sizeof( prmt_data_type ) ) != static_cast<long>( byte_size ) ) 
     {   
         printf( "Size of the input data file %s not as expected : %ld (model size) vs %ld (byte size).\n", 
-                                             file_name.c_str(), inv_prmt_size, static_cast<long>( byte_size ) );
+                                             file_name.c_str(), params.inv_prmt_size, static_cast<long>( byte_size ) );
         fflush(stdout); exit(0); 
     }
 
@@ -60,7 +60,7 @@ void Class_Inverse_Specs::input_inverse_parameter ( std::string file_name, std::
 
     if ( Map_inv_prmt.count( prmt_name ) > 0 )
         { printf("The input parameter %s has already been allocated memory space.", prmt_name.c_str()); fflush(stdout); exit(0); }
-    Map_inv_prmt[ prmt_name ].allocate_memory ( PADDED_inv_prmt_size );
+    Map_inv_prmt[ prmt_name ].allocate_memory ( params.PADDED_inv_prmt_size );
 
     run_time_vector<double> * model_data = nullptr;
     model_data = & ( Map_inv_prmt.at( prmt_name ) );
@@ -76,12 +76,12 @@ void Class_Inverse_Specs::input_inverse_parameter ( std::string file_name, std::
     //              Inv_Specs.PADDED_inv_prmt_size = ( Nx_prmt + 1 ) * ( Ny_prmt + 1 )
     //           THE STRIDE IS 
     //              ( Ny_prmt + 1 ).
-    const int PADDED_stride = Ny_prmt + 1;
+    const int PADDED_stride = params.Ny_prmt + 1;
      
     int data_count = 0;
-    for ( int ix = 0; ix < Nx_prmt; ix++ )
+    for ( int ix = 0; ix < params.Nx_prmt; ix++ )
     {
-        for ( int iy = 0; iy < Ny_prmt; iy++ )
+        for ( int iy = 0; iy < params.Ny_prmt; iy++ )
         {        
             int             i_prmt   = ix * PADDED_stride + iy;    // PADDED_stride = Ny_prmt + 1
             model_data->at( i_prmt ) = data_ptr[data_count];
@@ -101,26 +101,26 @@ void Class_Inverse_Specs::input_inverse_parameter ( std::string file_name, std::
     // check the compatibility of parameters if under periodic boundary condition 
     //     NOTE: NOT currently useful since all boundaries are assumed to be free surface.
     // ---- x direction
-    if ( Map_bdry_type.at({'x','L'}) == 'P' && Map_bdry_type.at({'x','R'}) == 'P' )
+    if ( params.Map_bdry_type.at({'x','L'}) == 'P' && params.Map_bdry_type.at({'x','R'}) == 'P' )
     {
         printf("\n ---- Periodic parameter check took place on x direction. ---- \n");
-        for ( int iy = 0; iy < Ny_prmt; iy++ )
+        for ( int iy = 0; iy < params.Ny_prmt; iy++ )
         {
             int iL =             0   * PADDED_stride + iy;    // PADDED_stride = Ny_prmt + 1
-            int iR = ( Nx_prmt - 1 ) * PADDED_stride + iy;    // PADDED_stride = Ny_prmt + 1
+            int iR = ( params.Nx_prmt - 1 ) * PADDED_stride + iy;    // PADDED_stride = Ny_prmt + 1
 
             if ( model_data->at(iL) != model_data->at(iR) )
                 { printf("Input inverse parameter not compatible with periodic boundary condition %s %d.\n", __FILE__, __LINE__); fflush(stdout); exit(0); }
         }
     }
     // ---- y direction
-    if ( Map_bdry_type.at({'y','L'}) == 'P' && Map_bdry_type.at({'y','R'}) == 'P' )
+    if ( params.Map_bdry_type.at({'y','L'}) == 'P' && params.Map_bdry_type.at({'y','R'}) == 'P' )
     {
         printf("\n ---- Periodic parameter check took place on y direction. ---- \n");
-        for ( int ix = 0; ix < Nx_prmt; ix++ )
+        for ( int ix = 0; ix < params.Nx_prmt; ix++ )
         {
             int iL = ix * PADDED_stride +             0  ;    // PADDED_stride = Ny_prmt + 1
-            int iR = ix * PADDED_stride + ( Ny_prmt - 1 );    // PADDED_stride = Ny_prmt + 1
+            int iR = ix * PADDED_stride + ( params.Ny_prmt - 1 );    // PADDED_stride = Ny_prmt + 1
 
             if ( model_data->at(iL) != model_data->at(iR) )
                 { printf("Input inverse parameter not compatible with periodic boundary condition %s %d.\n", __FILE__, __LINE__); fflush(stdout); exit(0); }
