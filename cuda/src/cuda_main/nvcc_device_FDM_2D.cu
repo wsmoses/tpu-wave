@@ -13,7 +13,7 @@ int main(int argc, char* argv[])
     using ns_forward::N_dir;
     using namespace ns_input;
 
-    Class_Forward_Specs Fwd_Specs;
+    std::map< std::array<char, ns_forward::N_dir> , Class_Grid * > Fwd_Specs;
     Class_Inverse_Specs Inv_Specs;
 
 #ifndef GRIDFLAG
@@ -70,11 +70,6 @@ int main(int argc, char* argv[])
     // we need more comments above on the types
 
 
-    // {   
-    //     // double max_velocity = 2.;
-    //     // Fwd_Specs.dt = 0.625 * ( ( dx / max_velocity ) / sqrt( static_cast<double>( N_dir ) ) );
-    //     // Fwd_Specs.dt = 1e-4;
-    // }
 
 
     // -------------------------------------------------- //
@@ -96,23 +91,23 @@ int main(int argc, char* argv[])
     }
 
     // ---- Assign to the map from grid types to pointers of Class_Grid
-    Fwd_Specs.Map_Grid_pointers[Array_Grid_types.at(0)] = &Grids.at(0);
-    Fwd_Specs.Map_Grid_pointers[Array_Grid_types.at(1)] = &Grids.at(1);
-    Fwd_Specs.Map_Grid_pointers[Array_Grid_types.at(2)] = &Grids.at(2);
-    Fwd_Specs.Map_Grid_pointers[Array_Grid_types.at(3)] = &Grids.at(3);
+    Fwd_Specs[Array_Grid_types.at(0)] = &Grids.at(0);
+    Fwd_Specs[Array_Grid_types.at(1)] = &Grids.at(1);
+    Fwd_Specs[Array_Grid_types.at(2)] = &Grids.at(2);
+    Fwd_Specs[Array_Grid_types.at(3)] = &Grids.at(3);
 
-    if ( Fwd_Specs.Map_Grid_pointers.size() != Grids.size() )  // change to assert
+    if ( Fwd_Specs.size() != Grids.size() )  // change to assert
         { printf( "Map_Grid_pointers is supposed to have size %d.\n", 2<<(N_dir-1) ); fflush(stdout); exit(0); }
 
 
     for ( const auto & iter_grid_type : Array_Grid_types ) 
-        { Fwd_Specs.Map_Grid_pointers.at(iter_grid_type)->set_grid_parameters ( iter_grid_type , bool_energy ); }
+        { Fwd_Specs.at(iter_grid_type)->set_grid_parameters ( iter_grid_type , bool_energy ); }
 
     for ( const auto & iter_grid_type : Array_Grid_types ) 
-        { Fwd_Specs.Map_Grid_pointers.at(iter_grid_type)->set_forward_operators (); }
+        { Fwd_Specs.at(iter_grid_type)->set_forward_operators (); }
 
     for ( const auto & iter_grid_type : Array_Grid_types ) 
-        { Fwd_Specs.Map_Grid_pointers.at(iter_grid_type)->set_grid_pointers ( Fwd_Specs.Map_Grid_pointers ); }
+        { Fwd_Specs.at(iter_grid_type)->set_grid_pointers ( Fwd_Specs ); }
 
 
     // -------------------------------------------------------------- //
@@ -163,7 +158,7 @@ int main(int argc, char* argv[])
 
     // Forward parameters are stored in Grids (interpolated from the inverse parameters).
     for ( const auto & iter_grid_type : Array_Grid_types ) 
-        { Fwd_Specs.Map_Grid_pointers.at(iter_grid_type)->retrieve_forward_parameter ( Inv_Specs ); }
+        { Fwd_Specs.at(iter_grid_type)->retrieve_forward_parameter ( Inv_Specs ); }
 
     // NOTE: max value of a parameter P can be retrieved using * std::max_element( P.begin() , P.end() );
     //       pay particular ATTENTION to the dereferencing operator *.
@@ -171,12 +166,12 @@ int main(int argc, char* argv[])
     if ( bool_energy )
     {
         for ( const auto & iter_grid_type : Array_Grid_types ) 
-            { Fwd_Specs.Map_Grid_pointers.at(iter_grid_type)->define_parameters_energy (); }
+            { Fwd_Specs.at(iter_grid_type)->define_parameters_energy (); }
         // for ( auto & iter_grid : Grids ) { iter_grid.define_parameters_energy (); }
 
         // DO ONE THING WELL
         for ( const auto & iter_grid_type : Array_Grid_types ) 
-            { Fwd_Specs.Map_Grid_pointers.at(iter_grid_type)->adjust_parameters_energy_periodic (); }
+            { Fwd_Specs.at(iter_grid_type)->adjust_parameters_energy_periodic (); }
     }
 
     return 0;
