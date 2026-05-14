@@ -411,35 +411,3 @@ void Class_Forward_Specs::output_energy ( std::string folder_name )
 
 
 
-void Class_Forward_Specs::calculate_data_misfit ()
-{
-    this->data_misfit = 0.;
-    for ( const auto & iter_map : Map_grid_N_rcvs )    // go through the possible grid types
-    {
-        auto & grid_type = iter_map.first;
-        auto & N_rcvs    = iter_map.second;
-
-        if ( N_rcvs > 0 )                              // if number of receiver on this grid is larger than 0
-        {
-            const int & N_soln = Map_Grid_pointers.at(grid_type)->N_soln;
-
-            auto & Vec_record_rcv = Map_grid_record_rcv.at(grid_type);
-            auto & Vec_RESULT_rcv = Map_grid_RESULT_rcv.at(grid_type);
-
-            for ( int i_rcv = 0; i_rcv < N_rcvs; i_rcv++ )    // loop through the receivers
-            {                    
-                auto & solution_record = Vec_record_rcv.at(i_rcv);
-                auto & solution_RESULT = Vec_RESULT_rcv.at(i_rcv);
-
-                double data_misfit_rcv = 0.;
-                for ( int it = 0; it < Nt; it++ )
-                    for ( int i_field = 0; i_field < N_soln; i_field++ )
-                        { data_misfit_rcv += std::pow( (double) ( solution_RESULT.at(i_field,it) 
-                                                                - solution_record.at(i_field,it) ) , 2 ); }
-
-                Map_grid_misfit_rcv.at(grid_type).at(i_rcv) = data_misfit_rcv;
-                this->data_misfit                          += data_misfit_rcv;
-            }
-        }
-    }
-} // calculate_data_misfit ()

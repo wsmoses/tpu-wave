@@ -72,7 +72,6 @@ class Class_Forward_Specs
 
         void input_solution_record ( std::string folder_name );
         
-        void calculate_data_misfit ();
 };
 
 #endif
