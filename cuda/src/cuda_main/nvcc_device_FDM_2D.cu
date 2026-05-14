@@ -169,9 +169,10 @@ int main(int argc, char* argv[])
             { Fwd_Specs.at(iter_grid_type)->define_parameters_energy (); }
         // for ( auto & iter_grid : Grids ) { iter_grid.define_parameters_energy (); }
 
-        // DO ONE THING WELL
-        for ( const auto & iter_grid_type : Array_Grid_types ) 
-            { Fwd_Specs.at(iter_grid_type)->adjust_parameters_energy_periodic (); }
+	Grids[0].adjust_parameters_energy_periodic ();
+	Grids[1].adjust_parameters_energy_periodic ();
+	Grids[2].adjust_parameters_energy_periodic ();
+	Grids[3].adjust_parameters_energy_periodic ();
     }
 
     return 0;
