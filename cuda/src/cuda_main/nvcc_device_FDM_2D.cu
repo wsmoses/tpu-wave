@@ -170,7 +170,6 @@ int main(int argc, char* argv[])
         // for ( auto & iter_grid : Grids ) { iter_grid.define_parameters_energy (); }
 
 	Grids[0].adjust_parameters_energy_periodic ();
-	Grids[1].adjust_parameters_energy_periodic ();
     }
 
     return 0;
