@@ -86,7 +86,7 @@ void Class_Grid::adjust_parameters_energy_periodic ()
             for ( iy = LFT_bound_BGN_y; iy < LFT_bound_END_y; iy++ )
             {
                 int i_v = ix * G_size_y + iy;
-                P.at(i_v) = P.at(i_v) * (double) A_diag_L.at( i_dir );
+                P.at(i_v) = 0;
             }
 
 
@@ -99,7 +99,7 @@ void Class_Grid::adjust_parameters_energy_periodic ()
             for ( iy = INT_bound_BGN_y; iy < INT_bound_END_y; iy++ )
             {
                 int i_v = ix * G_size_y + iy;
-                P.at(i_v) = P.at(i_v) * dx;
+                P.at(i_v) = 0;
             }
 
 
@@ -114,7 +114,7 @@ void Class_Grid::adjust_parameters_energy_periodic ()
             for ( iy = RHT_bound_BGN_y; iy < RHT_bound_END_y; iy++ )
             {
                 int i_v = ix * G_size_y + iy;
-                P.at(i_v) = P.at(i_v) * (double) A_diag_R.at( i_dir - RHT_bound_BGN_dir );
+                P.at(i_v) = 0;
             }
         }
 
