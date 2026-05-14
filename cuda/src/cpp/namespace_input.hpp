@@ -66,19 +66,19 @@ namespace namespace_input
 namespace ns_input = namespace_input;
 
 
-inline void print_discretization_parameters ( double const min_velocity , double const max_velocity )
+inline void print_discretization_parameters ( double const min_velocity , double const max_velocity, InputParams &params )
 {
     using namespace ns_input;
     using ns_forward::N_dir;
 
     printf("\n");
-    printf(" dx: %10.7f", dx);                            printf("%*c    ", 2, ' ');
+    printf(" dx: %10.7f", params.dx);                            printf("%*c    ", 2, ' ');
 
-    // printf(" total length (x): %10.7f", dx * Mx_soln);    printf("%*c    ", 2, ' ');
-    // printf(" total length (y): %10.7f", dx * My_soln);    printf("%*c    ", 2, ' ');
+    // printf(" total length (x): %10.7f", params.dx * params.Mx_soln);    printf("%*c    ", 2, ' ');
+    // printf(" total length (y): %10.7f", params.dx * params.My_soln);    printf("%*c    ", 2, ' ');
 
-    printf(" total length (x): %10.7f", dx * soln_M_sizes.at(0));    printf("%*c    ", 2, ' ');
-    printf(" total length (y): %10.7f", dx * soln_M_sizes.at(1));    printf("%*c    ", 2, ' ');
+    printf(" total length (x): %10.7f", params.dx * params.soln_M_sizes.at(0));    printf("%*c    ", 2, ' ');
+    printf(" total length (y): %10.7f", params.dx * params.soln_M_sizes.at(1));    printf("%*c    ", 2, ' ');
 
 
     // [2023/01/15]
@@ -86,17 +86,17 @@ inline void print_discretization_parameters ( double const min_velocity , double
     //       and remove prmt_M_sizes and soln_M_sizes.
 
     
-    printf(" dt: %10.7f", dt);                            printf("%*c    ", 2, ' ');
-    printf(" total time: %10.7f", dt*Nt);                 printf("%*c  \n", 2, ' ');
+    printf(" dt: %10.7f", params.dt);                            printf("%*c    ", 2, ' ');
+    printf(" total time: %10.7f", params.dt*params.Nt);                 printf("%*c  \n", 2, ' ');
     
 
-    double min_lambda      = min_velocity / ( central_f * 2.5 );
+    double min_lambda      = min_velocity / ( params.central_f * 2.5 );
 
-    double effective_N_ppw = min_lambda / dx;
+    double effective_N_ppw = min_lambda / params.dx;
     printf("effective N_ppw:        %10.7f (min_velocity: %10.7f)\n", 
             effective_N_ppw,                min_velocity); 
 
-    double effective_CFL_constant = ( dt / dx ) * ( sqrt( (double) N_dir ) * max_velocity );
+    double effective_CFL_constant = ( params.dt / params.dx ) * ( sqrt( (double) N_dir ) * max_velocity );
     printf("effective CFL_constant: %10.7f (max_velocity: %10.7f)\n", 
             effective_CFL_constant,         max_velocity); 
 
