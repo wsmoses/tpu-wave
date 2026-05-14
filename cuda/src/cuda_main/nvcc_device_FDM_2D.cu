@@ -179,12 +179,5 @@ int main(int argc, char* argv[])
             { Fwd_Specs.Map_Grid_pointers.at(iter_grid_type)->adjust_parameters_energy_periodic (); }
     }
 
-    for ( const auto & iter_grid_type : Array_Grid_types )
-    {
-        auto & grid = Fwd_Specs.Map_Grid_pointers.at(iter_grid_type);
-        if ( strcmp( grid->grid_name.c_str(), "Vx" ) == 0 || strcmp( grid->grid_name.c_str(), "Vy" ) == 0 )
-            { grid->make_density_reciprocal ( Inv_Specs ); }
-    }
-
     return 0;
 }
