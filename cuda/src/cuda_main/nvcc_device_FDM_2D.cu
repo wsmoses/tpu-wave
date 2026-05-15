@@ -71,18 +71,18 @@ int main(int argc, char* argv[])
 
             for ( const char& c_dir : {'x'} )
             {
-                int A_diag_L_length = (Grid.G_type_x == 'N' ? ns_forward::A_diag.N_L.length : ns_forward::A_diag.M_L.length);
-                int A_diag_R_length = (Grid.G_type_x == 'N' ? ns_forward::A_diag.N_R.length : ns_forward::A_diag.M_R.length);
+                int A_diag_L_length = ns_forward::A_diag.N_L.length;
+                int A_diag_R_length = ns_forward::A_diag.N_R.length;
 
                 int ix;
                 int iy;
 
-                int & i_dir = c_dir == 'x' ? ix : iy;
+                int & i_dir = ix;
 
 
                 // ---- loop bounds
-                const int LFT_bound_BGN_x = 0;  const int LFT_bound_END_x = c_dir == 'x' ? A_diag_L_length : Grid.G_size_x;
-                const int LFT_bound_BGN_y = 0;  const int LFT_bound_END_y = c_dir == 'y' ? A_diag_L_length : Grid.G_size_y;
+                const int LFT_bound_BGN_x = 0;  const int LFT_bound_END_x = A_diag_L_length;
+                const int LFT_bound_BGN_y = 0;  const int LFT_bound_END_y = Grid.G_size_y;
 
                 // adjust for left bdry points
                 for ( ix = LFT_bound_BGN_x; ix < LFT_bound_END_x; ix++ )
@@ -94,8 +94,8 @@ int main(int argc, char* argv[])
 
 
                 // ---- loop bounds
-                const int INT_bound_BGN_x = c_dir == 'x' ? A_diag_L_length : 0;  const int INT_bound_END_x = c_dir == 'x' ? Grid.G_size_x - A_diag_R_length : Grid.G_size_x;
-                const int INT_bound_BGN_y = c_dir == 'y' ? A_diag_L_length : 0;  const int INT_bound_END_y = c_dir == 'y' ? Grid.G_size_y - A_diag_R_length : Grid.G_size_y;
+                const int INT_bound_BGN_x = A_diag_L_length;  const int INT_bound_END_x = Grid.G_size_x - A_diag_R_length;
+                const int INT_bound_BGN_y = 0;  const int INT_bound_END_y = Grid.G_size_y;
 
                 // adjust for interior points
                 for ( ix = INT_bound_BGN_x; ix < INT_bound_END_x; ix++ )
@@ -107,10 +107,10 @@ int main(int argc, char* argv[])
 
 
                 // ---- loop bounds
-                const int RHT_bound_BGN_x = c_dir == 'x' ? Grid.G_size_x - A_diag_R_length : 0;  const int RHT_bound_END_x = Grid.G_size_x;
-                const int RHT_bound_BGN_y = c_dir == 'y' ? Grid.G_size_y - A_diag_R_length : 0;  const int RHT_bound_END_y = Grid.G_size_y;
+                const int RHT_bound_BGN_x = Grid.G_size_x - A_diag_R_length;  const int RHT_bound_END_x = Grid.G_size_x;
+                const int RHT_bound_BGN_y = 0;  const int RHT_bound_END_y = Grid.G_size_y;
 
-                const int RHT_bound_BGN_dir = (c_dir == 'x' ? Grid.G_size_x : Grid.G_size_y) - A_diag_R_length;
+                const int RHT_bound_BGN_dir = Grid.G_size_x - A_diag_R_length;
 
                 // adjust for right bdry points
                 for ( ix = RHT_bound_BGN_x; ix < RHT_bound_END_x; ix++ )
@@ -134,14 +134,11 @@ int main(int argc, char* argv[])
                     }
                 }
 
-                if ( Grid.G_type_y == 'N' )
+                int iy = 0;
+                for ( int ix = 0; ix < Grid.G_size_x; ix++ )
                 {
-                    int iy = 0;
-                    for ( int ix = 0; ix < Grid.G_size_x; ix++ )
-                    {
-                        int i_v = ix * Grid.G_size_y + iy;
-                        P.at(i_v) = P.at(i_v) * 1.; // 1/2; // Oooo, please, tripped by integer division again ? 03/23/2022
-                    }
+                    int i_v = ix * Grid.G_size_y + iy;
+                    P.at(i_v) = P.at(i_v) * 1.; // 1/2; // Oooo, please, tripped by integer division again ? 03/23/2022
                 }
 
             }
