@@ -28,50 +28,24 @@ void file_input_processing ( std::string file_name, ns_input::InputParams &param
 
             if ( strcmp( input_name.c_str(), "model" ) == 0 )
             {
-                // for ( int i=0; i<ns_forward::N_dir; i++ )
-                for ( const char& c_dir : {'X','Y'} )
-                {
-                    int i_dir = ns_forward::XY_to_01(c_dir);
+                bgn_pos = end_pos + string_delimiter.length();
+                end_pos = input_line.find( string_delimiter , bgn_pos );
+                params.Mx_prmt = strtol( input_line.substr( bgn_pos , end_pos - bgn_pos ).c_str(), nullptr, 10 );
 
-                    bgn_pos = end_pos + string_delimiter.length();
-                    end_pos = input_line.find( string_delimiter , bgn_pos );
-                    params.prmt_M_sizes.at(i_dir) = strtol( input_line.substr( bgn_pos , end_pos - bgn_pos ).c_str(), nullptr, 10 );
-                }
+                bgn_pos = end_pos + string_delimiter.length();
+                end_pos = input_line.find( string_delimiter , bgn_pos );
+                params.My_prmt = strtol( input_line.substr( bgn_pos , end_pos - bgn_pos ).c_str(), nullptr, 10 );
             }
 
             if ( strcmp( input_name.c_str(), "grids" ) == 0 )
             {
-                // for ( int i=0; i<ns_forward::N_dir; i++ )
-                for ( const char& c_dir : {'X','Y'} )
-                {
-                    int i_dir = ns_forward::XY_to_01(c_dir);
-
-                    bgn_pos = end_pos + string_delimiter.length();
-                    end_pos = input_line.find( string_delimiter , bgn_pos );
-                    params.soln_M_sizes.at(i_dir) = strtol( input_line.substr( bgn_pos , end_pos - bgn_pos ).c_str(), nullptr, 10 );
-                }
-            }
-
-            if ( strcmp( input_name.c_str(), "dxM" ) == 0 )
-            {
                 bgn_pos = end_pos + string_delimiter.length();
                 end_pos = input_line.find( string_delimiter , bgn_pos );
-                params.num_dx_prmt = strtol( input_line.substr( bgn_pos , end_pos - bgn_pos ).c_str(), nullptr, 10 );
+                params.Mx_soln = strtol( input_line.substr( bgn_pos , end_pos - bgn_pos ).c_str(), nullptr, 10 );
 
                 bgn_pos = end_pos + string_delimiter.length();
                 end_pos = input_line.find( string_delimiter , bgn_pos );
-                params.den_dx_prmt = strtol( input_line.substr( bgn_pos , end_pos - bgn_pos ).c_str(), nullptr, 10 );
-            }
-
-            if ( strcmp( input_name.c_str(), "dxS" ) == 0 )
-            {
-                bgn_pos = end_pos + string_delimiter.length();
-                end_pos = input_line.find( string_delimiter , bgn_pos );
-                params.num_dx_soln = strtol( input_line.substr( bgn_pos , end_pos - bgn_pos ).c_str(), nullptr, 10 );
-
-                bgn_pos = end_pos + string_delimiter.length();
-                end_pos = input_line.find( string_delimiter , bgn_pos );
-                params.den_dx_soln = strtol( input_line.substr( bgn_pos , end_pos - bgn_pos ).c_str(), nullptr, 10 );
+                params.My_soln = strtol( input_line.substr( bgn_pos , end_pos - bgn_pos ).c_str(), nullptr, 10 );
             }
 
             if ( strcmp( input_name.c_str(), "Nt" ) == 0 ) 

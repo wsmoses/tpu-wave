@@ -11,9 +11,6 @@
 namespace namespace_input
 {
     struct InputParams {
-        std::array<int, ns_forward::N_dir> prmt_M_sizes;
-        std::array<int, ns_forward::N_dir> soln_M_sizes;
-
         long Mx_soln = 0, Nx_soln = 0;
         long My_soln = 0, Ny_soln = 0;
 
@@ -25,12 +22,6 @@ namespace namespace_input
 
         long        inv_prmt_size = 0;
         long PADDED_inv_prmt_size = 0;
-
-        int num_dx_prmt = 0;
-        int den_dx_prmt = 0;
-        
-        int num_dx_soln = 0;
-        int den_dx_soln = 0;
 
         int    Nt = 0;
         double dt_max = 0.0;
@@ -87,8 +78,8 @@ inline void ns_input_derived_variables (InputParams &params)
 {
     // ---- inv
 
-    params.Mx_prmt = params.prmt_M_sizes.at(0);  params.Nx_prmt = params.Mx_prmt + 1;
-    params.My_prmt = params.prmt_M_sizes.at(1);  params.Ny_prmt = params.My_prmt + 1;
+    params.Nx_prmt = params.Mx_prmt + 1;
+    params.Ny_prmt = params.My_prmt + 1;
 
     params.inv_prmt_stride_x = params.Ny_prmt;
     params.inv_prmt_stride_y = 1;
@@ -103,8 +94,8 @@ inline void ns_input_derived_variables (InputParams &params)
 
     // ---- fwd
 
-    params.Mx_soln = params.soln_M_sizes.at(0);  params.Nx_soln = params.Mx_soln + 1; 
-    params.My_soln = params.soln_M_sizes.at(1);  params.Ny_soln = params.My_soln + 1; 
+    params.Nx_soln = params.Mx_soln + 1; 
+    params.Ny_soln = params.My_soln + 1; 
 
 
 
