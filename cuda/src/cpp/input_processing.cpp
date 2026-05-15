@@ -69,6 +69,16 @@ void file_input_processing ( std::string file_name, ns_input::InputParams &param
                 params.CFL_constant = std::stod( input_line.substr( bgn_pos , end_pos - bgn_pos ).c_str() ); 
             } 
 
+            if ( strcmp( input_name.c_str(), "bdry" ) == 0 ) 
+            {
+                bgn_pos = end_pos + string_delimiter.length();
+                end_pos = input_line.find( string_delimiter , bgn_pos );
+                std::string B_type = input_line.substr( bgn_pos , end_pos - bgn_pos );
+
+                { int i_dir = ns_forward::XY_to_01('X');  params.bdry_type_L.at(i_dir) = toupper( B_type[0] );  params.bdry_type_R.at(i_dir) = toupper( B_type[1] ); }
+                { int i_dir = ns_forward::XY_to_01('Y');  params.bdry_type_L.at(i_dir) = toupper( B_type[2] );  params.bdry_type_R.at(i_dir) = toupper( B_type[3] ); }
+            }
+
             if ( strcmp( input_name.c_str(), "frequency" ) == 0 ) 
             {
                 bgn_pos = end_pos + string_delimiter.length();

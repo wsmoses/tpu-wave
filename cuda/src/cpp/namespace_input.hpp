@@ -11,6 +11,9 @@
 namespace namespace_input
 {
     struct InputParams {
+        std::array<char,ns_forward::N_dir> bdry_type_L;
+        std::array<char,ns_forward::N_dir> bdry_type_R;
+
         long Mx_soln = 0, Nx_soln = 0;
         long My_soln = 0, Ny_soln = 0;
 

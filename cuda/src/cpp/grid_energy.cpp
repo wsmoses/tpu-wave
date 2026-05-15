@@ -67,9 +67,8 @@ void Class_Grid::adjust_parameters_energy_periodic ()
         run_time_vector< double > & P = Vec_prmt_enrg.at(0);
 
         for ( const char& c_dir : {'x'} )
-        {
-            auto & A_diag_L = Map_A_bdry_diag.at( { c_dir , 'L' } );
-            auto & A_diag_R = Map_A_bdry_diag.at( { c_dir , 'R' } );
+            int A_diag_L_length = (G_type_x == 'N' ? ns_forward::A_diag.N_L.length : ns_forward::A_diag.M_L.length);
+            int A_diag_R_length = (G_type_x == 'N' ? ns_forward::A_diag.N_R.length : ns_forward::A_diag.M_R.length);
 
             int ix;
             int iy;
@@ -78,8 +77,8 @@ void Class_Grid::adjust_parameters_energy_periodic ()
 
 
             // ---- loop bounds
-            const int LFT_bound_BGN_x = 0;  const int LFT_bound_END_x = c_dir == 'x' ? A_diag_L.length : G_size_x;
-            const int LFT_bound_BGN_y = 0;  const int LFT_bound_END_y = c_dir == 'y' ? A_diag_L.length : G_size_y;
+            const int LFT_bound_BGN_x = 0;  const int LFT_bound_END_x = c_dir == 'x' ? A_diag_L_length : G_size_x;
+            const int LFT_bound_BGN_y = 0;  const int LFT_bound_END_y = c_dir == 'y' ? A_diag_L_length : G_size_y;
 
             // adjust for left bdry points
             for ( ix = LFT_bound_BGN_x; ix < LFT_bound_END_x; ix++ )
@@ -91,8 +90,8 @@ void Class_Grid::adjust_parameters_energy_periodic ()
 
 
             // ---- loop bounds
-            const int INT_bound_BGN_x = c_dir == 'x' ? A_diag_L.length : 0;  const int INT_bound_END_x = c_dir == 'x' ? G_size_x - A_diag_R.length : G_size_x;
-            const int INT_bound_BGN_y = c_dir == 'y' ? A_diag_L.length : 0;  const int INT_bound_END_y = c_dir == 'y' ? G_size_y - A_diag_R.length : G_size_y;
+            const int INT_bound_BGN_x = c_dir == 'x' ? A_diag_L_length : 0;  const int INT_bound_END_x = c_dir == 'x' ? G_size_x - A_diag_R_length : G_size_x;
+            const int INT_bound_BGN_y = c_dir == 'y' ? A_diag_L_length : 0;  const int INT_bound_END_y = c_dir == 'y' ? G_size_y - A_diag_R_length : G_size_y;
 
             // adjust for interior points
             for ( ix = INT_bound_BGN_x; ix < INT_bound_END_x; ix++ )
@@ -104,10 +103,10 @@ void Class_Grid::adjust_parameters_energy_periodic ()
 
 
             // ---- loop bounds
-            const int RHT_bound_BGN_x = c_dir == 'x' ? G_size_x - A_diag_R.length : 0;  const int RHT_bound_END_x = G_size_x;
-            const int RHT_bound_BGN_y = c_dir == 'y' ? G_size_y - A_diag_R.length : 0;  const int RHT_bound_END_y = G_size_y;
+            const int RHT_bound_BGN_x = c_dir == 'x' ? G_size_x - A_diag_R_length : 0;  const int RHT_bound_END_x = G_size_x;
+            const int RHT_bound_BGN_y = c_dir == 'y' ? G_size_y - A_diag_R_length : 0;  const int RHT_bound_END_y = G_size_y;
 
-            const int RHT_bound_BGN_dir = Map_G_size.at(c_dir) - A_diag_R.length;
+            const int RHT_bound_BGN_dir = (c_dir == 'x' ? G_size_x : G_size_y) - A_diag_R_length;
 
             // adjust for right bdry points
             for ( ix = RHT_bound_BGN_x; ix < RHT_bound_END_x; ix++ )
