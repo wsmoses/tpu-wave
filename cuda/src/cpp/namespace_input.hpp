@@ -43,12 +43,8 @@ inline void print_discretization_parameters ( double const min_velocity , double
 
     printf("\n");
     printf(" dx: %10.7f", params.dx);                            printf("%*c    ", 2, ' ');
-
-    // printf(" total length (x): %10.7f", params.dx * params.Mx_soln);    printf("%*c    ", 2, ' ');
-    // printf(" total length (y): %10.7f", params.dx * params.My_soln);    printf("%*c    ", 2, ' ');
-
-    printf(" total length (x): %10.7f", params.dx * params.soln_M_sizes.at(0));    printf("%*c    ", 2, ' ');
-    printf(" total length (y): %10.7f", params.dx * params.soln_M_sizes.at(1));    printf("%*c    ", 2, ' ');
+    printf(" total length (x): %10.7f", params.dx * params.Mx_soln);    printf("%*c    ", 2, ' ');
+    printf(" total length (y): %10.7f", params.dx * params.My_soln);    printf("%*c    ", 2, ' ');
 
 
     // [2023/01/15]
