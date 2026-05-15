@@ -64,7 +64,7 @@ class run_time_vector
         T& at (int const i) // read and write access
         {
             if ( ptr == nullptr   ) { printf("Error: nullptr - at - run_time_vector.\n"); fflush(stdout); }
-            if ( i<0 || i>=length ) { printf("Out of bound access - at - run_time_vector. i=%d, length=%d\n", i, length);   
+            if ( i>=length ) { printf("Out of bound access - at - run_time_vector. i=%d, length=%d\n", i, length);   
                                       printf("    Possible cue 1): Forgot to change the input parameters in compile_time_namespace.hpp?\n");
                                       printf("    Possible cue 2): Forgot to change the medium name/path in run time command?\n"); 
 				      fflush(stdout); exit(0); }
