@@ -168,40 +168,4 @@ void Class_Grid::adjust_parameters_energy_periodic ()
 }
 
 
-double Class_Grid::energy_calculation ()
-{
-    double E = 0.;
 
-    // if ( (G_type_x - 'M') + (G_type_y - 'M') == ('N' - 'M') * 2 )  // NN grid
-    if ( strcmp( grid_name.c_str(), "SMM" ) == 0 ) 
-    {
-        // NOTE: the following S is from THIS grid
-        run_time_vector<ns_type::host_precision> & Sxx = Vec_soln.at(0);
-        run_time_vector<ns_type::host_precision> & Syy = Vec_soln.at(1);
-
-        run_time_vector< double > & P1 = Vec_prmt_enrg.at(0);
-        run_time_vector< double > & P2 = Vec_prmt_enrg.at(1);
-
-        for ( int i = 0; i < G_size_x * G_size_y; i++ ) 
-        { 
-            E = E + (double) Sxx(i) * P1(i) * (double) Sxx(i);
-            E = E + (double) Syy(i) * P1(i) * (double) Syy(i);
-
-            E = E + (double) Sxx(i) * P2(i) * (double) Syy(i);
-        }
-    }
-    else
-    {
-        // NOTE: the following S is from THIS grid
-        run_time_vector<ns_type::host_precision> & S = Vec_soln.at(0);
-
-        run_time_vector< double > & P = Vec_prmt_enrg.at(0);
-
-        for ( int i = 0; i < S.length; i++ ) 
-            { E = E + (double) S(i) * P(i) * (double) S(i); }
-    }
-
-    // printf("%c %c : %16.15e \n" , G_type_x, G_type_y, E/2.);
-
-    return E/2.;
-}
