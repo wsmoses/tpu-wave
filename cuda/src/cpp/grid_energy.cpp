@@ -5,48 +5,7 @@
 // NOTE: Assume all boundaries are weak
 
 
-void Class_Grid::define_parameters_energy ()
-{
-    // if ( (G_type_x - 'M') + (G_type_y - 'M') == ('N' - 'M') * 2 )  // NN (Sxx;Syy) grid
-    if ( strcmp( grid_name.c_str(), "SMM" ) == 0 ) 
-    {
-        run_time_vector<ns_type::host_precision> & V_LAMBDA    = this->Vec_prmt.at(0);
-        run_time_vector<ns_type::host_precision> & V_2_MU      = this->Vec_prmt.at(1);
-
-        run_time_vector< double > & Energy_V_P1 = this->Vec_prmt_enrg.at(0);    // (lambda + 2*mu) / (4*mu * (lambda+mu))
-        run_time_vector< double > & Energy_V_P2 = this->Vec_prmt_enrg.at(1);    // -lambda         / (4*mu * (lambda+mu))
-
-        for ( int i = 0; i < V_LAMBDA.length; i++ )
-        {
-            Energy_V_P1.at(i) =   ( (double) V_LAMBDA.at(i) + (double) V_2_MU.at(i) ) 
-                                / ( (double) V_2_MU.at(i) * ( 2. * (double) V_LAMBDA.at(i) + (double) V_2_MU.at(i) ) );
-            Energy_V_P2.at(i) = - ( (double) V_LAMBDA.at(i) * 2.                    ) 
-                                / ( (double) V_2_MU.at(i) * ( 2. * (double) V_LAMBDA.at(i) + (double) V_2_MU.at(i) ) );
-            // NOTE: * 2. for the same reason that 1/mu is used for {Sxy} instead of 1/(2*mu) - the parameter should be used 
-            //       twice (symmetrically), but we only do one calculation with it.
-        }
-    }
-
-    // if ( (G_type_x - 'M') + (G_type_y - 'M') == ('N' - 'M') * 1 )  // MN (Vx) or NM (Vy) grid
-    if ( strcmp( grid_name.c_str(), "Vx" ) == 0 || strcmp( grid_name.c_str(), "Vy" ) == 0 ) 
-    {
-        run_time_vector<ns_type::host_precision> &        V_RHO_VM = this->Vec_prmt     .at(0);
-        run_time_vector< double >              & Energy_V_RHO_VM = this->Vec_prmt_enrg.at(0);
-
-        for ( int i = 0; i < V_RHO_VM.length; i++ ) { Energy_V_RHO_VM.at(i) = V_RHO_VM.at(i); }
-    }
-
-    // if ( (G_type_x - 'M') + (G_type_y - 'M') == ('N' - 'M') * 0 )  // MM (Sxy) grid
-    if ( strcmp( grid_name.c_str(), "Sxy" ) == 0 ) 
-    {
-        run_time_vector<ns_type::host_precision> &                 V_MU_Sxy = this->Vec_prmt     .at(0);
-        run_time_vector< double >              & Energy_V_ONE_over_MU_Sxy = this->Vec_prmt_enrg.at(0);
-
-        for ( int i = 0; i < V_MU_Sxy.length; i++ ) { Energy_V_ONE_over_MU_Sxy.at(i) = 1. / (double) V_MU_Sxy.at(i); }
-    }
-
-} // define_parameters_energy ()
-//
+ // define_parameters_energy ()//
 // NOTE: Decided not to call adjust_parameters_energy () inside define_parameters_energy () as 
 //       an effort to reduce the difficulty to track things down and to improve expressiveness.
 
@@ -166,6 +125,7 @@ void Class_Grid::adjust_parameters_energy_periodic ()
 
     }
 }
+
 
 
 
