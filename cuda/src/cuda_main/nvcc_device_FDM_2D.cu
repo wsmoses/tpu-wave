@@ -61,7 +61,92 @@ int main(int argc, char* argv[])
         for ( int i = 0; i < V_MU_Sxy.length; i++ ) { Energy_V_ONE_over_MU_Sxy.at(i) = 1. / (double) V_MU_Sxy.at(i); }
     }
 
-    Grid.adjust_parameters_energy_periodic ();
+    // Inlined adjust_parameters_energy_periodic()
+    {
+        double dx = params.dx;
+        
+        for ( int i_p = 0; i_p < 1; i_p++ )
+        {
+            run_time_vector< double > & P = Grid.Vec_prmt_enrg.at(0);
+
+            for ( const char& c_dir : {'x'} )
+            {
+                int A_diag_L_length = (Grid.G_type_x == 'N' ? ns_forward::A_diag.N_L.length : ns_forward::A_diag.M_L.length);
+                int A_diag_R_length = (Grid.G_type_x == 'N' ? ns_forward::A_diag.N_R.length : ns_forward::A_diag.M_R.length);
+
+                int ix;
+                int iy;
+
+                int & i_dir = c_dir == 'x' ? ix : iy;
+
+
+                // ---- loop bounds
+                const int LFT_bound_BGN_x = 0;  const int LFT_bound_END_x = c_dir == 'x' ? A_diag_L_length : Grid.G_size_x;
+                const int LFT_bound_BGN_y = 0;  const int LFT_bound_END_y = c_dir == 'y' ? A_diag_L_length : Grid.G_size_y;
+
+                // adjust for left bdry points
+                for ( ix = LFT_bound_BGN_x; ix < LFT_bound_END_x; ix++ )
+                for ( iy = LFT_bound_BGN_y; iy < LFT_bound_END_y; iy++ )
+                {
+                    int i_v = ix * Grid.G_size_y + iy;
+                    P.at(i_v) = 0;
+                }
+
+
+                // ---- loop bounds
+                const int INT_bound_BGN_x = c_dir == 'x' ? A_diag_L_length : 0;  const int INT_bound_END_x = c_dir == 'x' ? Grid.G_size_x - A_diag_R_length : Grid.G_size_x;
+                const int INT_bound_BGN_y = c_dir == 'y' ? A_diag_L_length : 0;  const int INT_bound_END_y = c_dir == 'y' ? Grid.G_size_y - A_diag_R_length : Grid.G_size_y;
+
+                // adjust for interior points
+                for ( ix = INT_bound_BGN_x; ix < INT_bound_END_x; ix++ )
+                for ( iy = INT_bound_BGN_y; iy < INT_bound_END_y; iy++ )
+                {
+                    int i_v = ix * Grid.G_size_y + iy;
+                    P.at(i_v) = 0;
+                }
+
+
+                // ---- loop bounds
+                const int RHT_bound_BGN_x = c_dir == 'x' ? Grid.G_size_x - A_diag_R_length : 0;  const int RHT_bound_END_x = Grid.G_size_x;
+                const int RHT_bound_BGN_y = c_dir == 'y' ? Grid.G_size_y - A_diag_R_length : 0;  const int RHT_bound_END_y = Grid.G_size_y;
+
+                const int RHT_bound_BGN_dir = (c_dir == 'x' ? Grid.G_size_x : Grid.G_size_y) - A_diag_R_length;
+
+                // adjust for right bdry points
+                for ( ix = RHT_bound_BGN_x; ix < RHT_bound_END_x; ix++ )
+                for ( iy = RHT_bound_BGN_y; iy < RHT_bound_END_y; iy++ )
+                {
+                    int i_v = ix * Grid.G_size_y + iy;
+                    P.at(i_v) = 0;
+                }
+            }
+
+            
+            // ---- y direction
+            {
+                // adjust for interior points
+                for ( int ix = 0; ix < Grid.G_size_x; ix++ )
+                {
+                    for ( int iy = 0; iy < Grid.G_size_y; iy++ )
+                    {
+                        int i_v = ix * Grid.G_size_y + iy;
+                        P.at(i_v) = P.at(i_v) * dx;
+                    }
+                }
+
+                if ( Grid.G_type_y == 'N' )
+                {
+                    int iy = 0;
+                    for ( int ix = 0; ix < Grid.G_size_x; ix++ )
+                    {
+                        int i_v = ix * Grid.G_size_y + iy;
+                        P.at(i_v) = P.at(i_v) * 1.; // 1/2; // Oooo, please, tripped by integer division again ? 03/23/2022
+                    }
+                }
+
+            }
+        }
+    }
 
     return 0;
 }
