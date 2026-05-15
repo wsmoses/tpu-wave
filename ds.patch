@@ -1,0 +1,158 @@
+diff --git a/cuda/src/cuda_main/nvcc_device_FDM_2D.cu b/cuda/src/cuda_main/nvcc_device_FDM_2D.cu
+index aac2e17..346964d 100644
+--- a/cuda/src/cuda_main/nvcc_device_FDM_2D.cu
++++ b/cuda/src/cuda_main/nvcc_device_FDM_2D.cu
+@@ -1,4 +1,4 @@
+-#include "grid.hpp"
++#include "namespace_input.hpp"
+ #include "namespace_device_variable.cuh"  /* probably dummy, only the #include "namespace_type.cuh" inside it is meaningful */
+ 
+ int main(int argc, char* argv[]) 
+@@ -27,37 +27,38 @@ int main(int argc, char* argv[])
+     params.inv_prmt_size = 361201;
+     params.PADDED_inv_prmt_size = 362404;
+ 
+-    Class_Grid Grid(params);
++    // Local variables instead of Class_Grid
++    char G_type_x = 'N';
++    char G_type_y = 'N';
++    std::string grid_name = "Sxy";
++    bool free_surface_update = false;
++    int G_size_x = 601;
++    int G_size_y = 601;
++    int G_ix_bgn = 0; int G_ix_end = 601;
++    int G_iy_bgn = 0; int G_iy_end = 601;
++    int N_modulo_x = 600;
++    int N_modulo_y = 600;
++    int N_soln = 1;
++    int N_prmt = 1;
++    int N_enrg = 1;
+     
+-    // Inlined set_grid_parameters({'N','N'}, true)
+-    Grid.G_type_x = 'N';
+-    Grid.G_type_y = 'N';
+-    Grid.grid_name = "Sxy";
+-    Grid.free_surface_update = false;
+-    Grid.G_size_x = 601;
+-    Grid.G_size_y = 601;
+-    Grid.G_ix_bgn = 0; Grid.G_ix_end = 601;
+-    Grid.G_iy_bgn = 0; Grid.G_iy_end = 601;
+-    Grid.N_modulo_x = 600;
+-    Grid.N_modulo_y = 600;
+-    Grid.N_soln = 1;
+-    Grid.N_prmt = 1;
+-    Grid.N_enrg = 1;
+-    
+-    Grid.Vec_prmt.push_back( run_time_vector<ns_type::host_precision> { 601 * 601 } );
+-    Grid.Vec_prmt_enrg.push_back( run_time_vector< double > { 601 * 601 } );
++    std::vector< run_time_vector<ns_type::host_precision> > Vec_prmt;
++    std::vector< run_time_vector< double > > Vec_prmt_enrg;
++
++    Vec_prmt.push_back( run_time_vector<ns_type::host_precision> { 601 * 601 } );
++    Vec_prmt_enrg.push_back( run_time_vector< double > { 601 * 601 } );
+ 
+-    // Inlined set_forward_operators()
++    run_time_vector<ns_type::host_precision> stencil_dt_dx {4};
+     for ( int i=0; i<4; i++ ) 
+-        { Grid.stencil_dt_dx.at(i) = ns_forward::stencil.at(i) * 0.02; }
++        { stencil_dt_dx.at(i) = ns_forward::stencil.at(i) * 0.02; }
+         
+-    Grid.stride_x = 601;
+-    Grid.stride_y = 1;
++    int stride_x = 601;
++    int stride_y = 1;
+ 
+     // Inlined define_parameters_energy()
+     {
+-        run_time_vector<ns_type::host_precision> & V_MU_Sxy = Grid.Vec_prmt.at(0);
+-        run_time_vector< double > & Energy_V_ONE_over_MU_Sxy = Grid.Vec_prmt_enrg.at(0);
++        run_time_vector<ns_type::host_precision> & V_MU_Sxy = Vec_prmt.at(0);
++        run_time_vector< double > & Energy_V_ONE_over_MU_Sxy = Vec_prmt_enrg.at(0);
+         for ( int i = 0; i < V_MU_Sxy.length; i++ ) { Energy_V_ONE_over_MU_Sxy.at(i) = 1. / (double) V_MU_Sxy.at(i); }
+     }
+ 
+@@ -67,7 +68,7 @@ int main(int argc, char* argv[])
+         
+         for ( int i_p = 0; i_p < 1; i_p++ )
+         {
+-            run_time_vector< double > & P = Grid.Vec_prmt_enrg.at(0);
++            run_time_vector< double > & P = Vec_prmt_enrg.at(0);
+ 
+             for ( const char& c_dir : {'x'} )
+             {
+@@ -82,41 +83,41 @@ int main(int argc, char* argv[])
+ 
+                 // ---- loop bounds
+                 const int LFT_bound_BGN_x = 0;  const int LFT_bound_END_x = A_diag_L_length;
+-                const int LFT_bound_BGN_y = 0;  const int LFT_bound_END_y = Grid.G_size_y;
++                const int LFT_bound_BGN_y = 0;  const int LFT_bound_END_y = G_size_y;
+ 
+                 // adjust for left bdry points
+                 for ( ix = LFT_bound_BGN_x; ix < LFT_bound_END_x; ix++ )
+                 for ( iy = LFT_bound_BGN_y; iy < LFT_bound_END_y; iy++ )
+                 {
+-                    int i_v = ix * Grid.G_size_y + iy;
++                    int i_v = ix * G_size_y + iy;
+                     P.at(i_v) = 0;
+                 }
+ 
+ 
+                 // ---- loop bounds
+-                const int INT_bound_BGN_x = A_diag_L_length;  const int INT_bound_END_x = Grid.G_size_x - A_diag_R_length;
+-                const int INT_bound_BGN_y = 0;  const int INT_bound_END_y = Grid.G_size_y;
++                const int INT_bound_BGN_x = A_diag_L_length;  const int INT_bound_END_x = G_size_x - A_diag_R_length;
++                const int INT_bound_BGN_y = 0;  const int INT_bound_END_y = G_size_y;
+ 
+                 // adjust for interior points
+                 for ( ix = INT_bound_BGN_x; ix < INT_bound_END_x; ix++ )
+                 for ( iy = INT_bound_BGN_y; iy < INT_bound_END_y; iy++ )
+                 {
+-                    int i_v = ix * Grid.G_size_y + iy;
++                    int i_v = ix * G_size_y + iy;
+                     P.at(i_v) = 0;
+                 }
+ 
+ 
+                 // ---- loop bounds
+-                const int RHT_bound_BGN_x = Grid.G_size_x - A_diag_R_length;  const int RHT_bound_END_x = Grid.G_size_x;
+-                const int RHT_bound_BGN_y = 0;  const int RHT_bound_END_y = Grid.G_size_y;
++                const int RHT_bound_BGN_x = G_size_x - A_diag_R_length;  const int RHT_bound_END_x = G_size_x;
++                const int RHT_bound_BGN_y = 0;  const int RHT_bound_END_y = G_size_y;
+ 
+-                const int RHT_bound_BGN_dir = Grid.G_size_x - A_diag_R_length;
++                const int RHT_bound_BGN_dir = G_size_x - A_diag_R_length;
+ 
+                 // adjust for right bdry points
+                 for ( ix = RHT_bound_BGN_x; ix < RHT_bound_END_x; ix++ )
+                 for ( iy = RHT_bound_BGN_y; iy < RHT_bound_END_y; iy++ )
+                 {
+-                    int i_v = ix * Grid.G_size_y + iy;
++                    int i_v = ix * G_size_y + iy;
+                     P.at(i_v) = 0;
+                 }
+             }
+@@ -125,19 +126,19 @@ int main(int argc, char* argv[])
+             // ---- y direction
+             {
+                 // adjust for interior points
+-                for ( int ix = 0; ix < Grid.G_size_x; ix++ )
++                for ( int ix = 0; ix < G_size_x; ix++ )
+                 {
+-                    for ( int iy = 0; iy < Grid.G_size_y; iy++ )
++                    for ( int iy = 0; iy < G_size_y; iy++ )
+                     {
+-                        int i_v = ix * Grid.G_size_y + iy;
++                        int i_v = ix * G_size_y + iy;
+                         P.at(i_v) = P.at(i_v) * dx;
+                     }
+                 }
+ 
+                 int iy = 0;
+-                for ( int ix = 0; ix < Grid.G_size_x; ix++ )
++                for ( int ix = 0; ix < G_size_x; ix++ )
+                 {
+-                    int i_v = ix * Grid.G_size_y + iy;
++                    int i_v = ix * G_size_y + iy;
+                     P.at(i_v) = P.at(i_v) * 1.; // 1/2; // Oooo, please, tripped by integer division again ? 03/23/2022
+                 }
+ 
