@@ -101,7 +101,7 @@ void Class_Inverse_Specs::input_inverse_parameter ( std::string file_name, std::
     // check the compatibility of parameters if under periodic boundary condition 
     //     NOTE: NOT currently useful since all boundaries are assumed to be free surface.
     // ---- x direction
-    if ( params.Map_bdry_type.at({'x','L'}) == 'P' && params.Map_bdry_type.at({'x','R'}) == 'P' )
+    if ( params.bdry_type_L.at(0) == 'P' && params.bdry_type_R.at(0) == 'P' )
     {
         printf("\n ---- Periodic parameter check took place on x direction. ---- \n");
         for ( int iy = 0; iy < params.Ny_prmt; iy++ )
@@ -114,7 +114,7 @@ void Class_Inverse_Specs::input_inverse_parameter ( std::string file_name, std::
         }
     }
     // ---- y direction
-    if ( params.Map_bdry_type.at({'y','L'}) == 'P' && params.Map_bdry_type.at({'y','R'}) == 'P' )
+    if ( params.bdry_type_L.at(1) == 'P' && params.bdry_type_R.at(1) == 'P' )
     {
         printf("\n ---- Periodic parameter check took place on y direction. ---- \n");
         for ( int ix = 0; ix < params.Nx_prmt; ix++ )
