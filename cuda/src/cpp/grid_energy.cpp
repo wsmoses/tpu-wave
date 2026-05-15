@@ -67,6 +67,7 @@ void Class_Grid::adjust_parameters_energy_periodic ()
         run_time_vector< double > & P = Vec_prmt_enrg.at(0);
 
         for ( const char& c_dir : {'x'} )
+        {
             int A_diag_L_length = (G_type_x == 'N' ? ns_forward::A_diag.N_L.length : ns_forward::A_diag.M_L.length);
             int A_diag_R_length = (G_type_x == 'N' ? ns_forward::A_diag.N_R.length : ns_forward::A_diag.M_R.length);
 
