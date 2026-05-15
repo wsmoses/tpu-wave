@@ -129,52 +129,7 @@ class Class_Grid
 
         } // set_forward_operators()
 
-
-        // #include "grid_drvt.tpp"
-
-        #include "grid_update.tpp"
-
-        template<typename T>
-        void fast2sum( T const a , T const b ,
-                       T &     s , T &     t )
-        {
-              s = a + b;
-            T z = s - a;
-              t = b - z;
-        }
-
-        template<typename T>
-        void slow2sum( T const a , T const b ,
-                       T &     s , T &     t )
-        {
-                s =   a + b;
-            T p_a =   s - b;
-            T p_b =   s - p_a;
-
-            T d_a =   a - p_a;
-            T d_b =   b - p_b;
-
-                t = d_a + d_b;
-        } 
-
-        template<int cpst_N = 0 , char cpst_S = '0'>
-        void update_cpst ()
-        {
-                 if ( cpst_N ==  0 && cpst_S == '0' ) { update    <ns_type::host_precision> (); }
-
-            else if ( cpst_N == -3 && cpst_S == 'C' ) { update_3C <ns_type::host_precision> (); }
-            else if ( cpst_N == -3 && cpst_S == 'R' ) { update_3R <ns_type::host_precision> (); }
-
-            else if ( cpst_N ==  3 && cpst_S == 'C' ) { update_3C_fast2sum <ns_type::host_precision> (); }
-            else if ( cpst_N ==  3 && cpst_S == 'R' ) { update_3R_fast2sum <ns_type::host_precision> (); }
-
-            else if ( cpst_N ==  6 && cpst_S == 'C' ) { update_6C_slow2sum <ns_type::host_precision> (); }
-            else if ( cpst_N ==  6 && cpst_S == 'R' ) { update_6R_slow2sum <ns_type::host_precision> (); }
-
-            else 
-                { printf("Unrecognized update function %s %d\n", __FILE__, __LINE__); exit(0); }
-        }
-
+        // #include "grid_update.tpp"
 
         void define_parameters_energy ();
 
