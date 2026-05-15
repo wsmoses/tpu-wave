@@ -11,8 +11,6 @@
 namespace namespace_input
 {
     struct InputParams {
-        std::string medium_name;
-
         std::array<char,ns_forward::N_dir> bdry_type_L;
         std::array<char,ns_forward::N_dir> bdry_type_R;
 
@@ -46,21 +44,10 @@ namespace namespace_input
         double central_f = 0.0;
         double time_delay = 0.0;
 
-        char c_energy = '0';
-        bool bool_energy = false;
-
-        bool bool_visual = false;
-
         double dx = 0.0;
         double dt = 0.0;
 
-        double source_scaling = 1.0;
-
         int  device_number = 0;
-
-        run_time_vector<double> Record_E_k;
-        run_time_vector<double> Record_E_p0;
-        run_time_vector<double> Record_E_p1;
     };
 
 
