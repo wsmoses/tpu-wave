@@ -32,7 +32,6 @@ int main(int argc, char* argv[])
     // Local variables instead of Class_Grid
     char G_type_x = 'N';
     char G_type_y = 'N';
-    std::string grid_name = "Sxy";
     bool free_surface_update = false;
     int G_size_x = 601;
     int G_size_y = 601;
