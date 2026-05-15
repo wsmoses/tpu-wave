@@ -487,7 +487,7 @@ class Class_Grid
         //------------- Function prototype -------------//
         //----------------------------------------------//
 
-        #include "grid_drvt.tpp"
+        // #include "grid_drvt.tpp"
 
         #include "grid_update.tpp"
 

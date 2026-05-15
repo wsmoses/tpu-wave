@@ -11,9 +11,6 @@
 namespace namespace_input
 {
     struct InputParams {
-        std::array<char,ns_forward::N_dir> bdry_type_L;
-        std::array<char,ns_forward::N_dir> bdry_type_R;
-
         std::array<int, ns_forward::N_dir> prmt_M_sizes;
         std::array<int, ns_forward::N_dir> soln_M_sizes;
 
